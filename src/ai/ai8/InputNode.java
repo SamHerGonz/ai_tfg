@@ -58,7 +58,6 @@ public class InputNode extends Node implements Serializable{
 		double[] ret_values = new double[values.length];
 		for (int i = 0; i < valFrontLayer.size(); i++) {
 			int id = idNodeFrontLayer.get(i);
-			double n = valFrontLayer.get(i);
 			double dif = marginErrors[id] - value;
 			double derSigmoid = NeuralMath.setDerivativeSigmoid(values[id]);
 			ret_values[i] = value * derSigmoid * dif * learningRate;

@@ -21,7 +21,8 @@ public class MainAI {
 
         // Read data of the database
         try (BufferedReader br = new BufferedReader(new FileReader("src/ai/ai8/data/mnist_test.csv"))) {
-			String line = br.readLine();
+            br.readLine();
+            String line;
 			while ((line = br.readLine()) != null) {
 				String[] values = line.split(",");
 				double[] valuesDouble = new double[784];

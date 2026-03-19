@@ -87,7 +87,7 @@ public class NeuralNetwork implements Serializable {
             values[i] = new double[nodes[i].length];
         }
 		if (data.length != nodes[0].length) {
-			throw new Exception("Error en los datos recibidos");
+			throw new Exception("Error en los datos recibidos. No son del mismo tamaño");
 		}
 
 		// Make a copy of the array data to values[0]. It has to be like that, because if not it makes reference to the same array ¿¿Why??
@@ -145,23 +145,7 @@ public class NeuralNetwork implements Serializable {
 	 */
 	public void learn(double[][] values, double[] expectedData, double learningRate) throws Exception {
 		// Exceptions. Verify if the data is usable
-        double[][][] changedValues;
-		if (learningRate < 0 || learningRate > 1) {
-			throw new Exception("Error en la tasa de aprendizaje. Tiene que ser de un número del 0 al 1");
-		}
-		if (expectedData.length != nodes[nodes.length - 1].length) {
-            throw new Exception("Error en los datos de aprendizaje recibidos");
-        }
-		if (values.length != nodes.length) {
-			throw new Exception("Error en los valores recibidos, no hay el mismo número de capas en los valores y en los nodos de la red neuronal");
-		}
-		for (int i = 0; i < values.length; i++) {
-			if (values[i].length != nodes[i].length) {
-				throw new Exception("Error en los valores recibidos, la capa " + i + " no son del mismo tamaño");
-			}
-		}
-
-		changedValues = new double[values.length - 1][][];
+		double[][][] changedValues = getDoubles(values, expectedData, learningRate);
 
 		for (int i = 0; i < changedValues.length; i++) {
 			changedValues[i] = new double[values[i].length][];
@@ -218,4 +202,25 @@ public class NeuralNetwork implements Serializable {
 			}
 		}
     }
+
+	private double[][][] getDoubles(double[][] values, double[] expectedData, double learningRate) throws Exception {
+		double[][][] changedValues;
+		if (learningRate < 0 || learningRate > 1) {
+			throw new Exception("Error en la tasa de aprendizaje. Tiene que ser de un número del 0 al 1");
+		}
+		if (expectedData.length != nodes[nodes.length - 1].length) {
+            throw new Exception("Error en los datos de aprendizaje recibidos");
+        }
+		if (values.length != nodes.length) {
+			throw new Exception("Error en los valores recibidos, no hay el mismo número de capas en los valores y en los nodos de la red neuronal");
+		}
+		for (int i = 0; i < values.length; i++) {
+			if (values[i].length != nodes[i].length) {
+				throw new Exception("Error en los valores recibidos, la capa " + i + " no son del mismo tamaño");
+			}
+		}
+
+		changedValues = new double[values.length - 1][][];
+		return changedValues;
+	}
 }
