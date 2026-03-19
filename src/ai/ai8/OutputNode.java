@@ -2,7 +2,6 @@ package ai.ai8;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
 
 public class OutputNode extends Node implements Serializable {
 	private double bias;
