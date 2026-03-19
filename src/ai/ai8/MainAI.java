@@ -8,6 +8,7 @@ import java.util.List;
 public class MainAI {
     // En esta versión voy a intentar hacer que no se guarden los valores que tienen los nodos en los nodos, más bien que los tenga la red neuronal en una matriz
 	public static void main(String[] args) {
+        // Create Neural Network
         int[] shape = {784,16,16,10};
 		NeuralNetwork ai;
 		List<double[]> records = new ArrayList<>();
@@ -17,6 +18,8 @@ public class MainAI {
         } catch (Exception e) {
             ai = new NeuralNetwork(shape, 1);
         }
+
+        // Read data of the database
         try (BufferedReader br = new BufferedReader(new FileReader("src/ai/ai8/data/mnist_test.csv"))) {
 			String line = br.readLine();
 			while ((line = br.readLine()) != null) {
@@ -33,6 +36,8 @@ public class MainAI {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+        // Run neural network
         try {
             for (int i = 0; i < 1; i++) {
                 for (int j = 0; j < 100; j++) {
@@ -51,7 +56,7 @@ public class MainAI {
 			e.printStackTrace();
 		}
         try {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/ai/ai7/data/ai.obj"));
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/ai/ai8/data/ai.obj"));
             oos.writeObject(ai);
         } catch (IOException e) {
             throw new RuntimeException(e);
