@@ -33,13 +33,13 @@ public class InputNode extends Node implements Serializable{
 	}
 	
 	// Convierte un número en un rango entre el minRange al MaxRange en un número del 0 al 1
-	public double setValueSigmoid(double value, int minRange, int maxRange) {
+	public double setSigmoid(double value, int minRange, int maxRange) {
         return value / (maxRange - minRange) - minRange;
 	}
 	
 	public void addNodeFront(int idNode, double max) {
 		getIdNodeFrontLayer().add(idNode);
-		getValFrontLayer().add(Math.random() * (max * 2) - max);
+		getValFrontLayer().add(Math.random() * max);
 	}
 
 	// Value added to the next layer of the neural network from this neuron in the forward pass
@@ -54,27 +54,16 @@ public class InputNode extends Node implements Serializable{
     }
 
     // Aquí se edita el valor de los weights, biases y se calcula el peso del nodo siguiente
-    public double[] changeWeights(double value, double[] values, double[] marginErrors , double learningRate) {
-		double[] ret_values = new double[values.length];
-		for (int i = 0; i < valFrontLayer.size(); i++) {
-			int id = idNodeFrontLayer.get(i);
-			double dif = marginErrors[id] - value;
-			double derSigmoid = NeuralMath.setDerivativeSigmoid(values[id]);
-			ret_values[i] = value * derSigmoid * dif * learningRate;
+    public double[] changeWeights(double value, double[] values, double[] marginErrors) {
+        double[] ret_values = new double[values.length];
+        for (int i = 0; i < valFrontLayer.size(); i++) {
+            int id = idNodeFrontLayer.get(i);
+            double dif = NeuralMath.setSigmoid(values[id]) - marginErrors[id];
+            double derSigmoid = NeuralMath.setDerivativeSigmoid(values[id]);
 
-			//valFrontLayer.set(i, n + value * derSigmoid * dif * learningRate);
-		}
-
-            /*if (frontLayer.get(i) instanceof ConnectionNode)
-                ((ConnectionNode)frontLayer.get(i)).setBias(
-                        ((ConnectionNode)frontLayer.get(i)).getBias() +
-                                derSigmoid * dif * learningRate);
-            else if (frontLayer.get(i) instanceof OutputNode) {
-                ((OutputNode)frontLayer.get(i)).setBias(
-                        ((OutputNode)frontLayer.get(i)).getBias() +
-                                derSigmoid * dif * learningRate);
-            }*/
-		return ret_values;
+            ret_values[i] = NeuralMath.setSigmoid(value) * derSigmoid * dif;
+        }
+        return ret_values;
     }
 
 }

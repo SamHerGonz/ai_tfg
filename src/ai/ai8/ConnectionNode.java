@@ -14,7 +14,7 @@ public class ConnectionNode extends Node implements Serializable {
 	public ConnectionNode(double max) {
 		setIdNodeFrontLayer(new ArrayList<>());
 		setValFrontLayer(new ArrayList<>());
-        setBias(Math.random() * (max * 2) - max);
+        setBias(Math.random() * max);
 	}
 
 	public ArrayList<Integer> getIdNodeFrontLayer() {
@@ -44,7 +44,7 @@ public class ConnectionNode extends Node implements Serializable {
 	
 	public void addNodeFront(int idNode, double max) {
 		getIdNodeFrontLayer().add(idNode);
-		getValFrontLayer().add(Math.random() * (max * 2) - max);
+		getValFrontLayer().add(Math.random() * max);
 	}
 
 	// Value added to the next layer of the neural network from this neuron in the forward pass
@@ -57,15 +57,22 @@ public class ConnectionNode extends Node implements Serializable {
 		return ret_values;
 	}
 
+    /**
+     *
+     * @param value The value that the node had during the foward pass
+     * @param outputs The values that the nodes had
+     * @param target
+     * @return
+     */
     // Aquí se edita el valor de los weights, biases y se calcula el peso del nodo siguiente
-    public double[] changeWeights(double value, double[] values, double[] marginErrors, double learningRate) {
-		double[] ret_values = new double[values.length];
+    public double[] changeWeights(double value, double[] outputs, double[] target) {
+		double[] ret_values = new double[outputs.length];
         for (int i = 0; i < valFrontLayer.size(); i++) {
 			int id = idNodeFrontLayer.get(i);
-            double dif = marginErrors[id] - value;
-            double derSigmoid = NeuralMath.setDerivativeSigmoid(values[id]);
+            double dif = outputs[id] - target[id];
+            double derSigmoid = NeuralMath.setDerivativeSigmoid(outputs[id]);
 
-            ret_values[i] = value * derSigmoid * dif * learningRate;
+            ret_values[i] = value * derSigmoid * dif;
 		}
 		return ret_values;
     }

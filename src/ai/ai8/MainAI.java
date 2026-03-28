@@ -40,16 +40,23 @@ public class MainAI {
 
         // Run neural network
         try {
-            for (int i = 0; i < 1; i++) {
-                for (int j = 0; j < 100; j++) {
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < 1; j++) {
                     ai.setLearn(true);
-                    System.out.println(j + ": " + real.get(j));
-                    ai.run(records.get(j), 0, 255, real.get(j), 0.1);
+
+                    double[] expectedData = new double[10];
+                    expectedData[real.get(j)] = 1;
+
+                    ai.run(records.get(j), 0, 255, expectedData, 0.9, false);
                     ai.setLearn(false);
-                    System.out.println("After: ");
-                    ai.run(records.get(j), 0, 255, real.get(j), 1);
+                    ai.run(records.get(j), 0, 255, expectedData, 1, false);
 
                 }
+            }
+            for (int j = 0; j < 10; j++) {
+                double[] expectedData = new double[10];
+                expectedData[real.get(j)] = 1;
+                ai.run(records.get(j), 0, 255, expectedData, 1, true);
             }
 		}
 		catch(Exception e) {
