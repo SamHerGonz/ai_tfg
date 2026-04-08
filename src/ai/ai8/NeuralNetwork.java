@@ -2,6 +2,8 @@ package ai.ai8;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class NeuralNetwork implements Serializable {
 	private Node[][] nodes;
@@ -179,40 +181,21 @@ public class NeuralNetwork implements Serializable {
             }
         }
         // Calculate the expected data of all the remaining layers
-        for (int i = nodes.length - 3; i >= 0; i-- ) {
+        for (int i = nodes.length - 2; i >= 0; i-- ) {
             // Since the next layer is an instance of ConnectionNode, then we need to calculate the margin error
             // Each layer I get the values of the previous layer (the layer in which we really are) to be used in the next step of backpropagation, node by node, not all the layer
-            int[] idWeights = new int[nodes[i].length];
-            double[] weights = new double[nodes[i].length];
-            for (int j = 0; j < nodes[i + 1].length; j++) {
+            ArrayList<Integer> idWeights = new ArrayList<>();
+            ArrayList<Double> weights = new ArrayList<>();
+            for (int j = 0; j < nodes[i].length; j++) {
                 for (int k = 0; k < nodes[i].length; k++) {
                     // Get the jth index of the array
+                    if (((ConnectionNode)nodes[i][k]).getIdNodeFrontLayer().indexOf(j) != 0) {
+                        idWeights.add(((ConnectionNode) nodes[i][k]).getIdNodeFrontLayer().indexOf(j));
+                    }
                 }
                 expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
-                        ((ConnectionNode) nodes[i + 1][j]).calculateExpectedDataFromConnectionNode(values[i][j], idWeights, weights, expectedDatas[i + 1]));
+                        ((ConnectionNode) nodes[i][j]).calculateExpectedDataFromConnectionNode(values[i][j], idWeights, weights, expectedDatas[i]));
             }
-            /*for (int j = 0; j < nodes[i].length; j++) {
-                if (nodes[i][j] instanceof InputNode) {
-                    if (nodes[i + 1][0] instanceof ConnectionNode) {
-                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
-                                ((InputNode)nodes[i][j]).calculateExpectedDataFromConnectionNode(values[i][j], expectedDatas[i + 1]));
-                    }
-                    else {
-                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
-                                ((InputNode)nodes[i][j]).calculateExpectedDataFromOutputNode(values[i][j], targetOutputs));
-                    }
-                }
-                else if (nodes[i][j] instanceof ConnectionNode) {
-                    if (nodes[i + 1][0] instanceof ConnectionNode) {
-                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
-                                ((ConnectionNode) nodes[i][j]).calculateExpectedDataFromConnectionNode(values[i][j], expectedDatas[i + 1]));
-                    }
-                    else {
-                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
-                                ((ConnectionNode) nodes[i][j]).calculateExpectedDataFromOutputNode(values[i][j], targetOutputs));
-                    }
-                }
-            }*/
         }
 
 

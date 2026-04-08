@@ -74,12 +74,12 @@ public class ConnectionNode extends Node implements Serializable {
 		return ret_values;
     }
 
-    public double[] calculateExpectedDataFromConnectionNode(double value, int[] idWeights, double[] weights, double[] outputs) {
+    public double[] calculateExpectedDataFromConnectionNode(double value, ArrayList<Integer> idWeights, ArrayList<Double> weights, double[] outputs) {
         double[] ret_values = new double[outputs.length];
         double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
         for (int i = 0; i < ret_values.length; i++) {
-            int id = idWeights[i];
-            ret_values[i] = weights[id] * outputs[id] * derSigmoid;
+            int id = idWeights.get(i);
+            ret_values[i] = weights.get(id) * outputs[id] * derSigmoid;
         }
         return ret_values;
     }
