@@ -64,13 +64,19 @@ public class InputNode extends Node implements Serializable{
         return ret_values;
     }
 
-    public double[] calculateExpectedDataFromConnectionNode(double value, ArrayList<Double> nextLayerValues, ArrayList<Integer> idNodeNextLayer, double[] outputs) {
-        double[] ret_values = new double[outputs.length];
+    public double[] calculateExpectedDataFromConnectionNode(double value, ArrayList<Integer> idWeights, ArrayList<Double> weights, double[] outputs, int sizeLayer) {
+        double[] ret_values = new double[sizeLayer];
         double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
-        for (int i = 0; i < nextLayerValues.size(); i++) {
-            int id = idNodeNextLayer.get(i);
-            ret_values[i] = nextLayerValues.get(id) * outputs[id] * derSigmoid;
+        for (int i = 0; i < idWeights.size(); i++) {
+            if (idNodeFrontLayer.contains(i)) {
+                int id = idWeights.get(i);
+                ret_values[i] = derSigmoid;
+                for (double output : outputs) {
+                    ret_values[i] += weights.get(id) * output;
+                }
+            }
         }
         return ret_values;
     }
+
 }

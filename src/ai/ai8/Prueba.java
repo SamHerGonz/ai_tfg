@@ -2,8 +2,11 @@ package ai.ai8;
 
 public class Prueba {
     public static void main(String[] args) {
-        int[] shape = {3,2,4,3,1};
+        int[] shape = {3,3,1};
         NeuralNetwork ai = new NeuralNetwork(shape, 1);
+        int[] shape2 = {2,5,3,4,2};
+        NeuralNetwork ai2 = new NeuralNetwork(shape2, 1);
+        double[] result = {0,1};
         ai.setLearn(true);
         double[][][] data = {
                 {{0,0,0},{1}},
@@ -19,6 +22,16 @@ public class Prueba {
         try{
             for (int i = 0; i < 100000; i++) {
                 for (int j = 0; j < data.length; j++) {
+                    ai2.run(result, 0, 1,result,0.8, true);
+                }
+            }
+            ai2.setLearn(false);
+            System.out.println("\n\n\nPrueba final:");
+            ai2.run(result, 0, 1,result,0.5, true);
+
+
+            /*for (int i = 0; i < 100000; i++) {
+                for (int j = 0; j < data.length; j++) {
                     int n = (int)(Math.random() * data.length);
                     ai.run(data[n][0], 0, 1,data[n][1],0.8, true);
                 }
@@ -27,12 +40,13 @@ public class Prueba {
             System.out.println("\n\n\nPruebas finales:");
             for (int i = 0; i < data.length; i++) {
                 ai.run(data[i][0], 0, 1,data[i][1],0.5, true);
-            }
+                System.out.println("Resultado esperado: " + data[i][1][0]);
+            }*/
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
-        double[][] a1 = new double[2][3];
+        /*double[][] a1 = new double[2][3];
         double[][] a2 = new double[3][2];
 
         double count = 1;
@@ -67,6 +81,5 @@ public class Prueba {
         /*BigDecimal bd1 = new BigDecimal("1.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001");
         BigDecimal bd2 = new BigDecimal(1.000000000000001);
         System.out.println(bd1);*/
-
     }
 }

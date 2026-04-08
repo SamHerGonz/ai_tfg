@@ -168,6 +168,8 @@ public class NeuralNetwork implements Serializable {
 
         double[][] expectedDatas = new double[nodes.length - 1][];
         double[] targetOutputs = NeuralMath.subtractArrays(values[values.length - 1], expectedData);
+        ArrayList<Integer> idWeights = new ArrayList<>();
+        ArrayList<Double> weights = new ArrayList<>();
 
         // Calculate the expected data for the second last layer
         // We already have the expected data of the marginError in the targetOutputs
@@ -181,26 +183,46 @@ public class NeuralNetwork implements Serializable {
             }
         }
         // Calculate the expected data of all the remaining layers
-        for (int i = nodes.length - 2; i >= 0; i-- ) {
-            // Since the next layer is an instance of ConnectionNode, then we need to calculate the margin error
+        for (int i = nodes.length - 3; i > 0; i--) {
+            expectedDatas[i] = new double[nodes[i].length];
+            // Since the next layer is always an instance of ConnectionNode, we don't have any reason to verify it.
+            // We need to calculate the margin error
             // Each layer I get the values of the previous layer (the layer in which we really are) to be used in the next step of backpropagation, node by node, not all the layer
-            ArrayList<Integer> idWeights = new ArrayList<>();
-            ArrayList<Double> weights = new ArrayList<>();
             for (int j = 0; j < nodes[i].length; j++) {
+                idWeights.clear();
+                weights.clear();
                 for (int k = 0; k < nodes[i].length; k++) {
                     // Get the jth index of the array
-                    if (((ConnectionNode)nodes[i][k]).getIdNodeFrontLayer().indexOf(j) != 0) {
-                        idWeights.add(((ConnectionNode) nodes[i][k]).getIdNodeFrontLayer().indexOf(j));
+                    if (((ConnectionNode) nodes[i][k]).getIdNodeFrontLayer().contains(k)) {
+                        idWeights.add(((ConnectionNode) nodes[i][k]).getIdNodeFrontLayer().indexOf(k));
+                        weights.add(((ConnectionNode) nodes[i][k]).getValFrontLayer().get(idWeights.getLast()));
                     }
                 }
                 expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
-                        ((ConnectionNode) nodes[i][j]).calculateExpectedDataFromConnectionNode(values[i][j], idWeights, weights, expectedDatas[i]));
+                        ((ConnectionNode) nodes[i][j]).calculateExpectedDataFromConnectionNode(values[i][j], idWeights, weights, expectedDatas[i + 1], nodes[i].length));
+            }
+        }
+
+        //Calculate the expected data of the first layer only if the next layer of it is a connection node
+        // If not, it already has been calculated, and we don't need to do anything more
+        if (nodes[1][0] instanceof ConnectionNode) {
+            for (int j = 0; j < nodes[1].length; j++) {
+                idWeights.clear();
+                weights.clear();
+                for (int k = 0; k < nodes[0].length; k++) {
+                    // Get the jth index of the array
+                    if (((InputNode) nodes[0][k]).getIdNodeFrontLayer().contains(k)) {
+                        idWeights.add(((InputNode) nodes[0][k]).getIdNodeFrontLayer().indexOf(k));
+                        weights.add(((InputNode) nodes[0][k]).getValFrontLayer().get(idWeights.getLast()));
+                    }
+                }
+                expectedDatas[0] = NeuralMath.addArrays(expectedDatas[0],
+                        ((InputNode) nodes[0][j]).calculateExpectedDataFromConnectionNode(values[1][j], idWeights, weights, expectedDatas[1], nodes[1].length));
             }
         }
 
 
-
-		for (int i = 0; i < expectedDatas.length; i++) {
+        /*for (int i = 0; i < expectedDatas.length; i++) {
 			for (int j = 0; j < expectedDatas[i].length; j++) {
                 if (nodes[i][j] instanceof InputNode) {
 					((InputNode) nodes[i][j]).getValFrontLayer().set(j,
@@ -211,6 +233,27 @@ public class NeuralNetwork implements Serializable {
                             ((ConnectionNode)nodes[i][j]).getValFrontLayer().get(j) - expectedDatas[i][j] * learningRate);
                 }
 			}
-		}
+		}*/
+
+        for (int i = 0; i < expectedDatas.length; i++) {
+            for (int j = 0; j < expectedDatas[i].length; j++) {
+                if (nodes[i][j] instanceof InputNode) {
+                    for (int k = 0; k < ((InputNode)nodes[i][j]).getValFrontLayer().size(); k++) {
+                        ((InputNode) nodes[i][j]).getValFrontLayer().set(k,
+                                ((InputNode)nodes[i][j]).getValFrontLayer().get(k) -
+                                        expectedDatas[i][j] *
+                                                NeuralMath.setSigmoid(((InputNode)nodes[i][j]).getValFrontLayer().get(k)) * learningRate);
+                    }
+                }
+                else if (nodes[i][j] instanceof ConnectionNode) {
+                    for (int k = 0; k < ((ConnectionNode)nodes[i][j]).getValFrontLayer().size(); k++) {
+                        ((ConnectionNode) nodes[i][j]).getValFrontLayer().set(k,
+                                ((ConnectionNode)nodes[i][j]).getValFrontLayer().get(k) -
+                                        expectedDatas[i][j] *
+                                                NeuralMath.setSigmoid(((ConnectionNode)nodes[i][j]).getValFrontLayer().get(k)) * learningRate);
+                    }
+                }
+            }
+        }
     }
 }
