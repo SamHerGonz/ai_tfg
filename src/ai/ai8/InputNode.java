@@ -39,7 +39,7 @@ public class InputNode extends Node implements Serializable{
 	
 	public void addNodeFront(int idNode, double max) {
 		getIdNodeFrontLayer().add(idNode);
-		getValFrontLayer().add(Math.random() * max);
+		getValFrontLayer().add(Math.random() * (max * 2) - max);
 	}
 
 	// Value added to the next layer of the neural network from this neuron in the forward pass
@@ -53,17 +53,24 @@ public class InputNode extends Node implements Serializable{
         return ret_values;
     }
 
-    // Aquí se edita el valor de los weights, biases y se calcula el peso del nodo siguiente
-    public double[] changeWeights(double value, double[] values, double[] marginErrors) {
-        double[] ret_values = new double[values.length];
+    // Aquí se calcula el valor del dato esperado de esta capa (expectedData), o por lo menos la parte que indica esta capa
+    public double[] calculateExpectedDataFromOutputNode(double value, double[] outputs) {
+        double[] ret_values = new double[outputs.length];
+        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
         for (int i = 0; i < valFrontLayer.size(); i++) {
             int id = idNodeFrontLayer.get(i);
-            double dif = NeuralMath.setSigmoid(values[id]) - marginErrors[id];
-            double derSigmoid = NeuralMath.setDerivativeSigmoid(values[id]);
-
-            ret_values[i] = NeuralMath.setSigmoid(value) * derSigmoid * dif;
+            ret_values[i] = derSigmoid * outputs[id];
         }
         return ret_values;
     }
 
+    public double[] calculateExpectedDataFromConnectionNode(double value, ArrayList<Double> nextLayerValues, ArrayList<Integer> idNodeNextLayer, double[] outputs) {
+        double[] ret_values = new double[outputs.length];
+        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
+        for (int i = 0; i < nextLayerValues.size(); i++) {
+            int id = idNodeNextLayer.get(i);
+            ret_values[i] = nextLayerValues.get(id) * outputs[id] * derSigmoid;
+        }
+        return ret_values;
+    }
 }

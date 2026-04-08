@@ -142,7 +142,7 @@ public class NeuralNetwork implements Serializable {
 
 	/**
 	 *
-	 * @param values all the values of the nodes without the sigmoid function applied
+	 * @param values all the values of the nodes without the sigmoid function applied, except for the last layer
 	 * @param expectedData the real array that we expècted
 	 * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
 	 * @throws Exception
@@ -164,50 +164,70 @@ public class NeuralNetwork implements Serializable {
             }
         }
 
-        double[][][] newWeightValues = getShapeWeightDoubles();
+        double[][] expectedDatas = new double[nodes.length - 1][];
+        double[] targetOutputs = NeuralMath.subtractArrays(values[values.length - 1], expectedData);
 
-        for (int i = nodes.length - 2; i >= 0; i-- ) {
-            for (int j = 0; j < nodes[i].length; j++) {
-                if (nodes[i][j] instanceof InputNode) {
-                    newWeightValues[i][j] = ((InputNode)nodes[i][j]).changeWeights(values[i][j], values[i + 1], expectedData);
-                }
-                else if (nodes[i][j] instanceof ConnectionNode){
-                    newWeightValues[i][j] = ((ConnectionNode)nodes[i][j]).changeWeights(values[i][j], values[i + 1], expectedData);
-				}
-            }
-
-            expectedData = new double[nodes[i].length];
-
-            for (int j = 0; j < nodes[i].length; j++) {
-				for (int k = 0; k < newWeightValues[i][j].length; k++) {
-					expectedData[j] += newWeightValues[i][j][k] / values[i][j];
-				}
+        // Calculate the expected data for the second last layer
+        // We already have the expected data of the marginError in the targetOutputs
+        for (int j = 0; j < nodes[nodes.length - 2].length; j++) {
+            if (nodes[nodes.length - 2][j] instanceof InputNode) {
+                expectedDatas[nodes.length - 2] = NeuralMath.addArrays(expectedDatas[nodes.length - 2],
+                        ((InputNode) nodes[nodes.length - 2][j]).calculateExpectedDataFromOutputNode(values[nodes.length - 2][j], targetOutputs));
+            } else if (nodes[nodes.length - 2][j] instanceof ConnectionNode) {
+                expectedDatas[nodes.length - 2] = NeuralMath.addArrays(expectedDatas[nodes.length - 2],
+                        ((ConnectionNode) nodes[nodes.length - 2][j]).calculateExpectedDataFromOutputNode(values[nodes.length - 2][j], targetOutputs));
             }
         }
+        // Calculate the expected data of all the remaining layers
+        for (int i = nodes.length - 3; i >= 0; i-- ) {
+            // Since the next layer is an instance of ConnectionNode, then we need to calculate the margin error
+            // Each layer I get the values of the previous layer (the layer in which we really are) to be used in the next step of backpropagation, node by node, not all the layer
+            int[] idWeights = new int[nodes[i].length];
+            double[] weights = new double[nodes[i].length];
+            for (int j = 0; j < nodes[i + 1].length; j++) {
+                for (int k = 0; k < nodes[i].length; k++) {
+                    // Get the jth index of the array
+                }
+                expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
+                        ((ConnectionNode) nodes[i + 1][j]).calculateExpectedDataFromConnectionNode(values[i][j], idWeights, weights, expectedDatas[i + 1]));
+            }
+            /*for (int j = 0; j < nodes[i].length; j++) {
+                if (nodes[i][j] instanceof InputNode) {
+                    if (nodes[i + 1][0] instanceof ConnectionNode) {
+                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
+                                ((InputNode)nodes[i][j]).calculateExpectedDataFromConnectionNode(values[i][j], expectedDatas[i + 1]));
+                    }
+                    else {
+                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
+                                ((InputNode)nodes[i][j]).calculateExpectedDataFromOutputNode(values[i][j], targetOutputs));
+                    }
+                }
+                else if (nodes[i][j] instanceof ConnectionNode) {
+                    if (nodes[i + 1][0] instanceof ConnectionNode) {
+                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
+                                ((ConnectionNode) nodes[i][j]).calculateExpectedDataFromConnectionNode(values[i][j], expectedDatas[i + 1]));
+                    }
+                    else {
+                        expectedDatas[i] = NeuralMath.addArrays(expectedDatas[i],
+                                ((ConnectionNode) nodes[i][j]).calculateExpectedDataFromOutputNode(values[i][j], targetOutputs));
+                    }
+                }
+            }*/
+        }
 
-		for (int i = 0; i < newWeightValues.length; i++) {
-			for (int j = 0; j < newWeightValues[i].length; j++) {
-				for (int k = 0; k < newWeightValues[i][j].length; k++) {
-					if (nodes[i][j] instanceof InputNode) {
-						((InputNode) nodes[i][j]).getValFrontLayer().set(k,
-                                ((InputNode)nodes[i][j]).getValFrontLayer().get(k) - newWeightValues[i][j][k] * learningRate);
-					}
-					else if (nodes[i][j] instanceof ConnectionNode) {
-						((ConnectionNode)nodes[i][j]).getValFrontLayer().set(k,
-                                ((ConnectionNode)nodes[i][j]).getValFrontLayer().get(k) - newWeightValues[i][j][k] * learningRate);
-					}
 
-				}
+
+		for (int i = 0; i < expectedDatas.length; i++) {
+			for (int j = 0; j < expectedDatas[i].length; j++) {
+                if (nodes[i][j] instanceof InputNode) {
+					((InputNode) nodes[i][j]).getValFrontLayer().set(j,
+                            ((InputNode)nodes[i][j]).getValFrontLayer().get(j) - expectedDatas[i][j] * learningRate);
+                }
+                else if (nodes[i][j] instanceof ConnectionNode) {
+                    ((ConnectionNode)nodes[i][j]).getValFrontLayer().set(j,
+                            ((ConnectionNode)nodes[i][j]).getValFrontLayer().get(j) - expectedDatas[i][j] * learningRate);
+                }
 			}
 		}
     }
-
-	private double[][][] getShapeWeightDoubles() {
-		double[][][] weightValues = new double[nodes.length - 1][][];
-
-        for (int i = 0; i < weightValues.length; i++) {
-            weightValues[i] = new double[nodes[i].length][];
-        }
-		return weightValues;
-	}
 }

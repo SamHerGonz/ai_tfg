@@ -47,9 +47,9 @@ public class MainAI {
                     double[] expectedData = new double[10];
                     expectedData[real.get(j)] = 1;
 
-                    ai.run(records.get(j), 0, 255, expectedData, 0.9, false);
+                    ai.run(records.get(j), 0, 255, expectedData, 0.9, true);
                     ai.setLearn(false);
-                    ai.run(records.get(j), 0, 255, expectedData, 1, false);
+                    ai.run(records.get(j), 0, 255, expectedData, 1, true);
 
                 }
             }
@@ -63,11 +63,11 @@ public class MainAI {
 			System.out.println("Error");
 			e.printStackTrace();
 		}
-        try {
+        /*try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/ai/ai8/data/ai.obj"));
             oos.writeObject(ai);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 	}
 }

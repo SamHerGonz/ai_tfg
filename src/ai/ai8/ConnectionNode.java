@@ -14,7 +14,7 @@ public class ConnectionNode extends Node implements Serializable {
 	public ConnectionNode(double max) {
 		setIdNodeFrontLayer(new ArrayList<>());
 		setValFrontLayer(new ArrayList<>());
-        setBias(Math.random() * max);
+        setBias(Math.random() * (max * 2) - max);
 	}
 
 	public ArrayList<Integer> getIdNodeFrontLayer() {
@@ -44,7 +44,7 @@ public class ConnectionNode extends Node implements Serializable {
 	
 	public void addNodeFront(int idNode, double max) {
 		getIdNodeFrontLayer().add(idNode);
-		getValFrontLayer().add(Math.random() * max);
+		getValFrontLayer().add(Math.random() * (max * 2) - max);
 	}
 
 	// Value added to the next layer of the neural network from this neuron in the forward pass
@@ -60,20 +60,27 @@ public class ConnectionNode extends Node implements Serializable {
     /**
      *
      * @param value The value that the node had during the foward pass
-     * @param outputs The values that the nodes had
-     * @param target
+     * @param outputs The values that the next layer of nodes had
      * @return
      */
-    // Aquí se edita el valor de los weights, biases y se calcula el peso del nodo siguiente
-    public double[] changeWeights(double value, double[] outputs, double[] target) {
+    // Aquí se calcula el valor del dato esperado de esta capa (expectedData), o por lo menos la parte que indica esta capa
+    public double[] calculateExpectedDataFromOutputNode(double value, double[] outputs) {
 		double[] ret_values = new double[outputs.length];
-        for (int i = 0; i < valFrontLayer.size(); i++) {
+        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
+        for (int i = 0; i < ret_values.length; i++) {
 			int id = idNodeFrontLayer.get(i);
-            double dif = outputs[id] - target[id];
-            double derSigmoid = NeuralMath.setDerivativeSigmoid(outputs[id]);
-
-            ret_values[i] = value * derSigmoid * dif;
+            ret_values[i] = derSigmoid * outputs[id];
 		}
 		return ret_values;
+    }
+
+    public double[] calculateExpectedDataFromConnectionNode(double value, int[] idWeights, double[] weights, double[] outputs) {
+        double[] ret_values = new double[outputs.length];
+        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
+        for (int i = 0; i < ret_values.length; i++) {
+            int id = idWeights[i];
+            ret_values[i] = weights[id] * outputs[id] * derSigmoid;
+        }
+        return ret_values;
     }
 }

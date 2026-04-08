@@ -2,7 +2,7 @@ package ai.ai8;
 
 public class Prueba {
     public static void main(String[] args) {
-        int[] shape = {3,3,1};
+        int[] shape = {3,2,4,3,1};
         NeuralNetwork ai = new NeuralNetwork(shape, 1);
         ai.setLearn(true);
         double[][][] data = {
@@ -15,7 +15,7 @@ public class Prueba {
                 {{1,1,0},{1}},
                 {{1,1,1},{0}},
         };
-
+        System.out.println(NeuralMath.setSigmoid(8));
         try{
             for (int i = 0; i < 100000; i++) {
                 for (int j = 0; j < data.length; j++) {
