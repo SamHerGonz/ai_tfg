@@ -48,43 +48,28 @@ public class ConnectionNode extends Node implements Serializable {
 	}
 
 	// Value added to the next layer of the neural network from this neuron in the forward pass
-	public double[] transferAllData(double value) {
-		double[] ret_values = new double[valFrontLayer.size()];
-		for (int i = 0; i < ret_values.length; i++) {
+	public double[] transferAllData(double value, int sizeNextLayer) {
+		double[] ret_values = new double[sizeNextLayer];
+		for (int i = 0; i < valFrontLayer.size(); i++) {
 			int id = idNodeFrontLayer.get(i);
-			ret_values[id] = value * valFrontLayer.get(i);
+			ret_values[id] = value * valFrontLayer.get(id);
 		}
 		return ret_values;
 	}
 
     /**
      *
-     * @param value The value that the node had during the foward pass
-     * @param outputsNeuralNetwork The values that the next layer of nodes had
+     * @param value
+     * @param outputsNextLayer The outputs of the next layer
      * @return
      */
-    // Aquí se calcula el valor del dato esperado de esta capa (expectedData), o por lo menos la parte que indica esta capa
-    public double[] calculateExpectedDataFromOutputNode(double value, double[] outputsNeuralNetwork) {
-		double[] ret_values = new double[outputsNeuralNetwork.length];
-        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
-        for (int i = 0; i < ret_values.length; i++) {
+    public double calculateExpectedData(double value, double[] outputsNextLayer) {
+        double ret_values = NeuralMath.setDerivativeSigmoid(value);
+        for (int i = 0; i < outputsNextLayer.length; i++) {
             if (idNodeFrontLayer.contains(i)) {
                 int id = idNodeFrontLayer.get(i);
-                ret_values[i] = derSigmoid * outputsNeuralNetwork[id];
-            }
-		}
-		return ret_values;
-    }
-
-    public double[] calculateExpectedDataFromConnectionNode(double value, ArrayList<Integer> idWeights, ArrayList<Double> weights, double[] outputsLastLayer, int sizeLayer) {
-        double[] ret_values = new double[sizeLayer];
-        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
-        for (int i = 0; i < idWeights.size(); i++) {
-            if (idNodeFrontLayer.contains(i)) {
-                int id = idWeights.get(i);
-                ret_values[i] = derSigmoid;
-                for (double output : outputsLastLayer) {
-                    ret_values[i] += weights.get(id) * output;
+                for (double output : outputsNextLayer) {
+                    ret_values += valFrontLayer.get(id) * output;
                 }
             }
         }

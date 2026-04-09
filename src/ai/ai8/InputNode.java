@@ -43,40 +43,13 @@ public class InputNode extends Node implements Serializable{
 	}
 
 	// Value added to the next layer of the neural network from this neuron in the forward pass
-    public double[] transferAllData(double value) {
-        double[] ret_values = new double[valFrontLayer.size()];
-        for (int i = 0; i < ret_values.length; i++) {
-			int id = idNodeFrontLayer.get(i);
-            ret_values[id] = value * valFrontLayer.get(i);
-        }
-
-        return ret_values;
-    }
-
-    // Aquí se calcula el valor del dato esperado de esta capa (expectedData), o por lo menos la parte que indica esta capa
-    public double[] calculateExpectedDataFromOutputNode(double value, double[] outputs) {
-        double[] ret_values = new double[outputs.length];
-        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
+    public double[] transferAllData(double value, int sizeNextLayer) {
+        double[] ret_values = new double[sizeNextLayer];
         for (int i = 0; i < valFrontLayer.size(); i++) {
-            int id = idNodeFrontLayer.get(i);
-            ret_values[i] = derSigmoid * outputs[id];
+			int id = idNodeFrontLayer.get(i);
+            ret_values[id] = value * valFrontLayer.get(id);
         }
+
         return ret_values;
     }
-
-    public double[] calculateExpectedDataFromConnectionNode(double value, ArrayList<Integer> idWeights, ArrayList<Double> weights, double[] outputs, int sizeLayer) {
-        double[] ret_values = new double[sizeLayer];
-        double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
-        for (int i = 0; i < idWeights.size(); i++) {
-            if (idNodeFrontLayer.contains(i)) {
-                int id = idWeights.get(i);
-                ret_values[i] = derSigmoid;
-                for (double output : outputs) {
-                    ret_values[i] += weights.get(id) * output;
-                }
-            }
-        }
-        return ret_values;
-    }
-
 }

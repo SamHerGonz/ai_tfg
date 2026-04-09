@@ -20,13 +20,17 @@ public class OutputNode extends Node implements Serializable {
 		this.bias = bias;
 	}
 
+    /**
+     *
+     * @param value The value of the
+     * @param outputNeuralNetwork
+     * @return
+     */
     // Aquí se calcula el valor del dato esperado de esta capa (expectedData), o por lo menos la parte que indica esta capa
-    public double[] calculateExpectedDataFromOutputNode(double value, double[] outputs, int sizeLayer) {
-        double[] ret_values = new double[sizeLayer];
+    public double calculateExpectedData(double value, double outputNeuralNetwork) {
+        double ret_values = 1;
         double derSigmoid = NeuralMath.setDerivativeSigmoid(value);
-        for (int i = 0; i < sizeLayer; i++) {
-            ret_values[i] = derSigmoid * outputs[i];
-        }
+        ret_values *= derSigmoid * outputNeuralNetwork;
         return ret_values;
     }
 

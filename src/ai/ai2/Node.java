@@ -1,9 +1,11 @@
 package ai.ai2;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Node implements Serializable {
-	private static final long serialVersionUID = 1;
+	@Serial
+    private static final long serialVersionUID = 1;
 	private double value;
 	
 	

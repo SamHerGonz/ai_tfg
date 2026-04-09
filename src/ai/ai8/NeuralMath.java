@@ -1,5 +1,7 @@
 package ai.ai8;
 
+import java.util.ArrayList;
+
 public class NeuralMath {
     public static double setSigmoid(double n) {
         return (1 / (1 + Math.exp(- n)));
@@ -7,12 +9,12 @@ public class NeuralMath {
     public static double setDerivativeSigmoid(double n) {
         return setSigmoid(n) * (1 - setSigmoid(n));
     }
-    public static double[] addArrays(double[] a1, double[] a2) {
+    public static double[] addArrays(double[] a1, double[] a2, ArrayList<Integer> indexesA2) {
         if (a1 == null) {
             a1 = new double[a2.length];
         }
-        double[] ret_array = new double[a1.length];
-        for (int i = 0; i < ret_array.length; i++) {
+        double[] ret_array = a1.clone();
+        for (int i = 0; i < indexesA2.size(); i++) {
             ret_array[i] = a1[i] + a2[i];
         }
         return ret_array;
