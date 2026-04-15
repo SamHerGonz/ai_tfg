@@ -46,16 +46,17 @@ public class MainAI {
                     double[] expectedData = new double[10];
                     expectedData[real.get(j)] = 1;
 
-                    ai.run(records.get(j), 0, 255, expectedData, 0.9, false);
+                    ai.runAndLearn(records.get(j), 0, 255, expectedData, 0.9, false);
                 }
             }
             ai.setLearn(false);
-            for (int i = 0; i < 10; i++) {
+            int n = 0;
+            for (int i = 0; i < 1000; i++) {
                 int data = (int) (Math.random() * records.size());
                 double[] expectedData = new double[10];
                 expectedData[real.get(data)] = 1;
                 System.out.println("The real data is the index " + data);
-                double [] dataReceived = ai.run(records.get(data), 0, 255, expectedData, 1, true);
+                double [] dataReceived = ai.runAndLearn(records.get(data), 0, 255, expectedData, 1, true);
 
                 int max = 0;
                 for (int j = 1; j < dataReceived.length; j++) {
@@ -65,7 +66,11 @@ public class MainAI {
                 }
                 System.out.println("Expected: " + real.get(data));
                 System.out.println("Value guessed: " + max);
+                if (real.get(data) == max) {
+                    n++;
+                }
             }
+            System.out.println((double)n / 1000);
 		}
 		catch(Exception e) {
 			System.out.println("Error");

@@ -1,5 +1,3 @@
-import javax.swing.*;
-import java.awt.*;
 import java.io.*;
 
 public class Prueba {
@@ -44,11 +42,11 @@ public class Prueba {
                 double[] inputData = {Math.random(),Math.random()};
                 double[] outputData = {1 - inputData[0],1 - inputData[1]};
                 System.out.println("Input data: " + inputData[0] + " " + inputData[1]);
-                ai3.run(inputData,0,1,outputData,0.5,true);
+                ai3.runAndLearn(inputData,0,1,outputData,0.5,true);
             }
             double[] inputData = {0.01,0.99};
             double[] outputData = {0.99,0.01};
-            ai3.run(inputData,0,1,outputData,1,true);
+            ai3.runAndLearn(inputData,0,1,outputData,1,true);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
