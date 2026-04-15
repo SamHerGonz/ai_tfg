@@ -75,34 +75,19 @@ public class NeuralNetwork implements Serializable {
             if (((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
                 int i = ((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
                 ((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
-                ((InputNode)nodes[layer][firstLayerIndex]).getValFrontLayer().remove(i);
-                for (int j = 0; j < ((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().size(); j++) {
-                    if (((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().get(j) > i) {
-                        ((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().set(
-                                j, ((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().get(j) - 1
-                        );
-                    }
-                }
+                ((InputNode)nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
             }
         }
         else if (nodes[layer][firstLayerIndex] instanceof ConnectionNode) {
             if (((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
                 int i = ((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
                 ((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
-                ((ConnectionNode)nodes[layer][firstLayerIndex]).getValFrontLayer().remove(i);
-                for (int j = 0; j < ((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().size(); j++) {
-                    if (((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().get(j) > i) {
-                        ((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().set(
-                                j, ((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().get(j) - 1
-                        );
-                    }
-                }
-
+                ((ConnectionNode)nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
             }
         }
     }
 
-    // Funciona
+    // It works
 	/**
 	 *
 	 * @param data the data received
@@ -124,30 +109,35 @@ public class NeuralNetwork implements Serializable {
 
 		// Make a copy of the array data to values[0]. It has to be like that, because if not it makes reference to the same array ¿¿Why??
         System.arraycopy(data, 0, values[0], 0, values[0].length);
-
+        for (int i = 0; i < values[0].length; i++) {
+            values[0][i] = InputNode.setSigmoid(data[i], minRange, maxRange);
+        }
 		for (int i = 0; i < nodes.length - 1; i++) {
 
 			// Add the values of the next layer, without the sigmoid function
+            // SE LE TIENE QUE SUMAR EL BIAS!!! ESO TAMBIÉN EN LA RETROPROPAGACIÓN
 			for (int j = 0; j < nodes[i].length; j++) {
 				if (nodes[i][j] instanceof InputNode) {
 					values[i + 1] = NeuralMath.addArrays(
                             values[i + 1], ((InputNode)nodes[i][j]).transferAllData(
-                                    ((InputNode)nodes[i][j]).setSigmoid(values[i][j], minRange, maxRange), nodes[i + 1].length),
-                            ((InputNode)nodes[i][j]).getIdNodeFrontLayer());
+                                    values[i][j], nodes[i + 1].length));
 				}
 				else if (nodes[i][j] instanceof ConnectionNode){
 					values[i + 1] = NeuralMath.addArrays(
                             values[i + 1], ((ConnectionNode)nodes[i][j]).transferAllData(
-                                    NeuralMath.setSigmoid(values[i][j] + ((ConnectionNode) nodes[i][j]).getBias()), nodes[i + 1].length),
-                            ((ConnectionNode)nodes[i][j]).getIdNodeFrontLayer());
+                                    NeuralMath.setSigmoid(values[i][j]), nodes[i + 1].length));
 				}
 			}
+            // Add the biases of each node
+            for (int j = 0; j < nodes[i + 1].length; j++) {
+                if (nodes[i + 1][j] instanceof ConnectionNode) {
+                    values[i + 1][j] += ((ConnectionNode) nodes[i + 1][j]).getBias();
+                }
+                else if (nodes[i + 1][j] instanceof OutputNode) {
+                    values[i + 1][j] += ((OutputNode) nodes[i + 1][j]).getBias();
+                }
+            }
 		}
-
-		// Edit the values of the last layer with the sigmoid function
-        for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-            values[values.length - 1][i] += ((OutputNode) nodes[nodes.length - 1][i]).getBias();
-        }
 
         double marginError = 0;
         for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
@@ -178,9 +168,9 @@ public class NeuralNetwork implements Serializable {
 	 */
 	public void learn(double[][] values, double[] expectedData, double marginError, double learningRate) throws Exception {
 		// Exceptions. Verify if the data is usable
-        if (learningRate < 0 || learningRate > 1) {
+        /*if (learningRate < 0 || learningRate > 1) {
             throw new Exception("Error en la tasa de aprendizaje. Tiene que ser de un número del 0 al 1");
-        }
+        }*/
         if (expectedData.length != nodes[nodes.length - 1].length) {
             throw new Exception("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
         }
@@ -206,19 +196,21 @@ public class NeuralNetwork implements Serializable {
 
         double[] difOutputs = NeuralMath.subtractArrays(expectedData, lastLayer);
 
-        // Free the memory
-        lastLayer = null;
-
         // Calculate the expectedDatas for the last layer
         // We already have the expected data of the marginError in the targetOutputs
         for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-            difDatas[nodes.length - 2][j] = ((OutputNode)nodes[nodes.length - 1][j]).calculateExpectedData(values[nodes.length - 1][j], difOutputs[j]);
+            difDatas[nodes.length - 2][j] = (difOutputs[j] * NeuralMath.setDerivativeSigmoid(values[values.length - 1][j]));
         }
+
         // Calculate the expectedDatas of all the remaining layers
         // Para calcular el S& de la capa -2 los cálculos se hacen en la capa -2, cogiendo los datos de la capa -1 y el return tiene la longitud de la capa -2
         // NO NECESITO CALCULAR EL S& DE LA CAPA 0, LA DE LOS INPUTS, PORQUE NO SE USA EN NINGÚN MOMENTO
+        // It doesn't work correctly. There are values that skyrocket for no reason, which makes it act weird. The values are the weights of the Input nodes and the biases of the connections of the next node.
+        // That makes it easier to analyze the problem, and I think I know what is it. The activation of the Input Node is from 0 to 1, making a linear change to those, since it can receive a number from m to n.
+        // Important update: The previous error might be true, but it still doesn't work. I have a Nan error (I'll look later on that). The problem might be that the Input always receives a positive number n, since the range I used was always between 0 and a number n.
+        // Instead of that, I would make it between the range -n and n.
+        // Ok, that might work for the future, but now doesn't work either correctly in the final case, although it worked for the skyrocketing problem in the 1 training case
         for (int i = nodes.length - 2; i > 0; i--) {
-            difDatas[i - 1] = new double[nodes[i].length];
             // Since the next layer is always an instance of ConnectionNode, we don't have any reason to verify it.
             // We need to calculate the margin error
             // Each layer I get the values of the previous layer (the layer in which we really are) to be used in the next step of backpropagation, node by node, not all the layer
@@ -227,23 +219,27 @@ public class NeuralNetwork implements Serializable {
             }
         }
 
+        //It should work correctly up until here, if not, I have to reconsider the whole code
+
         // Use the expectedDatas to change the weights of the NeuralNetwork
         for (int i = 0; i < nodes.length - 1; i++) {
             for (int j = 0; j < nodes[i].length; j++) {
                 if (nodes[i][j] instanceof InputNode) {
-                    for (int k : ((InputNode)nodes[i][j]).getIdNodeFrontLayer()) {
-                            ((InputNode) nodes[i][j]).getValFrontLayer().set(k,
-                                    ((InputNode)nodes[i][j]).getValFrontLayer().get(k) +
-                                            difDatas[i][k] *
+                    for (int k = 0; k < ((InputNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
+                        int index = ((InputNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
+                            ((InputNode) nodes[i][j]).getWeightsFrontLayer().set(k,
+                                    ((InputNode)nodes[i][j]).getWeightsFrontLayer().get(k) +
+                                            difDatas[i][index] *
                                                     NeuralMath.setSigmoid(values[i][j]) * learningRate);
                     }
 
                 }
                 else if (nodes[i][j] instanceof ConnectionNode) {
-                    for (int k : ((ConnectionNode)nodes[i][j]).getIdNodeFrontLayer()) {
-                        ((ConnectionNode) nodes[i][j]).getValFrontLayer().set(k,
-                                ((ConnectionNode)nodes[i][j]).getValFrontLayer().get(k) +
-                                        difDatas[i][k] *
+                    for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
+                        int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
+                        ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().set(k,
+                                ((ConnectionNode)nodes[i][j]).getWeightsFrontLayer().get(k) +
+                                        difDatas[i][index] *
                                                 NeuralMath.setSigmoid(values[i][j]) * learningRate);
                     }
                 }
@@ -253,11 +249,11 @@ public class NeuralNetwork implements Serializable {
             for (int j = 0; j < nodes[i].length; j++) {
                 if (nodes[i][j] instanceof ConnectionNode) {
                     ((ConnectionNode)nodes[i][j]).setBias(
-                            ((ConnectionNode)nodes[i][j]).getBias() + difDatas[i - 1][j]);
+                            ((ConnectionNode)nodes[i][j]).getBias() + difDatas[i - 1][j] * learningRate);
                 }
                 else if (nodes[i][j] instanceof OutputNode) {
                     ((OutputNode)nodes[i][j]).setBias(
-                            ((OutputNode)nodes[i][j]).getBias() + difDatas[i - 1][j]);
+                            ((OutputNode)nodes[i][j]).getBias() + difDatas[i - 1][j] * learningRate);
 
                 }
             }
