@@ -10,7 +10,8 @@ public class InputNode extends Node implements Serializable{
 
 
     public InputNode() {
-		setIdNodeFrontLayer(new ArrayList<>());
+        // Initialize the arrayLists of the connections of the next layer
+        setIdNodeFrontLayer(new ArrayList<>());
 		setWeightsFrontLayer(new ArrayList<>());
 	}
 
@@ -36,7 +37,8 @@ public class InputNode extends Node implements Serializable{
 	}
 	
 	public void addNodeFront(int idNode, double max) {
-		getIdNodeFrontLayer().add(idNode);
+        // Initialize the value of a connection
+        getIdNodeFrontLayer().add(idNode);
 		getWeightsFrontLayer().add(Math.random() * (max * 2) - max);
 	}
 
