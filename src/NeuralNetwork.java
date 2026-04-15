@@ -92,7 +92,6 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    // It works
 	/**
 	 *
 	 * @param data the data received
@@ -102,9 +101,10 @@ public class NeuralNetwork implements Serializable {
 	 * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
 	 * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
 	 */
-	public void run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws Exception {
+	public double[] run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws Exception {
         // Creo un array para tener los valores de cada nodo
         double[][] values = new double[nodes.length][];
+        double[] ret_values;
         for (int i = 0; i < values.length; i++) {
             values[i] = new double[nodes[i].length];
         }
@@ -147,16 +147,21 @@ public class NeuralNetwork implements Serializable {
             }
 		}
 
+        ret_values = values[values.length - 1].clone();
+        for (int i = 0; i < ret_values.length; i++) {
+            ret_values[i] = NeuralMath.setSigmoid(ret_values[i]);
+        }
+
         if (showMarginError) {
             // Calculate the margin error of the feedforward (this function) respect to the expected value
             double marginError = 0;
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-                marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid(values[values.length - 1][i]), 2) / 2;
+                marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid(ret_values[i]), 2) / 2;
             }
 
             // Print all the output values
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-                System.out.println(NeuralMath.setSigmoid(values[values.length - 1][i]));
+                System.out.println(ret_values[i]);
             }
 
             System.out.println("Error de margen: " + marginError);
@@ -164,7 +169,7 @@ public class NeuralNetwork implements Serializable {
         if (learn) {
             learn(values, expectedData, learningRate);
         }
-
+        return ret_values;
 	}
 
 	/**

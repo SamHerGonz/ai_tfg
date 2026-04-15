@@ -1,5 +1,5 @@
-import panelDrawNumber.DrawingPanel;
-import panelDrawNumber.MouseClick;
+package panelDrawNumber;
+
 import panelDrawNumber.actionButtons.ClearAction;
 import panelDrawNumber.actionButtons.SendAction;
 
