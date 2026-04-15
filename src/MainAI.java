@@ -32,13 +32,14 @@ public class MainAI {
 				records.add(valuesDouble);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+            System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
 		}
 
         // Run neural network
         long time = System.nanoTime();
         try {
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 100; i++) {
+                System.out.println("Vuelta " + i);
                 for (int j = 0; j < records.size(); j++) {
                     ai.setLearn(true);
 
@@ -53,8 +54,17 @@ public class MainAI {
                 int data = (int) (Math.random() * records.size());
                 double[] expectedData = new double[10];
                 expectedData[real.get(data)] = 1;
-                System.out.println("Expected: " + real.get(data) + " the real data is the index " + data);
-                ai.run(records.get(data), 0, 255, expectedData, 1, true);
+                System.out.println("The real data is the index " + data);
+                double [] dataReceived = ai.run(records.get(data), 0, 255, expectedData, 1, true);
+
+                int max = 0;
+                for (int j = 1; j < dataReceived.length; j++) {
+                    if (dataReceived[j] > dataReceived[max]) {
+                        max = j;
+                    }
+                }
+                System.out.println("Expected: " + real.get(data));
+                System.out.println("Value guessed: " + max);
             }
 		}
 		catch(Exception e) {
