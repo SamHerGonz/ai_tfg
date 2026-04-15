@@ -10,8 +10,10 @@ public class ConnectionNode extends Node implements Serializable {
     private static final long serialVersionUID = 8381313154060074511L;
 	
 	public ConnectionNode(double max) {
+        // Initialize the arrayLists of the connections of the next layer
 		setIdNodeFrontLayer(new ArrayList<>());
 		setWeightsFrontLayer(new ArrayList<>());
+        // Set the bias to a random value
         setBias(Math.random() * (max * 2) - max);
 	}
 
@@ -41,6 +43,7 @@ public class ConnectionNode extends Node implements Serializable {
 	
 	
 	public void addNodeFront(int idNode, double max) {
+        // Initialize the value of a connection
 		getIdNodeFrontLayer().add(idNode);
 		getWeightsFrontLayer().add(Math.random() * (max * 2) - max);
 	}

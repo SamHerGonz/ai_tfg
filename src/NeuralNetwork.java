@@ -33,19 +33,24 @@ public class NeuralNetwork implements Serializable {
     private Node[][] createNodes(int[] shape, double max) {
 		Node[][] nodes = new Node[shape.length][];
 
+        // Create the shape of the Neural Network
         for (int i = 0; i < nodes.length; i++) {
             nodes[i] = new Node[shape[i]];
         }
 
+        // Fill the first layer of the nodes array with InputNodes
         for (int i = 0; i < shape[0]; i++) {
 			nodes[0][i] = new InputNode();
 		}
-		
+
+        // Fill all the layers except the first and last layers with ConnectionNodes
 		for (int i = 1; i < shape.length - 1; i++) {
 			for (int j = 0; j < shape[i]; j++) {
 				nodes[i][j] = new ConnectionNode(max);
 			}
 		}
+
+        // Fill the last layer of the nodes array with OutputNodes
         for (int i = 0; i < shape[shape.length - 1]; i++) {
             nodes[nodes.length - 1][i] = new OutputNode(max);
         }
@@ -95,7 +100,7 @@ public class NeuralNetwork implements Serializable {
 	 * @param maxRange the maximum number the data can have
 	 * @param expectedData the array of data expected to appear
 	 * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
-	 * @throws Exception
+	 * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
 	 */
 	public void run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws Exception {
         // Creo un array para tener los valores de cada nodo
@@ -107,15 +112,18 @@ public class NeuralNetwork implements Serializable {
 			throw new Exception("Error en los datos recibidos. No son del mismo tamaño");
 		}
 
-		// Make a copy of the array data to values[0]. It has to be like that, because if not it makes reference to the same array ¿¿Why??
+		// Make a copy of the array data to values[0]. It has to be like that, because if not it makes reference to the same array ¿¿Why?? I thought it never did that in java
         System.arraycopy(data, 0, values[0], 0, values[0].length);
+
+        // Change the values of all the InputNodes from a range of minRange to maxRange to a range of 0 to 1
         for (int i = 0; i < values[0].length; i++) {
             values[0][i] = InputNode.setSigmoid(data[i], minRange, maxRange);
         }
+
+
 		for (int i = 0; i < nodes.length - 1; i++) {
 
 			// Add the values of the next layer, without the sigmoid function
-            // SE LE TIENE QUE SUMAR EL BIAS!!! ESO TAMBIÉN EN LA RETROPROPAGACIÓN
 			for (int j = 0; j < nodes[i].length; j++) {
 				if (nodes[i][j] instanceof InputNode) {
 					values[i + 1] = NeuralMath.addArrays(
@@ -139,12 +147,13 @@ public class NeuralNetwork implements Serializable {
             }
 		}
 
-        double marginError = 0;
-        for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-            marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid(values[values.length - 1][i]), 2) / 2;
-        }
-
         if (showMarginError) {
+            // Calculate the margin error of the feedforward (this function) respect to the expected value
+            double marginError = 0;
+            for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
+                marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid(values[values.length - 1][i]), 2) / 2;
+            }
+
             // Print all the output values
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
                 System.out.println(NeuralMath.setSigmoid(values[values.length - 1][i]));
@@ -153,20 +162,19 @@ public class NeuralNetwork implements Serializable {
             System.out.println("Error de margen: " + marginError);
         }
         if (learn) {
-            learn(values, expectedData, marginError, learningRate);
+            learn(values, expectedData, learningRate);
         }
 
 	}
-    // TODO: arreglar
 
 	/**
 	 *
 	 * @param values all the values of the nodes without the sigmoid function applied
 	 * @param expectedData the real array that we expècted
 	 * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
-	 * @throws Exception
+	 * @throws Exception verify if all the values and expectedData are usable
 	 */
-	public void learn(double[][] values, double[] expectedData, double marginError, double learningRate) throws Exception {
+	public void learn(double[][] values, double[] expectedData, double learningRate) throws Exception {
 		// Exceptions. Verify if the data is usable
         /*if (learningRate < 0 || learningRate > 1) {
             throw new Exception("Error en la tasa de aprendizaje. Tiene que ser de un número del 0 al 1");
@@ -203,13 +211,6 @@ public class NeuralNetwork implements Serializable {
         }
 
         // Calculate the expectedDatas of all the remaining layers
-        // Para calcular el S& de la capa -2 los cálculos se hacen en la capa -2, cogiendo los datos de la capa -1 y el return tiene la longitud de la capa -2
-        // NO NECESITO CALCULAR EL S& DE LA CAPA 0, LA DE LOS INPUTS, PORQUE NO SE USA EN NINGÚN MOMENTO
-        // It doesn't work correctly. There are values that skyrocket for no reason, which makes it act weird. The values are the weights of the Input nodes and the biases of the connections of the next node.
-        // That makes it easier to analyze the problem, and I think I know what is it. The activation of the Input Node is from 0 to 1, making a linear change to those, since it can receive a number from m to n.
-        // Important update: The previous error might be true, but it still doesn't work. I have a Nan error (I'll look later on that). The problem might be that the Input always receives a positive number n, since the range I used was always between 0 and a number n.
-        // Instead of that, I would make it between the range -n and n.
-        // Ok, that might work for the future, but now doesn't work either correctly in the final case, although it worked for the skyrocketing problem in the 1 training case
         for (int i = nodes.length - 2; i > 0; i--) {
             // Since the next layer is always an instance of ConnectionNode, we don't have any reason to verify it.
             // We need to calculate the margin error
@@ -218,8 +219,6 @@ public class NeuralNetwork implements Serializable {
                 difDatas[i - 1][j] = ((ConnectionNode) nodes[i][j]).calculateExpectedData(values[i][j], difDatas[i]);
             }
         }
-
-        //It should work correctly up until here, if not, I have to reconsider the whole code
 
         // Use the expectedDatas to change the weights of the NeuralNetwork
         for (int i = 0; i < nodes.length - 1; i++) {
@@ -245,6 +244,8 @@ public class NeuralNetwork implements Serializable {
                 }
             }
         }
+
+        // Use the expectedDatas to change the biases of the Neural Network
         for (int i = 1; i < nodes.length; i++) {
             for (int j = 0; j < nodes[i].length; j++) {
                 if (nodes[i][j] instanceof ConnectionNode) {

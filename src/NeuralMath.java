@@ -1,8 +1,20 @@
 
 public class NeuralMath {
+
+    /**
+     * Activation function of the nodes
+     * @param n value
+     * @return The function activated
+     */
     public static double setSigmoid(double n) {
         return (1 / (1 + Math.exp(- n)));
     }
+
+    /**
+     *  The derivative of the activation sigmoid function
+     * @param n value
+     * @return The derivative of the function activated
+     */
     public static double setDerivativeSigmoid(double n) {
         return setSigmoid(n) * (1 - setSigmoid(n));
     }
@@ -26,6 +38,12 @@ public class NeuralMath {
         return ret_array;
     }
 
+    /**
+     * Subtract the values of a1 to a2
+     * @param a1 Array number 1
+     * @param a2 Array number 2
+     * @return a1 - a2 in an array
+     */
     public static double[] subtractArrays(double[] a1, double[] a2) {
         double[] ret_array = new double[a1.length];
         for (int i = 0; i < ret_array.length; i++) {
