@@ -10,14 +10,14 @@ public class MainAI {
 		NeuralNetwork ai;
 		List<double[]> records = new ArrayList<>();
 		List<Integer> real = new ArrayList<>();
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/ai/ai8/data/ai.obj"))){
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/ai.obj"))){
             ai = (NeuralNetwork)ois.readObject();
         } catch (Exception e) {
             ai = new NeuralNetwork(shape, 1);
         }
 
         // Read data of the database
-        try (BufferedReader br = new BufferedReader(new FileReader("src/ai/ai8/data/mnist_test.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("src/data/mnist_test.csv"))) {
             br.readLine();
             String line;
 			while ((line = br.readLine()) != null) {
@@ -36,30 +36,33 @@ public class MainAI {
 		}
 
         // Run neural network
+        long time = System.nanoTime();
         try {
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < 1; j++) {
+            for (int i = 0; i < 1; i++) {
+                for (int j = 0; j < records.size(); j++) {
                     ai.setLearn(true);
 
                     double[] expectedData = new double[10];
                     expectedData[real.get(j)] = 1;
 
-                    ai.run(records.get(j), 0, 255, expectedData, 0.9, true);
-                    ai.setLearn(false);
-                    ai.run(records.get(j), 0, 255, expectedData, 1, true);
-
+                    ai.run(records.get(j), 0, 255, expectedData, 0.9, false);
                 }
             }
-            for (int j = 0; j < 10; j++) {
+            ai.setLearn(false);
+            for (int i = 0; i < 10; i++) {
+                int data = (int) (Math.random() * records.size());
                 double[] expectedData = new double[10];
-                expectedData[real.get(j)] = 1;
-                ai.run(records.get(j), 0, 255, expectedData, 1, true);
+                expectedData[real.get(data)] = 1;
+                System.out.println("Expected: " + real.get(data) + " the real data is the index " + data);
+                ai.run(records.get(data), 0, 255, expectedData, 1, true);
             }
 		}
 		catch(Exception e) {
 			System.out.println("Error");
 			e.printStackTrace();
 		}
+        System.out.println("Took " + (double)((System.nanoTime() - time) / 1000000000) + " seconds");
+
         /*try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/ai/ai8/data/ai.obj"));
             oos.writeObject(ai);

@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 
 public class NeuralMath {
     public static double setSigmoid(double n) {
@@ -7,12 +6,21 @@ public class NeuralMath {
     public static double setDerivativeSigmoid(double n) {
         return setSigmoid(n) * (1 - setSigmoid(n));
     }
-    public static double[] addArrays(double[] a1, double[] a2, ArrayList<Integer> indexesA2) {
+    public static double reverseSigmoid(double n) {
+        if (n == 0) {
+            return -999;
+        }
+        else if (n == 1){
+            return NeuralMath.reverseSigmoid(0.9999999999999999);
+        }
+        return Math.log(n / (1 - n));
+    }
+    public static double[] addArrays(double[] a1, double[] a2) {
         if (a1 == null) {
             a1 = new double[a2.length];
         }
         double[] ret_array = a1.clone();
-        for (int i = 0; i < indexesA2.size(); i++) {
+        for (int i = 0; i < a1.length; i++) {
             ret_array[i] = a1[i] + a2[i];
         }
         return ret_array;

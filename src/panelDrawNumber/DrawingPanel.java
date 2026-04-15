@@ -55,6 +55,6 @@ public class DrawingPanel extends JPanel implements Runnable {
     public void sendData() throws IOException {
         // TODO: Fix
         ProcessBuilder pb = new ProcessBuilder("java", "-cp", "out/production/AI", "MainAI");
-        pb.start();
+        Process p = pb.start();
     }
 }
