@@ -14,7 +14,22 @@ public class MainAI {
             ai = (NeuralNetwork)ois.readObject();
         } catch (Exception e) {
             ai = new NeuralNetwork(shape, 1);
+            for (int i = 0; i < 1000000; i++) {
+                int randomLayer = (int)((ai.getNodes().length - 1) * Math.random());
+                int randomNode = (int)((ai.getNodes()[randomLayer].length) * Math.random());
+                int randomNodeOutput = (int)((ai.getNodes()[randomLayer + 1].length) * Math.random());
+                if (ai.getNodes()[randomLayer][randomNode] instanceof InputNode) {
+                    if (((InputNode) ai.getNodes()[randomLayer][randomNode]).getIdNodeFrontLayer().size() >= 2) {
+                        ai.removeWeight(randomLayer, randomNode,randomNodeOutput);
+                    }
+                } else if (ai.getNodes()[randomLayer][randomNode] instanceof ConnectionNode) {
+                    if (((ConnectionNode) ai.getNodes()[randomLayer][randomNode]).getIdNodeFrontLayer().size() >= 2) {
+                        ai.removeWeight(randomLayer, randomNode,randomNodeOutput);
+                    }
+                }
+            }
         }
+
 
         // Read data of the database
         try (BufferedReader br = new BufferedReader(new FileReader("src/data/mnist_test.csv"))) {
@@ -38,7 +53,7 @@ public class MainAI {
         // Run neural network
         long time = System.nanoTime();
         try {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
                 System.out.println("Vuelta " + i);
                 for (int j = 0; j < records.size(); j++) {
                     ai.setLearn(true);
@@ -51,12 +66,11 @@ public class MainAI {
             }
             ai.setLearn(false);
             int n = 0;
-            for (int i = 0; i < 1000; i++) {
-                int data = (int) (Math.random() * records.size());
+            for (int i = 0; i < records.size(); i++) {
                 double[] expectedData = new double[10];
-                expectedData[real.get(data)] = 1;
-                System.out.println("The real data is the index " + data);
-                double [] dataReceived = ai.run(records.get(data), 0, 255, expectedData, 1, true);
+                expectedData[real.get(i)] = 1;
+                System.out.println("The real data is the index " + i);
+                double [] dataReceived = ai.run(records.get(i), 0, 255, expectedData, 1, true);
 
                 int max = 0;
                 for (int j = 1; j < dataReceived.length; j++) {
@@ -64,12 +78,12 @@ public class MainAI {
                         max = j;
                     }
                 }
-                System.out.println("Expected: " + real.get(data));
+                System.out.println("Expected: " + real.get(i));
                 System.out.println("Value guessed: " + max);
-                if (real.get(data) == max) {
+                if (real.get(i) == max) {
                     n++;
                 }
-                System.out.println("Se han completado " + n + " de 1000");
+                System.out.println("Se han completado " + n + " de " + records.size());
             }
 		}
 		catch(Exception e) {

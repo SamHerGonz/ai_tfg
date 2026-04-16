@@ -138,6 +138,7 @@ public class NeuralNetwork implements Serializable {
 	 * @param data the data received
 	 * @param minRange the minimum number the data can have
 	 * @param maxRange the maximum number the data can have
+     * @return The values of each node without the sigmoid function applied
 	 * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
 	 */
 	private double[][] run(double[] data, int minRange, int maxRange) throws Exception {
@@ -198,9 +199,6 @@ public class NeuralNetwork implements Serializable {
      */
 	public double[][][] learn(double[][] values, double[] expectedData, double learningRate) throws Exception {
 		// Exceptions. Verify if the data is usable
-        /*if (learningRate < 0 || learningRate > 1) {
-            throw new Exception("Error en la tasa de aprendizaje. Tiene que ser de un número del 0 al 1");
-        }*/
         if (expectedData.length != nodes[nodes.length - 1].length) {
             throw new Exception("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
         }

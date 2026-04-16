@@ -68,7 +68,7 @@ public class ConnectionNode extends Node implements Serializable {
         double ret_values = 0;
         for (int i = 0; i < weightsFrontLayer.size(); i++) {
             int id = idNodeFrontLayer.get(i);
-            ret_values += weightsFrontLayer.get(id) * errorsNextLayer[id];
+            ret_values += weightsFrontLayer.get(i) * errorsNextLayer[id];
         }
         ret_values *= NeuralMath.setDerivativeSigmoid(nodeValue);
         return ret_values;
