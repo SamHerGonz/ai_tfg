@@ -38,6 +38,18 @@ public class NeuralMath {
         return ret_array;
     }
 
+    public static double[][][] addArrays(double[][][] a1, double[][][] a2) {
+        double[][][] ret_array = a1.clone();
+        for (int i = 0; i < a2.length; i++) {
+            for (int j = 0; j < a2[i].length; j++) {
+                for (int k = 0; k < a2[i][j].length; k++) {
+                    ret_array[i][j][k] = a1[i][j][k] + a2[i][j][k];
+                }
+            }
+        }
+        return ret_array;
+    }
+
     /**
      * Subtract the values of a1 to a2
      * @param a1 Array number 1

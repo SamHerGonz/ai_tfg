@@ -143,11 +143,59 @@ public class NeuralNetwork implements Serializable {
 
     /**
      *
+     * @param data An array with the datas which are going to be used
+     * @param minRange the minimum number the data can have
+     * @param maxRange the maximum number the data can have
+     * @param expectedData the array of data expected to appear
+     * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
+     * @param showMarginError if you want the result and the margin error to be shown
+     * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
+     */
+    public void runMiniBatch(double[][] data, int minRange, int maxRange, double[][] expectedData, double learningRate, boolean showMarginError) throws Exception {
+        double[][][] changes = null;
+        for (int i = 0; i < data.length; i++) {
+            double[][] values = run(data[i], minRange, maxRange);
+            double[] ret_values = values[values.length - 1].clone();
+
+            for (int j = 0; j < ret_values.length; j++) {
+                ret_values[j] = NeuralMath.setSigmoid(ret_values[j]);
+            }
+
+            if (showMarginError) {
+                // Calculate the margin error of the feedforward (this function) respect to the expected value
+                double marginError = 0;
+                for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
+                    marginError += Math.pow(expectedData[i][j] - NeuralMath.setSigmoid(ret_values[j]), 2) / 2;
+                }
+
+                // Print all the output values
+                for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
+                    System.out.println(ret_values[j]);
+                }
+
+                System.out.println("Error de margen: " + marginError);
+            }
+
+            if (learn) {
+                if (changes != null) {
+                    changes = NeuralMath.addArrays(changes, learn(values, expectedData[i], learningRate));
+                }
+                else {
+                    changes = learn(values, expectedData[i], learningRate);
+                }
+            }
+        }
+        changeWeightsAndBiases(changes);
+    }
+
+    /**
+     *
      * @param data the data received
      * @param minRange the minimum number the data can have
      * @param maxRange the maximum number the data can have
      * @param expectedData the array of data expected to appear
      * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
+     * @param showMarginError if you want the result and the margin error to be shown
      * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
      */
     public double[] run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws Exception {
@@ -246,7 +294,7 @@ public class NeuralNetwork implements Serializable {
      * @return All the changes the Neural network has to do
      * @throws Exception verify if all the values and expectedData are usable
      */
-	public double[][][] learn(double[][] values, double[] expectedData, double learningRate) throws Exception {
+	private double[][][] learn(double[][] values, double[] expectedData, double learningRate) throws Exception {
 		// Exceptions. Verify if the data is usable
         if (expectedData.length != nodes[nodes.length - 1].length) {
             throw new Exception("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
@@ -312,11 +360,11 @@ public class NeuralNetwork implements Serializable {
         }
 
         // Use the expectedDatas to get the changes of the biases of the Neural Network
-        ret_values[ret_values.length - 1] = new double[nodes.length][];
+        ret_values[ret_values.length - 1] = new double[nodes.length - 1][];
         for (int i = 1; i < nodes.length; i++) {
-            ret_values[ret_values.length - 1][i] = new double[nodes[i].length];
+            ret_values[ret_values.length - 1][i - 1] = new double[nodes[i].length];
             for (int j = 0; j < nodes[i].length; j++) {
-                ret_values[ret_values.length - 1][i][j] = difDatas[i - 1][j] * learningRate;
+                ret_values[ret_values.length - 1][i - 1][j] = difDatas[i - 1][j] * learningRate;
             }
         }
         return ret_values;
@@ -353,11 +401,11 @@ public class NeuralNetwork implements Serializable {
             for (int j = 0; j < nodes[i].length; j++) {
                 if (nodes[i][j] instanceof ConnectionNode) {
                     ((ConnectionNode)nodes[i][j]).setBias(
-                            ((ConnectionNode)nodes[i][j]).getBias() + changes[changes.length - 1][i][j]);
+                            ((ConnectionNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j]);
                 }
                 else if (nodes[i][j] instanceof OutputNode) {
                     ((OutputNode)nodes[i][j]).setBias(
-                            ((OutputNode)nodes[i][j]).getBias() + changes[changes.length - 1][i][j]);
+                            ((OutputNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j]);
 
                 }
             }
