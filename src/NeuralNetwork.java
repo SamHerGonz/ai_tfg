@@ -74,20 +74,69 @@ public class NeuralNetwork implements Serializable {
 		}
 	}
 
-    // It theoretically works
-    public void removeWeight(int layer, int firstLayerIndex, int lastLayerIndex) {
+    /**
+     *
+     * @param layer The layer in which the node is
+     * @param firstLayerIndex The node of the layer
+     * @param lastLayerIndex The other node of the layer
+     * @throws Exception If the weight is already eliminated, or it causes problems, like it isn't connected anywhere in the Network in a direction
+     */
+    public void removeWeight(int layer, int firstLayerIndex, int lastLayerIndex) throws Exception {
+        boolean b = false;
         if (nodes[layer][firstLayerIndex] instanceof InputNode) {
-            if (((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
-                int i = ((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
-                ((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
-                ((InputNode)nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
+            if (((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().size() >= 2) {
+                if (((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                    for (int i = 0; i < nodes[layer].length; i++) {
+                        if (i == lastLayerIndex) {
+                            continue;
+                        }
+                        if (((InputNode) nodes[layer][i]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                            b = true;
+                            break;
+                        }
+                    }
+                    if (b) {
+                        int i = ((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
+                        ((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
+                        ((InputNode) nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
+                    } else {
+                        throw new Exception("La neurona de lastLayerIndex que estás eliminando no está conectado por detrás a ninguna neurona");
+                    }
+                }
+                else {
+                    throw new Exception("Esta conexión no existe");
+                }
+            }
+            else {
+                throw new Exception("Esta neurona no está conectado por delante a ninguna neurona");
             }
         }
         else if (nodes[layer][firstLayerIndex] instanceof ConnectionNode) {
-            if (((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
-                int i = ((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
-                ((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
-                ((ConnectionNode)nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
+            if (((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().size() >= 2) {
+                if (((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                    for (int i = 0; i < nodes[layer].length; i++) {
+                        if (i == firstLayerIndex) {
+                            continue;
+                        }
+                        if (((ConnectionNode) nodes[layer][i]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                            b = true;
+                            break;
+                        }
+                    }
+                    if (b) {
+                        int i = ((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
+                        ((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
+                        ((ConnectionNode) nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
+                    } else {
+                        throw new Exception("La neurona de lastLayerIndex que estás eliminando no está conectado por detrás a ninguna neurona");
+                    }
+                }
+                else {
+                    throw new Exception("Esta conexión no existe");
+                }
+            }
+            else {
+                throw new Exception("Esta neurona solo está conectado por delante a una neurona");
             }
         }
     }

@@ -1,3 +1,5 @@
+import com.sun.source.tree.NewArrayTree;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,20 +16,25 @@ public class MainAI {
             ai = (NeuralNetwork)ois.readObject();
         } catch (Exception e) {
             ai = new NeuralNetwork(shape, 1);
-            for (int i = 0; i < 1000000; i++) {
-                int randomLayer = (int)((ai.getNodes().length - 1) * Math.random());
-                int randomNode = (int)((ai.getNodes()[randomLayer].length) * Math.random());
-                int randomNodeOutput = (int)((ai.getNodes()[randomLayer + 1].length) * Math.random());
-                if (ai.getNodes()[randomLayer][randomNode] instanceof InputNode) {
-                    if (((InputNode) ai.getNodes()[randomLayer][randomNode]).getIdNodeFrontLayer().size() >= 2) {
-                        ai.removeWeight(randomLayer, randomNode,randomNodeOutput);
-                    }
-                } else if (ai.getNodes()[randomLayer][randomNode] instanceof ConnectionNode) {
-                    if (((ConnectionNode) ai.getNodes()[randomLayer][randomNode]).getIdNodeFrontLayer().size() >= 2) {
-                        ai.removeWeight(randomLayer, randomNode,randomNodeOutput);
-                    }
+            /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
+                try {
+                    ai.removeWeight(0,0,i);
+                } catch (Exception ex) {
+                    System.out.println("Error " + ex);
                 }
             }
+            for (int i = 0; i < ai.getNodes()[1].length; i++) {
+                try {
+                    ai.removeWeight(1,i,0);
+                } catch (Exception ex) {
+                    System.out.println("Error " + ex);
+                }
+            }
+            try {
+                ai.removeWeight(1,0,0);
+            } catch (Exception ex) {
+                System.out.println("Error " + ex);
+            }*/
         }
 
 
@@ -53,9 +60,9 @@ public class MainAI {
         // Run neural network
         long time = System.nanoTime();
         try {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
                 System.out.println("Vuelta " + i);
-                for (int j = 0; j < records.size(); j++) {
+                for (int j = 0; j < records.size() - 1000; j++) {
                     ai.setLearn(true);
 
                     double[] expectedData = new double[10];
@@ -66,7 +73,7 @@ public class MainAI {
             }
             ai.setLearn(false);
             int n = 0;
-            for (int i = 0; i < records.size(); i++) {
+            for (int i = 9001; i < records.size(); i++) {
                 double[] expectedData = new double[10];
                 expectedData[real.get(i)] = 1;
                 System.out.println("The real data is the index " + i);
@@ -83,9 +90,9 @@ public class MainAI {
                 if (real.get(i) == max) {
                     n++;
                 }
-                System.out.println("Se han completado " + n + " de " + records.size());
             }
-		}
+            System.out.println("Se han completado " + n + " de " + 1000);
+        }
 		catch(Exception e) {
 			System.out.println("Error");
 			e.printStackTrace();
@@ -99,4 +106,30 @@ public class MainAI {
             throw new RuntimeException(e);
         }
 	}
+
+    public static NeuralNetwork createThinNeuralNetwork(int[] shape) {
+        NeuralNetwork ai = new NeuralNetwork(shape, 1);
+        for (int i = 0; i < ai.getNodes().length - 1; i++) {
+            for (int j = 0; j < ai.getNodes()[i].length; j++) {
+                int randomNodeOutput = (int)((ai.getNodes()[i + 1].length) * Math.random());
+                for (int k = 0; k < ai.getNodes()[i + 1].length; k++) {
+                    try {
+                        if (ai.getNodes()[i][j] instanceof InputNode) {
+                            if (k != randomNodeOutput) {
+                                ai.removeWeight(i, j, k);
+                            }
+                        } else if (ai.getNodes()[i][j] instanceof ConnectionNode) {
+                            if (k != randomNodeOutput) {
+                                ai.removeWeight(i, j, k);
+                            }
+                        }
+                    } catch (Exception e1) {
+                        randomNodeOutput = k;
+                        k = 0;
+                    }
+                }
+            }
+        }
+        return ai;
+    }
 }
