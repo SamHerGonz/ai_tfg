@@ -38,7 +38,7 @@ public class MainAI {
         // Run neural network
         long time = System.nanoTime();
         try {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
                 System.out.println("Vuelta " + i);
                 for (int j = 0; j < records.size(); j++) {
                     ai.setLearn(true);
@@ -50,7 +50,8 @@ public class MainAI {
                 }
             }
             ai.setLearn(false);
-            for (int i = 0; i < 10; i++) {
+            int n = 0;
+            for (int i = 0; i < 1000; i++) {
                 int data = (int) (Math.random() * records.size());
                 double[] expectedData = new double[10];
                 expectedData[real.get(data)] = 1;
@@ -65,6 +66,10 @@ public class MainAI {
                 }
                 System.out.println("Expected: " + real.get(data));
                 System.out.println("Value guessed: " + max);
+                if (real.get(data) == max) {
+                    n++;
+                }
+                System.out.println("Se han completado " + n + " de 1000");
             }
 		}
 		catch(Exception e) {
@@ -73,11 +78,11 @@ public class MainAI {
 		}
         System.out.println("Took " + (double)((System.nanoTime() - time) / 1000000000) + " seconds");
 
-        /*try {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/ai/ai8/data/ai.obj"));
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/data/ai.obj"));
             oos.writeObject(ai);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }*/
+        }
 	}
 }
