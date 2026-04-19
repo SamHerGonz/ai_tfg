@@ -1,10 +1,27 @@
-import javax.swing.*;
-import java.awt.*;
 import java.io.*;
+import java.util.Scanner;
 
 public class Prueba {
     public static void main(String[] args) {
         try{
+            Scanner reader = new Scanner(System.in);
+            double n = reader.nextDouble();
+            NeuralNetwork ai;
+            long t = System.nanoTime();
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/ai.obj"))) {
+                ai = (NeuralNetwork) ois.readObject();
+                System.out.println(ai);
+            }
+            catch (Exception _) {
+
+            }
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/collections/ai.obj"))) {
+                ai = (NeuralNetwork) ois.readObject();
+                System.out.println(ai);
+            }
+            catch (Exception _) {
+
+            }
             /*int[] shape3 = {2,3,2};
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/data/aiPrueba.obj"));
 
@@ -29,7 +46,7 @@ public class Prueba {
             ((ConnectionNode)ai3.getNodes()[1][2]).setBias(-0.45);
             ((OutputNode)ai3.getNodes()[2][0]).setBias(0.7);
             ((OutputNode)ai3.getNodes()[2][1]).setBias(0.45);
-            oos.writeObject(ai3);*/
+            oos.writeObject(ai3);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiPrueba.obj"));
             NeuralNetwork ai3 = (NeuralNetwork) ois.readObject();
 
@@ -41,7 +58,7 @@ public class Prueba {
             }
             double[] inputData = {0.01,0.99};
             double[] outputData = {0.99,0.01};
-            ai3.run(inputData,0,1,outputData,1,true);
+            ai3.run(inputData,0,1,outputData,1,true);*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -17,7 +17,20 @@ public class NeuralNetwork implements Serializable {
 	public Node[][] getNodes() {
 		return nodes;
 	}
-	
+
+    public int getWeightsCount() {
+        int n = 0;
+        for (Node[] node : nodes) {
+            for (Node value : node) {
+                if (value instanceof InputNode) {
+                    n += ((InputNode) value).getIdNodeFrontLayer().size();
+                } else if (value instanceof ConnectionNode) {
+                    n += ((ConnectionNode) value).getIdNodeFrontLayer().size();
+                }
+            }
+        }
+        return n;
+    }
 	public void setNodes(Node[][] nodes) {
 		this.nodes = nodes;
 	}
@@ -73,6 +86,24 @@ public class NeuralNetwork implements Serializable {
 			}
 		}
 	}
+
+    public void addWeight(int layer, int firstLayerIndex, int lastLayerIndex, double max) throws Exception {
+        /* if (lastLayerIndex <= nodes[layer + 1].length) {
+            throw new Exception("No existe el nodo número " + lastLayerIndex + " de la capa " + (layer + 1));
+        }*/
+        if (nodes[layer][firstLayerIndex] instanceof InputNode) {
+            if (((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                throw new Exception("Esta conexión ya existe");
+            }
+            ((InputNode) nodes[layer][firstLayerIndex]).addNodeFront(lastLayerIndex, max);
+        }
+        else if (nodes[layer][firstLayerIndex] instanceof ConnectionNode) {
+            if (((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                throw new Exception("Esta conexión ya existe");
+            }
+            ((ConnectionNode) nodes[layer][firstLayerIndex]).addNodeFront(lastLayerIndex, max);
+        }
+    }
 
     /**
      *
@@ -178,16 +209,28 @@ public class NeuralNetwork implements Serializable {
 
             if (learn) {
                 if (changes != null) {
-                    changes = NeuralMath.addArrays(changes, learn(values, expectedData[i], learningRate));
+                    changes = NeuralMath.addArrays(changes, learn(values, expectedData[i]));
                 }
                 else {
-                    changes = learn(values, expectedData[i], learningRate);
+                    changes = learn(values, expectedData[i]);
                 }
             }
         }
-        changeWeightsAndBiases(changes);
+        // Make all the changes got from all the data collected. Since it sums all the data, the learning rate is divided by the number of data received
+        changeWeightsAndBiases(changes, learningRate);
     }
 
+    public int getAnswer(double[] data, int minRange, int maxRange) throws Exception {
+        double[][] values = run(data, minRange, maxRange);
+        int max = 0;
+        for (int j = 1; j < values[values.length - 1].length; j++) {
+            if (values[values.length - 1][j] > values[values.length - 1][max]) {
+                max = j;
+            }
+        }
+        return max;
+
+    }
     /**
      *
      * @param data the data received
@@ -223,8 +266,8 @@ public class NeuralNetwork implements Serializable {
         }
 
         if (learn) {
-            double[][][] changes = learn(values, expectedData, learningRate);
-            changeWeightsAndBiases(changes);
+            double[][][] changes = learn(values, expectedData);
+            changeWeightsAndBiases(changes, learningRate);
         }
 
         return ret_values;
@@ -288,13 +331,12 @@ public class NeuralNetwork implements Serializable {
 
 	/**
      *
-     * @param values       all the values of the nodes without the sigmoid function applied
+     * @param values all the values of the nodes without the sigmoid function applied
      * @param expectedData the real array that we expècted
-     * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
      * @return All the changes the Neural network has to do
      * @throws Exception verify if all the values and expectedData are usable
      */
-	private double[][][] learn(double[][] values, double[] expectedData, double learningRate) throws Exception {
+	private double[][][] learn(double[][] values, double[] expectedData) throws Exception {
 		// Exceptions. Verify if the data is usable
         if (expectedData.length != nodes[nodes.length - 1].length) {
             throw new Exception("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
@@ -346,31 +388,35 @@ public class NeuralNetwork implements Serializable {
                 if (nodes[i][j] instanceof InputNode) {
                     for (int k = 0; k < ((InputNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
                         int index = ((InputNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ret_values[i][j][index] = difDatas[i][index] * NeuralMath.setSigmoid(values[i][j]) * learningRate;
+                        ret_values[i][j][index] = difDatas[i][index] * NeuralMath.setSigmoid(values[i][j]);
                     }
 
                 }
                 else if (nodes[i][j] instanceof ConnectionNode) {
                     for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
                         int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ret_values[i][j][index] = difDatas[i][index] * NeuralMath.setSigmoid(values[i][j]) * learningRate;
+                        ret_values[i][j][index] = difDatas[i][index] * NeuralMath.setSigmoid(values[i][j]);
                     }
                 }
             }
         }
 
-        // Use the expectedDatas to get the changes of the biases of the Neural Network
+        // Use the expectedDatas to get the changes of the biases of the Neural Network.
+        // it's saved in the last position of the array returned
         ret_values[ret_values.length - 1] = new double[nodes.length - 1][];
         for (int i = 1; i < nodes.length; i++) {
             ret_values[ret_values.length - 1][i - 1] = new double[nodes[i].length];
-            for (int j = 0; j < nodes[i].length; j++) {
-                ret_values[ret_values.length - 1][i - 1][j] = difDatas[i - 1][j] * learningRate;
-            }
+            System.arraycopy(difDatas[i - 1], 0, ret_values[ret_values.length - 1][i - 1], 0, nodes[i].length);
         }
         return ret_values;
     }
 
-    public void changeWeightsAndBiases(double[][][] changes) {
+    /**
+     *
+     * @param changes The changes applied to the neural Network
+     * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
+     */
+    public void changeWeightsAndBiases(double[][][] changes, double learningRate) {
 
         // Use the expectedDatas to change the weights of the NeuralNetwork
         for (int i = 0; i < nodes.length - 1; i++) {
@@ -381,7 +427,7 @@ public class NeuralNetwork implements Serializable {
                         int index = ((InputNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
                         ((InputNode) nodes[i][j]).getWeightsFrontLayer().set(k,
                                 ((InputNode)nodes[i][j]).getWeightsFrontLayer().get(k) +
-                                        changes[i][j][index]);
+                                        changes[i][j][index] * learningRate);
                     }
 
                 }
@@ -390,7 +436,7 @@ public class NeuralNetwork implements Serializable {
                         int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
                         ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().set(k,
                                 ((ConnectionNode)nodes[i][j]).getWeightsFrontLayer().get(k) +
-                                        changes[i][j][index]);
+                                        changes[i][j][index] * learningRate);
                     }
                 }
             }
@@ -401,14 +447,70 @@ public class NeuralNetwork implements Serializable {
             for (int j = 0; j < nodes[i].length; j++) {
                 if (nodes[i][j] instanceof ConnectionNode) {
                     ((ConnectionNode)nodes[i][j]).setBias(
-                            ((ConnectionNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j]);
+                            ((ConnectionNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j] * learningRate);
                 }
                 else if (nodes[i][j] instanceof OutputNode) {
                     ((OutputNode)nodes[i][j]).setBias(
-                            ((OutputNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j]);
+                            ((OutputNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j] * learningRate);
 
                 }
             }
         }
+    }
+
+    public NeuralNetwork clone(boolean mutate) throws CloneNotSupportedException {
+        return clone(mutate, (double) 1 / getWeightsCount(), 0.1);
+    }
+
+    public NeuralNetwork clone(boolean mutate, double mutationChance, double mutationChange) throws CloneNotSupportedException {
+        NeuralNetwork neuralNetwork = (NeuralNetwork) super.clone();
+        if (mutate) {
+            for (Node[] layer : nodes) {
+                for (Node node : layer) {
+                    if (node instanceof InputNode) {
+                        for (int i = 0; i < ((InputNode) node).getWeightsFrontLayer().size(); i++) {
+                            if (Math.random() < mutationChance) {
+                                ((InputNode) node).getWeightsFrontLayer().set(i, ((InputNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
+                            }
+                        }
+                    } else if (node instanceof ConnectionNode) {
+                        for (int i = 0; i < ((ConnectionNode) node).getWeightsFrontLayer().size(); i++) {
+                            if (Math.random() < mutationChance) {
+                                ((ConnectionNode) node).getWeightsFrontLayer().set(i, ((ConnectionNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
+                            }
+                        }
+                        if (Math.random() < mutationChance) {
+                            ((ConnectionNode) node).setBias(((ConnectionNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
+                        }
+                    } else if (node instanceof OutputNode) {
+                        if (Math.random() < mutationChance) {
+                            ((OutputNode) node).setBias(((OutputNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
+                        }
+                    }
+                }
+            }
+        }
+        return neuralNetwork;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder("Neural Network: ");
+
+        s.append("\nNúmero de capas: ").append(nodes.length);
+
+        for (int i = 0; i < nodes.length; i++) {
+            s.append("\n\tCapa ").append(i).append(": ").append(nodes[i].length).append(" ");
+        }
+
+        s.append("\nNúmero total pesos (w): ");
+        int n = getWeightsCount();
+        s.append(n).append("\n Número total de parámetros (w y biases): ");
+
+        for (int i = 1; i < nodes.length; i++) {
+            n += nodes[i].length;
+        }
+        s.append(n);
+        return s.toString();
     }
 }

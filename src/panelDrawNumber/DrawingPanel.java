@@ -14,6 +14,22 @@ public class DrawingPanel extends JPanel implements Runnable {
         drawingBoard = new int[width][height];
     }
 
+    public double[] getDrawingBoard() {
+        double[] drawingBoard;
+        int n = 0;
+        for (int[] v : this.drawingBoard) {
+            n += v.length;
+        }
+        drawingBoard = new double[n];
+
+        for (int i = 0; i < this.drawingBoard.length; i++) {
+            for (int j = 0; j < this.drawingBoard[i].length; j++) {
+                drawingBoard[i * drawingBoard.length + j] = this.drawingBoard[i][j];
+            }
+        }
+        return drawingBoard;
+    }
+
     public void startThread() {
         thread = new Thread(this);
         thread.start();
@@ -52,9 +68,10 @@ public class DrawingPanel extends JPanel implements Runnable {
         }
     }
 
-    public void sendData() throws IOException {
+    public void sendData() throws IOException, InterruptedException {
         // TODO: Fix
         ProcessBuilder pb = new ProcessBuilder("java", "-cp", "out/production/AI", "MainAI");
         Process p = pb.start();
+        p.waitFor();
     }
 }
