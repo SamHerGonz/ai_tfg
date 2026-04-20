@@ -17,8 +17,9 @@ public class MainAI {
         Scanner reader = new Scanner(System.in);
 
         // Search the 'ai.obj' file, which has a Neural Network. If it doesn't exist, it creates a Neural Network
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/ai.obj"))){
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize12.obj"))){
             ai = (NeuralNetwork)ois.readObject();
+            ai.mutate();
         } catch (Exception e) {
             ai = new NeuralNetwork(shape, 1);
             /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
@@ -76,7 +77,7 @@ public class MainAI {
         System.out.println("0: Aprendizaje normal");
         System.out.println("1: Aprendizaje con mini-batch de tamaño customizado");
         n = reader.nextInt();
-        System.out.println("Cual quieres que sea la tasa de aprendizaje");
+        System.out.println("Cual quieres que sea la tasa de aprendizaje (recomendado: 0,3 )");
         double rate = reader.nextDouble();
         long time = System.nanoTime();
         try {
@@ -144,7 +145,7 @@ public class MainAI {
         try {
             System.out.println("Indique el nombre de la nueva red neuronal: ");
             reader.nextLine();
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/data/" + reader.nextLine()));
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/data/" + reader.nextLine() + ".obj"));
             oos.writeObject(ai);
         } catch (IOException e) {
             throw new RuntimeException(e);

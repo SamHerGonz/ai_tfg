@@ -458,39 +458,35 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    public NeuralNetwork clone(boolean mutate) throws CloneNotSupportedException {
-        return clone(mutate, (double) 1 / getWeightsCount(), 0.1);
+    public void mutate() {
+        mutate((double) 1 / getWeightsCount(), 0.1);
     }
 
-    public NeuralNetwork clone(boolean mutate, double mutationChance, double mutationChange) throws CloneNotSupportedException {
-        NeuralNetwork neuralNetwork = (NeuralNetwork) super.clone();
-        if (mutate) {
-            for (Node[] layer : nodes) {
-                for (Node node : layer) {
-                    if (node instanceof InputNode) {
-                        for (int i = 0; i < ((InputNode) node).getWeightsFrontLayer().size(); i++) {
-                            if (Math.random() < mutationChance) {
-                                ((InputNode) node).getWeightsFrontLayer().set(i, ((InputNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
-                            }
+    public void mutate(double mutationChance, double mutationChange) {
+        for (Node[] layer : nodes) {
+            for (Node node : layer) {
+                if (node instanceof InputNode) {
+                    for (int i = 0; i < ((InputNode) node).getWeightsFrontLayer().size(); i++) {
+                        if (Math.random() <= mutationChance) {
+                            ((InputNode) node).getWeightsFrontLayer().set(i, ((InputNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
                         }
-                    } else if (node instanceof ConnectionNode) {
-                        for (int i = 0; i < ((ConnectionNode) node).getWeightsFrontLayer().size(); i++) {
-                            if (Math.random() < mutationChance) {
-                                ((ConnectionNode) node).getWeightsFrontLayer().set(i, ((ConnectionNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
-                            }
+                    }
+                } else if (node instanceof ConnectionNode) {
+                    for (int i = 0; i < ((ConnectionNode) node).getWeightsFrontLayer().size(); i++) {
+                        if (Math.random() <= mutationChance) {
+                            ((ConnectionNode) node).getWeightsFrontLayer().set(i, ((ConnectionNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
                         }
-                        if (Math.random() < mutationChance) {
-                            ((ConnectionNode) node).setBias(((ConnectionNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
-                        }
-                    } else if (node instanceof OutputNode) {
-                        if (Math.random() < mutationChance) {
-                            ((OutputNode) node).setBias(((OutputNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
-                        }
+                    }
+                    if (Math.random() <= mutationChance) {
+                        ((ConnectionNode) node).setBias(((ConnectionNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
+                    }
+                } else if (node instanceof OutputNode) {
+                    if (Math.random() <= mutationChance) {
+                        ((OutputNode) node).setBias(((OutputNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
                     }
                 }
             }
         }
-        return neuralNetwork;
     }
 
     @Override
