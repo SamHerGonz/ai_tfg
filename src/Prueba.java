@@ -1,3 +1,5 @@
+import ai.NeuralNetwork;
+
 import java.io.*;
 import java.util.Scanner;
 
@@ -25,30 +27,30 @@ public class Prueba {
             /*int[] shape3 = {2,3,2};
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/data/aiPrueba.obj"));
 
-            NeuralNetwork ai3 = new NeuralNetwork(shape3,1);
+            ai.NeuralNetwork ai3 = new ai.NeuralNetwork(shape3,1);
             ai3.removeWeight(0,0,2);
             ai3.removeWeight(1,1,1);
             ai3.removeWeight(1,2,0);
 
-            ((InputNode)ai3.getNodes()[0][0]).getWeightsFrontLayer().set(0,0.05);
-            ((InputNode)ai3.getNodes()[0][0]).getWeightsFrontLayer().set(1,-0.1);
-            ((InputNode)ai3.getNodes()[0][1]).getWeightsFrontLayer().set(0,0.15);
-            ((InputNode)ai3.getNodes()[0][1]).getWeightsFrontLayer().set(1,-0.2);
-            ((InputNode)ai3.getNodes()[0][1]).getWeightsFrontLayer().set(2,0.3);
+            ((ai.InputNode)ai3.getNodes()[0][0]).getWeightsFrontLayer().set(0,0.05);
+            ((ai.InputNode)ai3.getNodes()[0][0]).getWeightsFrontLayer().set(1,-0.1);
+            ((ai.InputNode)ai3.getNodes()[0][1]).getWeightsFrontLayer().set(0,0.15);
+            ((ai.InputNode)ai3.getNodes()[0][1]).getWeightsFrontLayer().set(1,-0.2);
+            ((ai.InputNode)ai3.getNodes()[0][1]).getWeightsFrontLayer().set(2,0.3);
 
-            ((ConnectionNode)ai3.getNodes()[1][0]).getWeightsFrontLayer().set(0,-0.25);
-            ((ConnectionNode)ai3.getNodes()[1][0]).getWeightsFrontLayer().set(1,-0.3);
-            ((ConnectionNode)ai3.getNodes()[1][1]).getWeightsFrontLayer().set(0,0.35);
-            ((ConnectionNode)ai3.getNodes()[1][2]).getWeightsFrontLayer().set(0,0.4);
+            ((ai.ConnectionNode)ai3.getNodes()[1][0]).getWeightsFrontLayer().set(0,-0.25);
+            ((ai.ConnectionNode)ai3.getNodes()[1][0]).getWeightsFrontLayer().set(1,-0.3);
+            ((ai.ConnectionNode)ai3.getNodes()[1][1]).getWeightsFrontLayer().set(0,0.35);
+            ((ai.ConnectionNode)ai3.getNodes()[1][2]).getWeightsFrontLayer().set(0,0.4);
 
-            ((ConnectionNode)ai3.getNodes()[1][0]).setBias(0.3);
-            ((ConnectionNode)ai3.getNodes()[1][1]).setBias(0.5);
-            ((ConnectionNode)ai3.getNodes()[1][2]).setBias(-0.45);
-            ((OutputNode)ai3.getNodes()[2][0]).setBias(0.7);
-            ((OutputNode)ai3.getNodes()[2][1]).setBias(0.45);
+            ((ai.ConnectionNode)ai3.getNodes()[1][0]).setBias(0.3);
+            ((ai.ConnectionNode)ai3.getNodes()[1][1]).setBias(0.5);
+            ((ai.ConnectionNode)ai3.getNodes()[1][2]).setBias(-0.45);
+            ((ai.OutputNode)ai3.getNodes()[2][0]).setBias(0.7);
+            ((ai.OutputNode)ai3.getNodes()[2][1]).setBias(0.45);
             oos.writeObject(ai3);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiPrueba.obj"));
-            NeuralNetwork ai3 = (NeuralNetwork) ois.readObject();
+            ai.NeuralNetwork ai3 = (ai.NeuralNetwork) ois.readObject();
 
             for (int i = 0; i < 20000; i++) {
                 double[] inputData = {Math.random(),Math.random()};

@@ -1,3 +1,7 @@
+import ai.ConnectionNode;
+import ai.InputNode;
+import ai.NeuralNetwork;
+
 import java.io.*;
 import java.util.*;
 

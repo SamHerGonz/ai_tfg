@@ -1,3 +1,5 @@
+package ai;
+
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -371,7 +373,7 @@ public class NeuralNetwork implements Serializable {
 
         // Calculate the expectedDatas of all the remaining layers
         for (int i = nodes.length - 2; i > 0; i--) {
-            // Since the next layer is always an instance of ConnectionNode, we don't have any reason to verify it.
+            // Since the next layer is always an instance of ai.ConnectionNode, we don't have any reason to verify it.
             // We need to calculate the margin error
             // Each layer I get the values of the previous layer (the layer in which we really are) to be used in the next step of backpropagation, node by node, not all the layer
             for (int j = 0; j < nodes[i].length; j++) {
@@ -380,7 +382,7 @@ public class NeuralNetwork implements Serializable {
         }
 
         double[][][] ret_values = new double[nodes.length][][];
-        // Use the expectedDatas to get the changes of the weights of the NeuralNetwork
+        // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork
         for (int i = 0; i < nodes.length - 1; i++) {
             ret_values[i] = new double[nodes[i].length][];
             for (int j = 0; j < nodes[i].length; j++) {
@@ -418,7 +420,7 @@ public class NeuralNetwork implements Serializable {
      */
     public void changeWeightsAndBiases(double[][][] changes, double learningRate) {
 
-        // Use the expectedDatas to change the weights of the NeuralNetwork
+        // Use the expectedDatas to change the weights of the ai.NeuralNetwork
         for (int i = 0; i < nodes.length - 1; i++) {
             for (int j = 0; j < nodes[i].length; j++) {
                 // Get the index of the weight. Then, it updates that weight
