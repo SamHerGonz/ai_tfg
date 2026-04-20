@@ -117,8 +117,11 @@ public class NeuralNetwork implements Serializable {
     public void removeWeight(int layer, int firstLayerIndex, int lastLayerIndex) throws Exception {
         boolean b = false;
         if (nodes[layer][firstLayerIndex] instanceof InputNode) {
+            // Only if the node has more than 2 connections in the front
             if (((InputNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().size() >= 2) {
+                // If the connection exists
                 if (((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                    // b is if the node we are disconnecting to has 2 or more connections
                     for (int i = 0; i < nodes[layer].length; i++) {
                         if (i == lastLayerIndex) {
                             continue;
@@ -129,6 +132,7 @@ public class NeuralNetwork implements Serializable {
                         }
                     }
                     if (b) {
+                        // Remove the connection
                         int i = ((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
                         ((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
                         ((InputNode) nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
@@ -145,8 +149,11 @@ public class NeuralNetwork implements Serializable {
             }
         }
         else if (nodes[layer][firstLayerIndex] instanceof ConnectionNode) {
+            // Only if the node has more than 2 connections in the front
             if (((ConnectionNode)nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().size() >= 2) {
+                // If the connection exists
                 if (((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
+                    // b is if the node we are disconnecting to has 2 or more connections
                     for (int i = 0; i < nodes[layer].length; i++) {
                         if (i == firstLayerIndex) {
                             continue;
@@ -157,6 +164,7 @@ public class NeuralNetwork implements Serializable {
                         }
                     }
                     if (b) {
+                        // Remove the connection
                         int i = ((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().indexOf(lastLayerIndex);
                         ((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().remove(i);
                         ((ConnectionNode) nodes[layer][firstLayerIndex]).getWeightsFrontLayer().remove(i);
@@ -209,6 +217,7 @@ public class NeuralNetwork implements Serializable {
                 System.out.println("Error de margen: " + marginError);
             }
 
+            // Add the changes for the weights and biases
             if (learn) {
                 if (changes != null) {
                     changes = NeuralMath.addArrays(changes, learn(values, expectedData[i]));
