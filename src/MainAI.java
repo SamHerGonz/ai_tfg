@@ -21,9 +21,10 @@ public class MainAI {
         Scanner reader = new Scanner(System.in);
 
         // Search the 'ai.obj' file, which has a Neural Network. If it doesn't exist, it creates a Neural Network
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize12.obj"))){
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize10.obj"))){
             ai = (NeuralNetwork)ois.readObject();
             ai.mutate();
+            System.out.println("Funciona");
         } catch (Exception e) {
             ai = new NeuralNetwork(shape, 1);
             /*for (int i = 0; i < ai.getNodes()[1].length; i++) {

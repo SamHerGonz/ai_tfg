@@ -15,19 +15,19 @@ public class DrawingPanel extends JPanel implements Runnable {
     }
 
     public double[] getDrawingBoard() {
-        double[] drawingBoard;
+        double[] ret_value;
         int n = 0;
         for (int[] v : this.drawingBoard) {
             n += v.length;
         }
-        drawingBoard = new double[n];
+        ret_value = new double[n];
 
         for (int i = 0; i < this.drawingBoard.length; i++) {
             for (int j = 0; j < this.drawingBoard[i].length; j++) {
-                drawingBoard[i * drawingBoard.length + j] = this.drawingBoard[i][j];
+                ret_value[i * this.drawingBoard.length + j] = this.drawingBoard[j][i];
             }
         }
-        return drawingBoard;
+        return ret_value;
     }
 
     public void startThread() {

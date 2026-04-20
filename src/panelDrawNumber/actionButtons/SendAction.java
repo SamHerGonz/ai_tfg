@@ -15,12 +15,10 @@ public class SendAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize12.obj"));
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize10.obj"))){
             NeuralNetwork ai = (NeuralNetwork) ois.readObject();
             ai.setLearn(false);
             System.out.println(ai.getAnswer(dp.getDrawingBoard(), 0, 255));
-            ois.close();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
