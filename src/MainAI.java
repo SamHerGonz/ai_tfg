@@ -21,7 +21,7 @@ public class MainAI {
         Scanner reader = new Scanner(System.in);
 
         // Search the 'ai.obj' file, which has a Neural Network. If it doesn't exist, it creates a Neural Network
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize10.obj"))){
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/ai.obj"))){
             ai = (NeuralNetwork)ois.readObject();
             ai.mutate();
             System.out.println("Funciona");
@@ -162,16 +162,7 @@ public class MainAI {
         ai.setLearn(false);
         n = 0;
         for (int i = 0; i < recordsTest.size(); i++) {
-            double[] expectedData = new double[10];
-            expectedData[expectedTest.get(i)] = 1;
-            double [] dataReceived = ai.run(recordsTest.get(i), 0, 255, expectedData, 1, false);
-
-            int max = 0;
-            for (int j = 1; j < dataReceived.length; j++) {
-                if (dataReceived[j] > dataReceived[max]) {
-                    max = j;
-                }
-            }
+            int max = ai.getAnswer(recordsTest.get(i),0,255);
             if (expectedTest.get(i) == max) {
                 n++;
             }/*

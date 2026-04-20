@@ -242,6 +242,7 @@ public class NeuralNetwork implements Serializable {
         return max;
 
     }
+
     /**
      *
      * @param data the data received
@@ -252,25 +253,20 @@ public class NeuralNetwork implements Serializable {
      * @param showMarginError if you want the result and the margin error to be shown
      * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
      */
-    public double[] run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws Exception {
+    public void run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws Exception {
         // Run the Neural network and get the values of all the nodes during the feedforward
         double[][] values = run(data, minRange, maxRange);
-        double[] ret_values = values[values.length - 1].clone();
-
-        for (int i = 0; i < ret_values.length; i++) {
-            ret_values[i] = NeuralMath.setSigmoid(ret_values[i]);
-        }
 
         if (showMarginError) {
             // Calculate the margin error of the feedforward (this function) respect to the expected value
             double marginError = 0;
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-                marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid(ret_values[i]), 2) / 2;
+                marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid(values[values.length - 1][i]), 2) / 2;
             }
 
             // Print all the output values
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-                System.out.println(ret_values[i]);
+                System.out.println(values[values.length - 1][i]);
             }
 
             System.out.println("Error de margen: " + marginError);
@@ -280,8 +276,6 @@ public class NeuralNetwork implements Serializable {
             double[][][] changes = learn(values, expectedData);
             changeWeightsAndBiases(changes, learningRate);
         }
-
-        return ret_values;
     }
 
 	/**
