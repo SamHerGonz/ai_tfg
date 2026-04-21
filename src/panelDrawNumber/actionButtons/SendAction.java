@@ -1,6 +1,5 @@
 package panelDrawNumber.actionButtons;
 
-import ai.NeuralNetwork;
 import panelDrawNumber.DrawingPanel;
 
 import java.awt.event.ActionEvent;
@@ -15,7 +14,7 @@ public class SendAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize10.obj"))){
+        try {
             System.out.println(dp.getAnswer());
         } catch (Exception ex) {
             throw new RuntimeException(ex);
