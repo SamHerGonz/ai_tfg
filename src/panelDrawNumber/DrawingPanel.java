@@ -4,7 +4,6 @@ import ai.NeuralNetwork;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 public class DrawingPanel extends JPanel implements Runnable {
     public final int TILESIZE = 28;
