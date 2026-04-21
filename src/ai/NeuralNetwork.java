@@ -266,7 +266,7 @@ public class NeuralNetwork implements Serializable {
 
             // Print all the output values
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-                System.out.println(values[values.length - 1][i]);
+                System.out.println(NeuralMath.setSigmoid(values[values.length - 1][i]));
             }
 
             System.out.println("Error de margen: " + marginError);

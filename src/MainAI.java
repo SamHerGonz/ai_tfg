@@ -73,6 +73,7 @@ public class MainAI {
             temp[i] = i;
         }
         List<Integer> index_records = Arrays.asList(temp);
+
         // Run neural network
 
         // I did this 10 times each, in total each way did 100000 numbers. The first method ended doing almost 2000 more numbers correctly than the second one
@@ -97,8 +98,8 @@ public class MainAI {
 
                             double[] expectedData = new double[10];
                             expectedData[expectedTrain.get(j)] = 1;
-
-                            ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
+                            // ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
+                            ai.run(moveDrawing(recordsTrain.get(j), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)), 0, 255, expectedData, rate, false);
                         }
                         verify(ai, recordsTest, expectedTest);
                         // bw.write(n + "\n");
@@ -130,7 +131,8 @@ public class MainAI {
                                 double[] expectedData = new double[10];
                                 expectedData[expectedTrain.get(index_records.get(j + k))] = 1;
 
-                                miniBatchData[k] = recordsTrain.get(index_records.get(j + k));
+                                // miniBatchData[k] = moveDrawing(recordsTrain.get(j + k), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)); // recordsTrain.get(index_records.get(j + k));
+                                miniBatchData[k] = recordsTrain.get(index_records.get(j + k)); // moveDrawing(recordsTrain.get(j + k), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10));
                                 miniBatchExpected[k] = expectedData;
                             }
                             ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
@@ -168,6 +170,8 @@ public class MainAI {
             }/*
             else {
                 System.out.println("The realTrain data is the index " + i);
+                double[] expectedData = new double[10];
+                expectedData[expectedTest.get(i)] = 1;
                 ai.run(recordsTest.get(i), 0, 255, expectedData, 1, true);
                 System.out.println("Expected: " + expectedTest.get(i));
                 System.out.println("Value guessed: " + max);
@@ -220,58 +224,88 @@ public class MainAI {
         return ai;
     }
 
-    // Todo: Fix
-    public static void moveDrawing(double[] record, int x, int y) throws Exception {
+    public static double[] moveDrawing(double[] record, int x, int y) throws Exception {
         if (record.length != 784) {
             throw new Exception("");
         }
-
-        // Move in the x coordinates
-        if (x != 0) {
-            if (x < 0) {
-                for (int i = 0; i > x; i--) {
-                    boolean b = false;
-                    for (int j = 0; j < 28; j++) {
-                        if (record[j * 28] != 0) {
-                            b = true;
-                            break;
-                        }
-                    }
-                    if (!b) {
-                        double n;
-                        for (int j = 0; j < record.length - 1; j++) {
-                            n = record[j + 1];
-                            record[j] = n;
-                        }
-                        record[record.length - 1] = 0;
-                    }
-                    else {
+        int movePosX = 0;
+        int movePosY = 0;
+        int movePos;
+        boolean b = false;
+        if (x < 0) {
+            for (int i = 0; i < 28; i++) {
+                for (int j = 0; j < 28; j++) {
+                    if (record[i * 28 + j] != 0) {
+                        b = true;
                         break;
                     }
                 }
-            }
-            else {
-                for (int i = 0; i < x; i++) {
-                    boolean b = false;
-                    for (int j = 0; j < 28; j++) {
-                        if (record[j * 28] != 0) {
-                            b = true;
-                            break;
-                        }
-                    }
-                    if (!b) {
-                        double n;
-                        for (int j = record.length - 1; j > 0; j--) {
-                            n = record[j - 1];
-                            record[j] = n;
-                        }
-                        record[record.length - 1] = 0;
-                    }
-                    else {
-                        break;
-                    }
+                if (b) {
+                    break;
                 }
+                movePosX--;
             }
+            movePosX = Math.max(x, movePosX);
         }
+        else {
+            for (int i = 27; i > 0; i--) {
+                for (int j = 0; j < 28; j++) {
+                    if (record[j * 28 + i] != 0) {
+                        b = true;
+                        break;
+                    }
+                }
+                if (b) {
+                    break;
+                }
+                movePosX++;
+            }
+            movePosX = Math.min(x, movePosX);
+        }
+
+        b = false;
+
+        if (y < 0) {
+            for (int i = 0; i < 28; i++) {
+                for (int j = 0; j < 28; j++) {
+                    if (record[i * 28 + j] != 0) {
+                        b = true;
+                        break;
+                    }
+                }
+                if (b) {
+                    break;
+                }
+                movePosY--;
+            }
+            movePosY = Math.max(y, movePosY);
+        }
+        else {
+            for (int i = 27; i > 0; i--) {
+                for (int j = 0; j < 28; j++) {
+                    if (record[i * 28 + j] != 0) {
+                        b = true;
+                        break;
+                    }
+                }
+                if (b) {
+                    break;
+                }
+                movePosY++;
+            }
+            movePosY = Math.min(y, movePosY);
+        }
+
+        movePos = movePosX + movePosY * 28;
+        double[] ret_value = new double[record.length];
+        if (movePos >= 0) {
+            if (record.length - movePos >= 0)
+                System.arraycopy(record, 0, ret_value, movePos, record.length - movePos);
+        }
+        else {
+            if (record.length + movePos >= 0)
+                System.arraycopy(record, -movePos, ret_value, 0, record.length + movePos);
+        }
+        return ret_value;
     }
 }

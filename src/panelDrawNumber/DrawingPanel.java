@@ -1,5 +1,7 @@
 package panelDrawNumber;
 
+import ai.NeuralNetwork;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -9,9 +11,11 @@ public class DrawingPanel extends JPanel implements Runnable {
     Thread thread;
     public int[][] drawingBoard;
     public boolean finished;
+    public NeuralNetwork ai;
 
-    public DrawingPanel(int width, int height) {
+    public DrawingPanel(int width, int height, NeuralNetwork ai) {
         drawingBoard = new int[width][height];
+        this.ai = ai;
     }
 
     public double[] getDrawingBoard() {
@@ -68,10 +72,7 @@ public class DrawingPanel extends JPanel implements Runnable {
         }
     }
 
-    public void sendData() throws IOException, InterruptedException {
-        // TODO: Fix
-        ProcessBuilder pb = new ProcessBuilder("java", "-cp", "out/production/AI", "MainAI");
-        Process p = pb.start();
-        p.waitFor();
+    public int getAnswer() throws Exception {
+        return ai.getAnswer(getDrawingBoard(), 0, 255);
     }
 }
