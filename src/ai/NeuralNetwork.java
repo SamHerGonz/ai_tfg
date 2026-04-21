@@ -430,18 +430,14 @@ public class NeuralNetwork implements Serializable {
                 if (nodes[i][j] instanceof InputNode) {
                     for (int k = 0; k < ((InputNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
                         int index = ((InputNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ((InputNode) nodes[i][j]).getWeightsFrontLayer().set(k,
-                                ((InputNode)nodes[i][j]).getWeightsFrontLayer().get(k) +
-                                        changes[i][j][index] * learningRate);
+                        ((InputNode) nodes[i][j]).addWeightsFrontLayer(k,changes[i][j][index] * learningRate);
                     }
 
                 }
                 else if (nodes[i][j] instanceof ConnectionNode) {
                     for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
                         int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().set(k,
-                                ((ConnectionNode)nodes[i][j]).getWeightsFrontLayer().get(k) +
-                                        changes[i][j][index] * learningRate);
+                        ((ConnectionNode) nodes[i][j]).addWeightsFrontLayer(k,changes[i][j][index] * learningRate);
                     }
                 }
             }
@@ -473,13 +469,13 @@ public class NeuralNetwork implements Serializable {
                 if (node instanceof InputNode) {
                     for (int i = 0; i < ((InputNode) node).getWeightsFrontLayer().size(); i++) {
                         if (Math.random() <= mutationChance) {
-                            ((InputNode) node).getWeightsFrontLayer().set(i, ((InputNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
+                            ((InputNode) node).addWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
                         }
                     }
                 } else if (node instanceof ConnectionNode) {
                     for (int i = 0; i < ((ConnectionNode) node).getWeightsFrontLayer().size(); i++) {
                         if (Math.random() <= mutationChance) {
-                            ((ConnectionNode) node).getWeightsFrontLayer().set(i, ((ConnectionNode) node).getWeightsFrontLayer().get(i) + (Math.random() * mutationChange * 2 - mutationChange));
+                            ((ConnectionNode) node).addWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
                         }
                     }
                     if (Math.random() <= mutationChance) {
