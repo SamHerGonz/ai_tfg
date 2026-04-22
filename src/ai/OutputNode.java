@@ -20,4 +20,9 @@ public class OutputNode extends Node implements Serializable {
 	public void setBias(double bias) {
 		this.bias = bias;
 	}
+
+    public void addBias(double bias) {
+        this.bias = getBias() + bias;
+    }
+
 }

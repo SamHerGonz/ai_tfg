@@ -47,7 +47,10 @@ public class ConnectionNode extends Node implements Serializable {
 		this.bias = bias;
 	}
 	
-	
+	public void addBias(double bias) {
+        setBias(getBias() + bias);
+    }
+
 	public void addNodeFront(int idNode, double max) {
         // Initialize the value of a connection
 		getIdNodeFrontLayer().add(idNode);

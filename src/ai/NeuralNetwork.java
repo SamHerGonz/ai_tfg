@@ -447,12 +447,10 @@ public class NeuralNetwork implements Serializable {
         for (int i = 1; i < nodes.length; i++) {
             for (int j = 0; j < nodes[i].length; j++) {
                 if (nodes[i][j] instanceof ConnectionNode) {
-                    ((ConnectionNode)nodes[i][j]).setBias(
-                            ((ConnectionNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j] * learningRate);
+                    ((ConnectionNode)nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
                 }
                 else if (nodes[i][j] instanceof OutputNode) {
-                    ((OutputNode)nodes[i][j]).setBias(
-                            ((OutputNode)nodes[i][j]).getBias() + changes[changes.length - 1][i - 1][j] * learningRate);
+                    ((OutputNode)nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
 
                 }
             }
@@ -479,11 +477,11 @@ public class NeuralNetwork implements Serializable {
                         }
                     }
                     if (Math.random() <= mutationChance) {
-                        ((ConnectionNode) node).setBias(((ConnectionNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
+                        ((ConnectionNode) node).addBias((Math.random() * mutationChange * 2 - mutationChange));
                     }
                 } else if (node instanceof OutputNode) {
                     if (Math.random() <= mutationChance) {
-                        ((OutputNode) node).setBias(((OutputNode) node).getBias() + (Math.random() * mutationChange * 2 - mutationChange));
+                        ((OutputNode) node).addBias((Math.random() * mutationChange * 2 - mutationChange));
                     }
                 }
             }
