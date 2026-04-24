@@ -8,6 +8,9 @@ import java.util.*;
 public class MainAI {
     // En esta versión voy a intentar hacer que no se guarden los valores que tienen los nodos en los nodos, más bien que los tenga la red neuronal en una matriz
 	public static void main(String[] args) {
+        if (!(args.length == 2)) {
+            throw new RuntimeException();
+        }
         int n;
         Integer [] temp;
         // Tamaño 784,30,10 30 vueltas tiempo: 418.56 segundos (13.95 por vuelta)
@@ -27,6 +30,7 @@ public class MainAI {
             System.out.println("Funciona");
         } catch (Exception e) {
             ai = new NeuralNetwork(shape, 1);
+            // ai = createThinNeuralNetwork(shape);
             /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
                 try {
                     ai.removeWeight(0,0,i);
@@ -98,17 +102,16 @@ public class MainAI {
 
                             double[] expectedData = new double[10];
                             expectedData[expectedTrain.get(j)] = 1;
-                            // ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
-                            ai.run(moveDrawing(recordsTrain.get(j), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)), 0, 255, expectedData, rate, false);
+                            ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
+                            // ai.run(moveDrawing(recordsTrain.get(j), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)), 0, 255, expectedData, rate, false);
                         }
-                        verify(ai, recordsTest, expectedTest);
-                        // bw.write(n + "\n");
-
+                        verify(ai, recordsTest, expectedTest,false);
                     }
                     break;
                 case 1:
                     System.out.println("Indique el tamaño del mini-batch: ");
                     int sizeMiniBatch = reader.nextInt();
+                    time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
                         ai.setLearn(true);
                         System.out.println("Vuelta " + i);
@@ -137,18 +140,15 @@ public class MainAI {
                             }
                             ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
                         }
-                        verify(ai, recordsTest, expectedTest);
-                        // bw.write(n + "\n");
+                        verify(ai, recordsTest, expectedTest,false);
                     }
                     break;
             }
-            verify(ai, recordsTest, expectedTest);
-            // bw.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
-
+        System.out.println(ai);
         try {
             System.out.println("Indique el nombre de la nueva red neuronal: ");
             reader.nextLine();
@@ -159,12 +159,14 @@ public class MainAI {
         }
 	}
 
-    private static int verify(NeuralNetwork ai, List<double[]> recordsTest, List<Integer> expectedTest) throws Exception {
+    private static int verify(NeuralNetwork ai, List<double[]> recordsTest, List<Integer> expectedTest, boolean move) throws Exception {
         int n;
         ai.setLearn(false);
         n = 0;
         for (int i = 0; i < recordsTest.size(); i++) {
-            int max = ai.getAnswer(recordsTest.get(i),0,255);
+            int max = move ?
+                    ai.getAnswer(recordsTest.get(i),0,255) :
+                    ai.getAnswer(moveDrawing(recordsTest.get(i),(int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)),0,255);
             if (expectedTest.get(i) == max) {
                 n++;
             }/*
@@ -200,26 +202,24 @@ public class MainAI {
     // Una prueba tonta, no te preocupes. Además, no funciona, pero me sirve para una pequeña prueba
     public static NeuralNetwork createThinNeuralNetwork(int[] shape) {
         NeuralNetwork ai = new NeuralNetwork(shape, 1);
-        for (int i = 0; i < ai.getNodes().length - 1; i++) {
-            for (int j = 0; j < ai.getNodes()[i].length; j++) {
-                int randomNodeOutput = (int)((ai.getNodes()[i + 1].length) * Math.random());
-                for (int k = 0; k < ai.getNodes()[i + 1].length; k++) {
-                    try {
-                        if (ai.getNodes()[i][j] instanceof InputNode) {
-                            if (k != randomNodeOutput) {
-                                if (((InputNode) ai.getNodes()[i][j]).getIdNodeFrontLayer().contains(k)) {
-                                    ai.removeWeight(i, j, k);
-                                }
-                            }
-                        } else if (ai.getNodes()[i][j] instanceof ConnectionNode) {
-                            if (k != randomNodeOutput) {
-                                if (((ConnectionNode) ai.getNodes()[i][j]).getIdNodeFrontLayer().contains(k)) {
-                                    ai.removeWeight(i, j, k);
-                                }
+        for (int j = 0; j < ai.getNodes()[0].length; j++) {
+            int randomNodeOutput = (int)((ai.getNodes()[1].length) * Math.random());
+            for (int k = 0; k < ai.getNodes()[1].length; k++) {
+                try {
+                    if (ai.getNodes()[0][j] instanceof InputNode) {
+                        if (k != randomNodeOutput) {
+                            if (((InputNode) ai.getNodes()[0][j]).getIdNodeFrontLayer().contains(k)) {
+                                ai.removeWeight(0, j, k);
                             }
                         }
-                    } catch (Exception _) {}
-                }
+                    } else if (ai.getNodes()[0][j] instanceof ConnectionNode) {
+                        if (k != randomNodeOutput) {
+                            if (((ConnectionNode) ai.getNodes()[0][j]).getIdNodeFrontLayer().contains(k)) {
+                                ai.removeWeight(0, j, k);
+                            }
+                        }
+                    }
+                } catch (Exception _) {}
             }
         }
         return ai;

@@ -36,6 +36,7 @@ public class ShowNumber {
             window.setSize(dp.TILESIZE * WIDTHDP + 300, dp.TILESIZE * WIDTHDP + 100);
             window.setResizable(false);
             window.setVisible(true);
+            window.setTitle("Inteligencia artificial");
             window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             window.add(dp);
 

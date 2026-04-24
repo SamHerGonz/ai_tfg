@@ -10,11 +10,11 @@ public class NeuralNetwork implements Serializable {
     private static final long serialVersionUID = 3877515453607213504L;
 
     public NeuralNetwork(int[] shape, double max) {
-		setNodes(createNodes(shape, max));
-		setLearn(true);
+        setNodes(createNodes(shape, max));
+        setLearn(true);
         connectNodes(max);
 	}
-	
+
 	
 	public Node[][] getNodes() {
 		return nodes;
@@ -74,19 +74,19 @@ public class NeuralNetwork implements Serializable {
 	
 	private void connectNodes(double max) {
 		for (int i = 0; i < nodes.length; i++) {
-			for (int j = 0; j < nodes[i].length; j++) {
-				if (nodes[i][j] instanceof InputNode) {
-					for (int k = 0; k < nodes[i + 1].length; k++) {
-						((InputNode)nodes[i][j]).addNodeFront(k, max);
-					}
-				}
-				else if (nodes[i][j] instanceof ConnectionNode) {
-					for (int k = 0; k < nodes[i + 1].length; k++) {
+            for (int j = 0; j < nodes[i].length; j++) {
+                if (nodes[i][j] instanceof InputNode) {
+                    for (int k = 0; k < nodes[i + 1].length; k++) {
+                        ((InputNode)nodes[i][j]).addNodeFront(k, max);
+                    }
+                }
+                else if (nodes[i][j] instanceof ConnectionNode) {
+                    for (int k = 0; k < nodes[i + 1].length; k++) {
                         ((ConnectionNode)nodes[i][j]).addNodeFront(k, max);
-					}
-				}
-			}
-		}
+                    }
+                }
+            }
+        }
 	}
 
     public void addWeight(int layer, int firstLayerIndex, int lastLayerIndex, double max) throws Exception {
