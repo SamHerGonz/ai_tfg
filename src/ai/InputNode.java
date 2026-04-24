@@ -32,12 +32,8 @@ public class InputNode extends Node implements Serializable{
 	public void setWeightsFrontLayer(ArrayList<Double> weightsFrontLayer) {
 		this.weightsFrontLayer = weightsFrontLayer;
 	}
-
-    public void addWeightsFrontLayer(int index, double value) {
-        this.getWeightsFrontLayer().set(index, this.getWeightsFrontLayer().get(index) + value);
-    }
-    
-    // Convierte un número en un rango entre el minRange al MaxRange en un número del 0 al 1
+	
+	// Convierte un número en un rango entre el minRange al MaxRange en un número del 0 al 1
 	public static double setSigmoid(double value, int minRange, int maxRange) {
         return value / (maxRange - minRange);
 	}
