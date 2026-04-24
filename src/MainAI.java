@@ -89,6 +89,9 @@ public class MainAI {
         n = reader.nextInt();
         System.out.println("Cual quieres que sea la tasa de aprendizaje (recomendado: 0,3 )");
         double rate = reader.nextDouble();
+        System.out.println("¿Quieres el modo avanzado? S/n (Solo sin mini-batch))");
+        reader.nextLine();
+        boolean advanced = reader.nextLine().equalsIgnoreCase("S");
         long time = System.nanoTime();
         try {
             int iMax = 60;
@@ -102,10 +105,13 @@ public class MainAI {
 
                             double[] expectedData = new double[10];
                             expectedData[expectedTrain.get(j)] = 1;
-                            ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
-                            // ai.run(moveDrawing(recordsTrain.get(j), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)), 0, 255, expectedData, rate, false);
+                            if (advanced) {
+                                ai.run(moveDrawing(recordsTrain.get(j), (int) (Math.random() * 20 - 10), (int) (Math.random() * 20 - 10)), 0, 255, expectedData, rate, false);
+                            } else {
+                                ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
+                            }
                         }
-                        verify(ai, recordsTest, expectedTest,false);
+                        verify(ai, recordsTest, expectedTest,advanced);
                     }
                     break;
                 case 1:
@@ -140,7 +146,7 @@ public class MainAI {
                             }
                             ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
                         }
-                        verify(ai, recordsTest, expectedTest,false);
+                        verify(ai, recordsTest, expectedTest,advanced);
                     }
                     break;
             }
@@ -165,8 +171,8 @@ public class MainAI {
         n = 0;
         for (int i = 0; i < recordsTest.size(); i++) {
             int max = move ?
-                    ai.getAnswer(recordsTest.get(i),0,255) :
-                    ai.getAnswer(moveDrawing(recordsTest.get(i),(int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)),0,255);
+                    ai.getAnswer(moveDrawing(recordsTest.get(i),(int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)),0,255) :
+                    ai.getAnswer(recordsTest.get(i),0,255);
             if (expectedTest.get(i) == max) {
                 n++;
             }/*
