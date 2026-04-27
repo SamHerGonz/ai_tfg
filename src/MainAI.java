@@ -28,7 +28,7 @@ public class MainAI {
             ai.mutate();
             System.out.println("Funciona");
         } catch (Exception e) {
-            ai = new NeuralNetwork(784, 10, 1);
+            ai = new NeuralNetwork(shape, 1);
             System.out.println(ai);
             // ai = createThinNeuralNetwork(shape);
             /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
@@ -91,10 +91,10 @@ public class MainAI {
         double rate = reader.nextDouble();
         System.out.println("¿Cuántas iteraciones quieres que haya?");
         int iMax = reader.nextInt();
-        long time = System.nanoTime();
         System.out.println("¿Quieres el modo avanzado? S/n");
         reader.nextLine();
         boolean advanced = reader.nextLine().equalsIgnoreCase("s");
+        long time = System.nanoTime();
         try {
             // BufferedWriter bw = new BufferedWriter(new FileWriter("data.txt"));
             switch (n) {
@@ -119,6 +119,7 @@ public class MainAI {
                 case 1:
                     System.out.println("Indique el tamaño del mini-batch: ");
                     int sizeMiniBatch = reader.nextInt();
+                    reader.nextLine();
                     time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
                         ai.setLearn(true);
@@ -156,6 +157,7 @@ public class MainAI {
                     }
                     break;
                 default:
+                    time = System.nanoTime();
                     verify(ai, recordsTest, expectedTest,false);
                     break;
             }
@@ -164,9 +166,8 @@ public class MainAI {
         }
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
         System.out.println(ai);
-        try {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"))){
             System.out.println("Indique el nombre de la nueva red neuronal: ");
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"));
             oos.writeObject(ai);
         } catch (IOException e) {
             throw new RuntimeException(e);
