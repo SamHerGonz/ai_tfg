@@ -15,6 +15,17 @@ public class NeuralNetwork implements Serializable {
         connectNodes(max);
     }
 
+    public NeuralNetwork(int nInput, int nOutput, double max) {
+        int[] shape = new int[((int)(Math.sqrt(nInput)) - nOutput) / 2 + 1];
+        for (int i = 0; i < shape.length; i++) {
+            shape[i] = (int) Math.pow((int)(Math.sqrt(nInput)) - i * 2, 2);
+        }
+        shape[shape.length - 1] = nOutput;
+        setNodes(createNodes(shape, max));
+        setLearn(true);
+        connectNodesDeepMode(max);
+    }
+
 
     public Node[][] getNodes() {
         return nodes;
@@ -74,17 +85,45 @@ public class NeuralNetwork implements Serializable {
 
     private void connectNodes(double max) {
         for (int i = 0; i < nodes.length; i++) {
+            if (nodes[i][0] instanceof InputNode) {
+                for (int j = 0; j < nodes[i].length; j++) {
+                    for (int k = 0; k < nodes[i + 1].length; k++) {
+                        ((InputNode) nodes[i][j]).addNodeFront(k, max);
+                    }
+                }
+            } else if (nodes[i][0] instanceof ConnectionNode) {
+                for (int j = 0; j < nodes[i].length; j++) {
+                    for (int k = 0; k < nodes[i + 1].length; k++) {
+                        ((ConnectionNode) nodes[i][j]).addNodeFront(k, max);
+                    }
+                }
+            }
+        }
+    }
+
+    private void connectNodesDeepMode(double max) {
+        // Iterate through all layers except the last one
+        for (int i = 0; i < nodes.length - 2; i++) {
+            // Iterate through each node of each layer
             for (int j = 0; j < nodes[i].length; j++) {
-                if (nodes[i][j] instanceof InputNode) {
-                    for (int k = 0; k < nodes[i + 1].length; k++) {
-                        ((InputNode)nodes[i][j]).addNodeFront(k, max);
+                for (int k = -1; k <= 1; k++) {
+                    for (int l = -1; l <= 1; l++) {
+                        if (i - k + (l * 28) >= 0) {
+                            if (nodes[i][j] instanceof InputNode) {
+                                ((InputNode)nodes[i][j]).addNodeFront(i - k + (l * 28), max);
+                            }
+                            else if (nodes[i][j] instanceof ConnectionNode) {
+                                ((ConnectionNode)nodes[i][j]).addNodeFront(i - k + (l * 28), max);
+                            }
+                        }
                     }
                 }
-                else if (nodes[i][j] instanceof ConnectionNode) {
-                    for (int k = 0; k < nodes[i + 1].length; k++) {
-                        ((ConnectionNode)nodes[i][j]).addNodeFront(k, max);
-                    }
-                }
+            }
+        }
+        // Connect the last layer with all the connections
+        for (int j = 0; j < nodes[nodes.length - 2].length; j++) {
+            for (int k = 0; k < nodes[nodes.length - 1].length; k++) {
+                ((ConnectionNode)nodes[nodes.length - 2][j]).addNodeFront(k, max);
             }
         }
     }
@@ -231,16 +270,21 @@ public class NeuralNetwork implements Serializable {
         changeWeightsAndBiases(changes, learningRate);
     }
 
-    public int getAnswer(double[] data, int minRange, int maxRange) throws Exception {
+    public int getAnswer(double[] data, int minRange, int maxRange, boolean show) throws Exception {
         double[][] values = run(data, minRange, maxRange);
         int max = 0;
-        for (int j = 1; j < values[values.length - 1].length; j++) {
-            if (values[values.length - 1][j] > values[values.length - 1][max]) {
-                max = j;
+        for (int i = 1; i < values[values.length - 1].length; i++) {
+            if (values[values.length - 1][i] > values[values.length - 1][max]) {
+                max = i;
+            }
+        }
+        if (show) {
+            System.out.println("\nReal value: " + max);
+            for (int i = 0; i < values[values.length - 1].length; i++) {
+                System.out.println(NeuralMath.setSigmoid(values[values.length - 1][i]));
             }
         }
         return max;
-
     }
 
     /**

@@ -8,27 +8,27 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class SelectRandomNumber implements ActionListener {
+public class SelectNumber implements ActionListener {
     DrawingPanel dp;
 
-    public SelectRandomNumber(DrawingPanel dp) {
+    public SelectNumber(DrawingPanel dp) {
         this.dp = dp;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try (BufferedReader br = new BufferedReader(new FileReader("src/data/mnist_test.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_train_valid.csv"))) {
             br.readLine();
-            for (int i = 0; i < Math.random() * 9999; i++) {
+            for (int i = 0; i < dp.index; i++) {
                 br.readLine();
             }
             String line = br.readLine();
-            String[] values = line.split(",");
+            String[] values = line.split(";");
             double[] valuesDouble = new double[784];
             int[][] records = new int[dp.drawingBoard.length][dp.drawingBoard[0].length];
 
-            for (int i = 1; i < valuesDouble.length; i++) {
-                valuesDouble[i] = Integer.parseInt(values[i]);
+            for (int i = 0; i < valuesDouble.length; i++) {
+                valuesDouble[i] = Integer.parseInt(values[i + 2]);
             }
 
             for (int i = 0; i < records.length; i++) {
@@ -36,7 +36,11 @@ public class SelectRandomNumber implements ActionListener {
                     records[j][i] = (int) valuesDouble[i * records.length + j];
                 }
             }
+            dp.expectedAnswer = Integer.parseInt(values[0]);
             dp.drawingBoard = records;
+            dp.index++;
+            System.out.println(dp.index);
+            dp.setAnswer(false);
         } catch (IOException ex) {
             System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
         } catch (Exception ex) {

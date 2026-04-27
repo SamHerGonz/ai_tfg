@@ -5,19 +5,16 @@ import panelDrawNumber.DrawingPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SendAction implements ActionListener {
+public class GlobalAction implements ActionListener {
     DrawingPanel dp;
-    public SendAction(DrawingPanel dp) {
+
+    public GlobalAction(DrawingPanel dp) {
         this.dp = dp;
     }
 
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        try {
-            dp.setAnswer(true);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+        dp.requestFocusInWindow();
     }
-
 }

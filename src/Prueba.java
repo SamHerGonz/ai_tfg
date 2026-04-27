@@ -1,12 +1,60 @@
+import ai.InputNode;
 import ai.NeuralNetwork;
+import ai.OutputNode;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Prueba {
+    private static void verify(NeuralNetwork ai, List<double[]> recordsTest, List<Integer> expectedTest) throws Exception {
+        int n;
+        ai.setLearn(false);
+        n = 0;
+        for (int i = 0; i < recordsTest.size(); i++) {
+            int max = ai.getAnswer(recordsTest.get(i),0,255,false);
+            if (expectedTest.get(i) == max) {
+                n++;
+            }/*
+            else {
+                System.out.println("The realTrain data is the index " + i);
+                double[] expectedData = new double[10];
+                expectedData[expectedTest.get(i)] = 1;
+                ai.run(recordsTest.get(i), 0, 255, expectedData, 1, true);
+                System.out.println("Expected: " + expectedTest.get(i));
+                System.out.println("Value guessed: " + max);
+            }*/
+        }
+        System.out.println("Se han completado " + n + " de " + recordsTest.size());
+    }
+
     public static void main(String[] args) {
         try{
-            Scanner reader = new Scanner(System.in);
+            List<double[]> recordsTest = new ArrayList<>();
+            List<Integer> expectedTest = new ArrayList<>();
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize10.obj"));
+            try (BufferedReader br = new BufferedReader(new FileReader("src/data/mnist_test.csv"))) {
+                br.readLine();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] values = line.split(",");
+                    double[] valuesDouble = new double[784];
+
+                    expectedTest.add(Integer.parseInt(values[0]));
+
+                    for (int i = 1; i < valuesDouble.length; i++) {
+                        valuesDouble[i] = Double.parseDouble(values[i]);
+                    }
+                    recordsTest.add(valuesDouble);
+                }
+            } catch (IOException e) {
+                System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
+            }
+
+            NeuralNetwork ai = (NeuralNetwork)ois.readObject();
+            verify(ai,recordsTest,expectedTest);
+            /*Scanner reader = new Scanner(System.in);
             double n = reader.nextDouble();
             NeuralNetwork ai;
             long t = System.nanoTime();

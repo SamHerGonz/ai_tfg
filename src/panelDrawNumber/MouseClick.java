@@ -7,15 +7,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 public class MouseClick implements MouseMotionListener, MouseListener {
-    JFrame window;
     DrawingPanel dp;
     Rectangle board;
-    int brushSize;
+    double brushSize;
     int brushHardness;
     boolean paint = false;
 
-    public MouseClick(JFrame window, DrawingPanel dp, Rectangle board, int brushSize, int brushHardness) {
-        this.window = window;
+    public MouseClick(DrawingPanel dp, Rectangle board, double brushSize, int brushHardness) {
         this.dp = dp;
         this.board = board;
         this.brushSize = brushSize;
@@ -31,7 +29,7 @@ public class MouseClick implements MouseMotionListener, MouseListener {
     public void mousePressed(MouseEvent e) {
         paint = true;
         if (checkRange()) {
-            dp.draw(window.getMousePosition().x - 7, window.getMousePosition().y - 30, brushSize, brushHardness);
+            dp.draw(dp.window.getMousePosition().x - 7, dp.window.getMousePosition().y - 30, brushSize, brushHardness);
         }
     }
 
@@ -53,7 +51,7 @@ public class MouseClick implements MouseMotionListener, MouseListener {
     @Override
     public void mouseDragged(MouseEvent e) {
         if (paint && checkRange()) {
-            dp.draw(window.getMousePosition().x - 7, window.getMousePosition().y - 30, brushSize, brushHardness);
+            dp.draw(dp.window.getMousePosition().x - 7, dp.window.getMousePosition().y - 30, brushSize, brushHardness);
         }
     }
 
@@ -63,6 +61,6 @@ public class MouseClick implements MouseMotionListener, MouseListener {
     }
 
     public boolean checkRange() {
-        return board.contains(window.getMousePosition().x - 7, window.getMousePosition().y - 30);
+        return board.contains(dp.window.getMousePosition().x - 7, dp.window.getMousePosition().y - 30);
     }
 }

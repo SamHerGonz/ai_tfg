@@ -1,15 +1,14 @@
 import ai.ConnectionNode;
 import ai.InputNode;
 import ai.NeuralNetwork;
-
 import java.io.*;
 import java.util.*;
 
 public class MainAI {
     // En esta versión voy a intentar hacer que no se guarden los valores que tienen los nodos en los nodos, más bien que los tenga la red neuronal en una matriz
 	public static void main(String[] args) {
-        if (!(args.length == 2)) {
-            throw new RuntimeException();
+        if (!(args.length == 2 || args.length == 3)) {
+            throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación");
         }
         int n;
         Integer [] temp;
@@ -23,13 +22,14 @@ public class MainAI {
         List<Integer> expectedTest = new ArrayList<>();
         Scanner reader = new Scanner(System.in);
 
-        // Search the 'ai.obj' file, which has a Neural Network. If it doesn't exist, it creates a Neural Network
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/ai.obj"))){
+        // Search the 'ai.obj' file (if there isn't a 3rd argument, if not the 3rd), which has a Neural Network. If it doesn't exist, it creates a Neural Network
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args.length == 3 ? args[2] : "src/data/ai.obj"))){
             ai = (NeuralNetwork)ois.readObject();
             ai.mutate();
             System.out.println("Funciona");
         } catch (Exception e) {
-            ai = new NeuralNetwork(shape, 1);
+            ai = new NeuralNetwork(784, 10, 1);
+            System.out.println(ai);
             // ai = createThinNeuralNetwork(shape);
             /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
                 try {
@@ -89,15 +89,17 @@ public class MainAI {
         n = reader.nextInt();
         System.out.println("Cual quieres que sea la tasa de aprendizaje (recomendado: 0,3 )");
         double rate = reader.nextDouble();
-        System.out.println("¿Quieres el modo avanzado? S/n (Solo sin mini-batch))");
-        reader.nextLine();
-        boolean advanced = reader.nextLine().equalsIgnoreCase("S");
+        System.out.println("¿Cuántas iteraciones quieres que haya?");
+        int iMax = reader.nextInt();
         long time = System.nanoTime();
+        System.out.println("¿Quieres el modo avanzado? S/n");
+        reader.nextLine();
+        boolean advanced = reader.nextLine().equalsIgnoreCase("s");
         try {
-            int iMax = 60;
             // BufferedWriter bw = new BufferedWriter(new FileWriter("data.txt"));
             switch (n) {
                 case 0:
+                    time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
                         System.out.println("Vuelta " + i);
                         ai.setLearn(true);
@@ -140,14 +142,21 @@ public class MainAI {
                                 double[] expectedData = new double[10];
                                 expectedData[expectedTrain.get(index_records.get(j + k))] = 1;
 
-                                // miniBatchData[k] = moveDrawing(recordsTrain.get(j + k), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)); // recordsTrain.get(index_records.get(j + k));
-                                miniBatchData[k] = recordsTrain.get(index_records.get(j + k)); // moveDrawing(recordsTrain.get(j + k), (int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10));
+                                if (advanced) {
+                                    miniBatchData[k] = moveDrawing(recordsTrain.get(index_records.get(j + k)), (int) (Math.random() * 20 - 10), (int) (Math.random() * 20 - 10));
+                                }
+                                else {
+                                    miniBatchData[k] = recordsTrain.get(index_records.get(j + k));
+                                }
                                 miniBatchExpected[k] = expectedData;
                             }
                             ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
                         }
                         verify(ai, recordsTest, expectedTest,advanced);
                     }
+                    break;
+                default:
+                    verify(ai, recordsTest, expectedTest,false);
                     break;
             }
         } catch (Exception e) {
@@ -157,8 +166,7 @@ public class MainAI {
         System.out.println(ai);
         try {
             System.out.println("Indique el nombre de la nueva red neuronal: ");
-            reader.nextLine();
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/data/" + reader.nextLine() + ".obj"));
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"));
             oos.writeObject(ai);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -171,8 +179,8 @@ public class MainAI {
         n = 0;
         for (int i = 0; i < recordsTest.size(); i++) {
             int max = move ?
-                    ai.getAnswer(moveDrawing(recordsTest.get(i),(int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)),0,255) :
-                    ai.getAnswer(recordsTest.get(i),0,255);
+                    ai.getAnswer(moveDrawing(recordsTest.get(i),(int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)),0,255, false) :
+                    ai.getAnswer(recordsTest.get(i),0,255, false);
             if (expectedTest.get(i) == max) {
                 n++;
             }/*
@@ -229,6 +237,10 @@ public class MainAI {
             }
         }
         return ai;
+    }
+
+    public static void centerDrawing(double[] record) {
+
     }
 
     public static double[] moveDrawing(double[] record, int x, int y) throws Exception {
