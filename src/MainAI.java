@@ -8,12 +8,14 @@ public class MainAI {
     // En esta versión voy a intentar hacer que no se guarden los valores que tienen los nodos en los nodos, más bien que los tenga la red neuronal en una matriz
 	public static void main(String[] args) {
         if (!(args.length == 2 || args.length == 3)) {
-            throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación");
+            throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación\t[Red neuronal a leer]");
         }
         int n;
         Integer [] temp;
-        // Tamaño 784,30,10 30 vueltas tiempo: 418.56 segundos (13.95 por vuelta)
-        // Tamaño 784,16,16,10 30 vueltas tiempo: 247.28 segundos (8.24 por vuelta)
+        // Tamaño 784,30,10 60 vueltas tiempo: 800,75 segundos (13,34 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
+        // Tamaño 784,16,16,10 60 vueltas tiempo: 502.3035003 segundos (8.26 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
+        // Tamaño 784,16,16,10 60 vueltas tiempo: 958,115383 segundos (15,97 por vuelta, 70000 iteraciones)
+        // DefAi tamaño 784,24,24,10 60 vueltas tiempo: 1429 segundos (23,82 por vuelta, 70000 iteraciones)
         int[] shape = {784,16,16,10};
 		NeuralNetwork ai;
         List<double[]> recordsTrain = new ArrayList<>();
@@ -26,10 +28,13 @@ public class MainAI {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args.length == 3 ? args[2] : "src/data/ai.obj"))){
             ai = (NeuralNetwork)ois.readObject();
             ai.mutate();
-            System.out.println("Funciona");
         } catch (Exception e) {
-            ai = new NeuralNetwork(shape, 1);
-            System.out.println(ai);
+            try {
+                ai = new NeuralNetwork(shape, 1);
+                System.out.println(ai);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
             // ai = createThinNeuralNetwork(shape);
             /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
                 try {
@@ -166,8 +171,9 @@ public class MainAI {
         }
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
         System.out.println(ai);
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"))){
+        try {
             System.out.println("Indique el nombre de la nueva red neuronal: ");
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"));
             oos.writeObject(ai);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -216,7 +222,12 @@ public class MainAI {
 
     // Una prueba tonta, no te preocupes. Además, no funciona, pero me sirve para una pequeña prueba
     public static NeuralNetwork createThinNeuralNetwork(int[] shape) {
-        NeuralNetwork ai = new NeuralNetwork(shape, 1);
+        NeuralNetwork ai;
+        try {
+            ai = new NeuralNetwork(shape, 1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         for (int j = 0; j < ai.getNodes()[0].length; j++) {
             int randomNodeOutput = (int)((ai.getNodes()[1].length) * Math.random());
             for (int k = 0; k < ai.getNodes()[1].length; k++) {
