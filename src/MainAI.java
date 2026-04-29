@@ -14,7 +14,7 @@ public class MainAI {
         Integer [] temp;
         // Tamaño 784,30,10 60 vueltas tiempo: 800,75 segundos (13,34 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 502.3035003 segundos (8.26 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
-        // Tamaño 784,16,16,10 60 vueltas tiempo: 958,115383 segundos (15,97 por vuelta, 70000 iteraciones)
+        // Tamaño 784,16,16,10 60 vueltas tiempo: 811.1674603 segundos (13,52 por vuelta, 70000 iteraciones)
         // DefAi tamaño 784,24,24,10 60 vueltas tiempo: 1429 segundos (23,82 por vuelta, 70000 iteraciones)
         int[] shape = {784,16,16,10};
 		NeuralNetwork ai;

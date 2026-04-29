@@ -333,7 +333,7 @@ public class NeuralNetwork implements Serializable {
      * @param data the data received
      * @param minRange the minimum number the data can have
      * @param maxRange the maximum number the data can have
-     * @return The values of each node without the sigmoid function applied. The first one is the exception with a range between 0 and 1, but since it should have that from the first time we ignore that
+     * @return The values of each node without the sigmoid function applied. The first one is the exception
      * @throws ExceptionInInitializerError if the data received is not valid.
      */
     private double[][] run(double[] data, int minRange, int maxRange) throws ExceptionInInitializerError {
@@ -458,7 +458,7 @@ public class NeuralNetwork implements Serializable {
             ret_values[0][j] = new double[nodes[1].length];
             for (int k = 0; k < ((InputNode) nodes[0][j]).getWeightsFrontLayer().size(); k++) {
                 int index = ((InputNode) nodes[0][j]).getIdNodeFrontLayer().get(k);
-                ret_values[0][j][index] = difDatas[0][index] * NeuralMath.setSigmoid(values[0][j]);
+                ret_values[0][j][index] = difDatas[0][index] * values[0][j];
             }
         }
 

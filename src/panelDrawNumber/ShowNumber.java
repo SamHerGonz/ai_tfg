@@ -5,7 +5,6 @@ import panelDrawNumber.actionButtons.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 
@@ -15,7 +14,7 @@ public class ShowNumber {
 
     public static void main(String[] args) {
         JFrame window = new JFrame("Título");
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("defAI.obj"))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("fixedDefAi.obj"))) {
             NeuralNetwork ai = (NeuralNetwork) ois.readObject();
             ai.setLearn(false);
 
