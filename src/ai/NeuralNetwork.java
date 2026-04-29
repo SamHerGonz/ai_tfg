@@ -235,9 +235,9 @@ public class NeuralNetwork implements Serializable {
      * @param expectedData the array of data expected to appear
      * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
      * @param showMarginError if you want the result and the margin error to be shown
-     * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
+     * @throws ExceptionInInitializerError if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
      */
-    public void runMiniBatch(double[][] data, int minRange, int maxRange, double[][] expectedData, double learningRate, boolean showMarginError) throws Exception {
+    public void runMiniBatch(double[][] data, int minRange, int maxRange, double[][] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
         double[][][] changes = null;
         for (int i = 0; i < data.length; i++) {
             double[][] values = run(data[i], minRange, maxRange);
@@ -276,7 +276,7 @@ public class NeuralNetwork implements Serializable {
         changeWeightsAndBiases(changes, learningRate);
     }
 
-    public int getAnswer(double[] data, int minRange, int maxRange, boolean show) throws Exception {
+    public int getAnswer(double[] data, int minRange, int maxRange, boolean show) throws ExceptionInInitializerError {
         double[][] values = run(data, minRange, maxRange);
         int max = 0;
         for (int i = 1; i < values[values.length - 1].length; i++) {
@@ -301,9 +301,9 @@ public class NeuralNetwork implements Serializable {
      * @param expectedData the array of data expected to appear
      * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
      * @param showMarginError if you want the result and the margin error to be shown
-     * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
+     * @throws ExceptionInInitializerError if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
      */
-    public void run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws Exception {
+    public void run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
         // Run the Neural network and get the values of all the nodes during the feedforward
         double[][] values = run(data, minRange, maxRange);
 
@@ -333,21 +333,18 @@ public class NeuralNetwork implements Serializable {
      * @param data the data received
      * @param minRange the minimum number the data can have
      * @param maxRange the maximum number the data can have
-     * @return The values of each node without the sigmoid function applied
-     * @throws Exception if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
+     * @return The values of each node without the sigmoid function applied. The first one is the exception with a range between 0 and 1, but since it should have that from the first time we ignore that
+     * @throws ExceptionInInitializerError if the data received is not valid.
      */
-    private double[][] run(double[] data, int minRange, int maxRange) throws Exception {
+    private double[][] run(double[] data, int minRange, int maxRange) throws ExceptionInInitializerError {
         // Creo un array para tener los valores de cada nodo
         double[][] values = new double[nodes.length][];
         for (int i = 0; i < values.length; i++) {
             values[i] = new double[nodes[i].length];
         }
         if (data.length != nodes[0].length) {
-            throw new Exception("Error en los datos recibidos. No son del mismo tamaño");
+            throw new ExceptionInInitializerError("Error en los datos recibidos. No son del mismo tamaño");
         }
-
-        // Make a copy of the array data to values[0]. It has to be like that, because if not it makes reference to the same array ¿¿Why?? I thought it never did that in java
-        System.arraycopy(data, 0, values[0], 0, values[0].length);
 
         // Change the values of all the InputNodes from a range of minRange to maxRange to a range of 0 to 1
         for (int i = 0; i < values[0].length; i++) {
@@ -405,19 +402,19 @@ public class NeuralNetwork implements Serializable {
      * @param values all the values of the nodes without the sigmoid function applied
      * @param expectedData the real array that we expècted
      * @return All the changes the Neural network has to do
-     * @throws Exception verify if all the values and expectedData are usable
+     * @throws ExceptionInInitializerError verify if all the values and expectedData are usable
      */
-    private double[][][] learn(double[][] values, double[] expectedData) throws Exception {
+    private double[][][] learn(double[][] values, double[] expectedData) throws ExceptionInInitializerError {
         // Exceptions. Verify if the data is usable
         if (expectedData.length != nodes[nodes.length - 1].length) {
-            throw new Exception("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
+            throw new ExceptionInInitializerError("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
         }
         if (values.length != nodes.length) {
-            throw new Exception("Error en los valores recibidos, no hay el mismo número de capas en los valores y en los nodos de la red neuronal");
+            throw new ExceptionInInitializerError("Error en los valores recibidos, no hay el mismo número de capas en los valores y en los nodos de la red neuronal");
         }
         for (int i = 0; i < values.length; i++) {
             if (values[i].length != nodes[i].length) {
-                throw new Exception("Error en los valores recibidos, la capa " + i + " no son del mismo tamaño que el de esa capa de nodos");
+                throw new ExceptionInInitializerError("Error en los valores recibidos, la capa " + i + " no son del mismo tamaño que el de esa capa de nodos");
             }
         }
 
