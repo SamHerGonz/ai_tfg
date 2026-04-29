@@ -421,7 +421,7 @@ public class NeuralNetwork implements Serializable {
             }
         }
 
-        // The size of difDatas is the size of the array of nodes except the input node, since we don't need to compute it
+        // The size of difDatas is the size of the array of nodes except the input node layer, since we don't need to compute it
         double[][] difDatas = new double[nodes.length - 1][];
         for (int i = 0; i < difDatas.length; i++) {
             difDatas[i] = new double[nodes[i + 1].length];
@@ -451,6 +451,8 @@ public class NeuralNetwork implements Serializable {
             }
         }
 
+        // The size of the returned values is the same as the number of layers in the neural network.
+        // The last one is not used for the last layer, it's used for the biases
         double[][][] ret_values = new double[nodes.length][][];
 
         // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork in the first layer
@@ -463,7 +465,7 @@ public class NeuralNetwork implements Serializable {
             }
         }
 
-        // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork in the remaining layers
+        // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork in the remaining layers, except in the last one
         for (int i = 1; i < nodes.length - 1; i++) {
             ret_values[i] = new double[nodes[i].length][];
             for (int j = 0; j < nodes[i].length; j++) {
