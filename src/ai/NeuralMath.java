@@ -17,8 +17,10 @@ public class NeuralMath {
      * @return The derivative of the function activated
      */
     public static double setDerivativeSigmoid(double n) {
-        return setSigmoid(n) * (1 - setSigmoid(n));
+        double sigmoid = setSigmoid(n);
+        return sigmoid * (1 - sigmoid);
     }
+
     public static double reverseSigmoid(double n) {
         if (n == 0) {
             return -999;
@@ -28,6 +30,13 @@ public class NeuralMath {
         }
         return Math.log(n / (1 - n));
     }
+
+    /**
+     * Sum the values of the 2 arrays. They both need to have the same size
+     * @param a1 the first array. It can be null
+     * @param a2 the second array
+     * @return An array with the sum of both arrays
+     */
     public static double[] addArrays(double[] a1, double[] a2) {
         if (a1 == null) {
             a1 = new double[a2.length];
@@ -39,6 +48,12 @@ public class NeuralMath {
         return ret_array;
     }
 
+    /**
+     * Sum the values of the 2 arrays. They both need to have the same size, in all of its dimensions
+     * @param a1 the first array. It can be null
+     * @param a2 the second array
+     * @return An array with the sum of both arrays
+     */
     public static double[][][] addArrays(double[][][] a1, double[][][] a2) {
         double[][][] ret_array = a1.clone();
         for (int i = 0; i < a2.length; i++) {
@@ -52,7 +67,7 @@ public class NeuralMath {
     }
 
     /**
-     * Subtract the values of a1 to a2
+     * Subtract the values of a1 to a2. Both have to be the same size
      * @param a1 Array number 1
      * @param a2 Array number 2
      * @return a1 - a2 in an array
