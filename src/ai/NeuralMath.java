@@ -13,11 +13,10 @@ public class NeuralMath {
 
     /**
      *  The derivative of the activation sigmoid function
-     * @param n value
+     * @param sigmoid value
      * @return The derivative of the function activated
      */
-    public static double setDerivativeSigmoid(double n) {
-        double sigmoid = setSigmoid(n);
+    public static double setDerivativeSigmoid(double sigmoid) {
         return sigmoid * (1 - sigmoid);
     }
 

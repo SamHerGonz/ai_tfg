@@ -287,7 +287,7 @@ public class NeuralNetwork implements Serializable {
         if (show) {
             System.out.println("\nReal value: " + max);
             for (int i = 0; i < values[values.length - 1].length; i++) {
-                System.out.println(NeuralMath.setSigmoid(values[values.length - 1][i]));
+                System.out.println(values[values.length - 1][i]);
             }
         }
         return max;
@@ -316,7 +316,7 @@ public class NeuralNetwork implements Serializable {
 
             // Print all the output values
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-                System.out.println(NeuralMath.setSigmoid(values[values.length - 1][i]));
+                System.out.println((values[values.length - 1][i]));
             }
 
             System.out.println("Error de margen: " + marginError);
@@ -333,8 +333,8 @@ public class NeuralNetwork implements Serializable {
      * @param data the data received
      * @param minRange the minimum number the data can have
      * @param maxRange the maximum number the data can have
-     * @return The values of each node without the sigmoid function applied. The first one is the exception
-     * @throws ExceptionInInitializerError if the data received is not valid.
+     * @return The values of each node with the sigmoid function applied
+     * @throws ExceptionInInitializerError if the data received is not valid
      */
     private double[][] run(double[] data, int minRange, int maxRange) throws ExceptionInInitializerError {
         // Creo un array para tener los valores de cada nodo
@@ -359,47 +359,53 @@ public class NeuralNetwork implements Serializable {
                             values[0][j], nodes[1].length));
         }
 
-        // Add the bias of each node in the second layer
+        // Add the bias of each node in the second layer, and edit the value with the sigmoid function
         if (nodes[1][0]instanceof ConnectionNode) {
-            for (int j = 0; j < nodes[1].length; j++) {
-                values[1][j] += ((ConnectionNode) nodes[1][j]).getBias();
-            }
+            setUpConnection(values, 0);
         }
         else {
-            for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-                values[nodes.length - 1][j] += ((OutputNode) nodes[nodes.length - 1][j]).getBias();
-            }
+            setUpOutput(values);
         }
 
 
         for (int i = 1; i < nodes.length - 1; i++) {
-            // Add the values of the next layer, without the sigmoid function
+            // Add the values of the next layer
             for (int j = 0; j < nodes[i].length; j++) {
                 values[i + 1] = NeuralMath.addArrays(
                         values[i + 1], ((ConnectionNode)nodes[i][j]).transferAllData(
-                                NeuralMath.setSigmoid(values[i][j]), nodes[i + 1].length));
+                                values[i][j], nodes[i + 1].length));
             }
 
-            // Add the biases of each node
+            // Add the biases of each node and edit the value with the sigmoid function
             if (nodes[i + 1][0]instanceof ConnectionNode) {
-                for (int j = 0; j < nodes[i + 1].length; j++) {
-                    values[i + 1][j] += ((ConnectionNode) nodes[i + 1][j]).getBias();
-                }
+                setUpConnection(values, i);
             }
-            // Add the biases of each node in the last layer
+            // Add the biases of each node in the last layer and edit the value with the sigmoid function
             else {
-                for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-                    values[nodes.length - 1][j] += ((OutputNode) nodes[nodes.length - 1][j]).getBias();
-                }
+                setUpOutput(values);
             }
         }
 
         return values;
     }
 
+    private void setUpConnection(double[][] values, int i) {
+        for (int j = 0; j < nodes[i + 1].length; j++) {
+            values[i + 1][j] += ((ConnectionNode) nodes[i + 1][j]).getBias();
+            values[i + 1][j] = NeuralMath.setSigmoid(values[i + 1][j]);
+        }
+    }
+
+    private void setUpOutput(double[][] values) {
+        for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
+            values[nodes.length - 1][j] += ((OutputNode) nodes[nodes.length - 1][j]).getBias();
+            values[nodes.length - 1][j] = NeuralMath.setSigmoid(values[nodes.length - 1][j]);
+        }
+    }
+
     /**
      *
-     * @param values all the values of the nodes without the sigmoid function applied
+     * @param values all the values of the nodes with the sigmoid function applied
      * @param expectedData the real array that we expècted
      * @return All the changes the Neural network has to do
      * @throws ExceptionInInitializerError verify if all the values and expectedData are usable
@@ -424,11 +430,9 @@ public class NeuralNetwork implements Serializable {
             difDatas[i] = new double[nodes[i + 1].length];
         }
 
-        // Foreach en el values[values.length - 1]
         double[] lastLayer = new double[values[values.length - 1].length];
-        for (int i = 0; i < lastLayer.length; i++) {
-            lastLayer[i] = NeuralMath.setSigmoid(values[values.length - 1][i]);
-        }
+        // Copy the values of the last layer of values into lastLayer
+        System.arraycopy(values[values.length - 1], 0, lastLayer, 0, lastLayer.length);
 
         double[] difOutputs = NeuralMath.subtractArrays(expectedData, lastLayer);
 
@@ -469,7 +473,7 @@ public class NeuralNetwork implements Serializable {
                 ret_values[i][j] = new double[nodes[i + 1].length];
                 for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
                     int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                    ret_values[i][j][index] = difDatas[i][index] * NeuralMath.setSigmoid(values[i][j]);
+                    ret_values[i][j][index] = difDatas[i][index] * values[i][j];
                 }
             }
         }
