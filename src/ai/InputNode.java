@@ -58,4 +58,13 @@ public class InputNode extends Node implements Serializable{
 
         return ret_values;
     }
+
+    protected double[] getExpectedDataWeights(double[] difDatas, double value, int sizeNextLayer) {
+        double[] ret_values = new double[sizeNextLayer];
+        for (int i = 0; i < getWeightsFrontLayer().size(); i++) {
+            int index = getIdNodeFrontLayer().get(i);
+            ret_values[index] = difDatas[index] * value;
+        }
+        return ret_values;
+    }
 }

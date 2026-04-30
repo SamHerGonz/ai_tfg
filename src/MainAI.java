@@ -12,11 +12,12 @@ public class MainAI {
         }
         int n;
         Integer [] temp;
-        // Tamaño 784,30,10 60 vueltas tiempo: 800,75 segundos (13,34 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
+        // Tamaño 784,30,10 60 vueltas tiempo: 582,71 segundos (9,71 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 370,453093 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
+        // Tamaño 784,16,16,10 con 1ª capa con el mínimo de pesos (784) 60 vueltas tiempo: 195.7935879 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 811,1674603 segundos (13,52 por vuelta, 70000 iteraciones)
         // DefAi tamaño 784,24,24,10 60 vueltas moviendo el panel tiempo:  segundos ( por vuelta, 70000 iteraciones)
-        int[] shape = {784,30,10};
+        int[] shape = {784,24,24,10};
 		NeuralNetwork ai;
         List<double[]> recordsTrain = new ArrayList<>();
         List<double[]> recordsTest = new ArrayList<>();
@@ -31,7 +32,7 @@ public class MainAI {
         } catch (Exception e) {
             try {
                 System.out.println("No se ha encontrado ninguna IA con el nombre indicado, creando nueva: ");
-                ai = new NeuralNetwork(shape, 1);
+                ai = new NeuralNetwork(shape,1);
                 System.out.println(ai);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);

@@ -73,13 +73,22 @@ public class ConnectionNode extends Node implements Serializable {
      * @param errorsNextLayer The errors of the next layer
      * @return The error of the value of this node
      */
-    public double calculateExpectedData(double nodeValue, double[] errorsNextLayer) {
+    public double calculateExpectedDataNode(double nodeValue, double[] errorsNextLayer) {
         double ret_values = 0;
         for (int i = 0; i < weightsFrontLayer.size(); i++) {
             int id = idNodeFrontLayer.get(i);
             ret_values += weightsFrontLayer.get(i) * errorsNextLayer[id];
         }
         ret_values *= NeuralMath.setDerivativeSigmoid(nodeValue);
+        return ret_values;
+    }
+
+    protected double[] getExpectedDataWeights(double[] difDatas, double value, int sizeNextLayer) {
+        double[] ret_values = new double[sizeNextLayer];
+        for (int i = 0; i < getWeightsFrontLayer().size(); i++) {
+            int index = getIdNodeFrontLayer().get(i);
+            ret_values[index] = difDatas[index] * value;
+        }
         return ret_values;
     }
 }

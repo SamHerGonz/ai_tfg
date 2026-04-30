@@ -14,7 +14,7 @@ public class ShowNumber {
 
     public static void main(String[] args) {
         JFrame window = new JFrame("Título");
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("masterDefAi.obj"))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("aiMaster.obj"))) {
             NeuralNetwork ai = (NeuralNetwork) ois.readObject();
             ai.setLearn(false);
 
