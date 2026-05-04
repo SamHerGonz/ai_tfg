@@ -272,6 +272,7 @@ public class NeuralNetwork implements Serializable {
             }
 
             // Obtener los cambios de los pesos y biases
+            // TODO: Aquí se pasa mucho tiempo haciendo cálculos, pero no mucho, optimizar si es posible
             if (learn) {
                 if (changes != null) {
                     changes = NeuralMath.addArrays(changes, learn(values, expectedData[i]));
@@ -356,60 +357,61 @@ public class NeuralNetwork implements Serializable {
             throw new ExceptionInInitializerError("Error en los datos recibidos. No son del mismo tamaño");
         }
 
-        // Change the values of all the InputNodes from a range of minRange to maxRange to a range of 0 to 1
+        // Cambiar los valores de todos los InputNodes desde el rango de min a max al rango de 0 a 1
         for (int i = 0; i < values[0].length; i++) {
             values[0][i] = InputNode.setSigmoid(data[i], minRange, maxRange);
         }
 
-
-        // Add the values of the next layer, without the sigmoid function in the first layer
+        // TODO: Aquí se pasa mucho tiempo haciendo cálculos, optimizar
+        // Añadir los valores de la siguiente capa, con la función sigmoide en la primera capa
         for (int j = 0; j < nodes[0].length; j++) {
             values[1] = NeuralMath.addArrays(
                     values[1], ((InputNode)nodes[0][j]).transferAllData(
                             values[0][j], nodes[1].length));
         }
 
-        // Add the bias of each node in the second layer, and edit the value with the sigmoid function
+        // Añadir el bias de cada nodo en la segunda capa, y editar el valor con la función sigmoide
+        // El valor de la variable capa es 1 porque estamos editando la segunda capa ahora, al ya haber pasado todos los datos
         if (nodes[1][0]instanceof ConnectionNode) {
-            setUpConnections(values, 0);
+            setUpConnections(values[1], 1);
         }
         else {
-            setUpOutputs(values);
+            setUpOutputs(values[1], 1);
         }
 
-
+        // TODO: Aquí se pasa mucho tiempo haciendo cálculos, optimizar
         for (int i = 1; i < nodes.length - 1; i++) {
-            // Add the values of the next layer
+            // Añadir los valores de la siguiente capa
             for (int j = 0; j < nodes[i].length; j++) {
                 values[i + 1] = NeuralMath.addArrays(
                         values[i + 1], ((ConnectionNode)nodes[i][j]).transferAllData(
                                 values[i][j], nodes[i + 1].length));
             }
 
-            // Add the biases of each node and edit the value with the sigmoid function
+            // Añadir el bias de cada nodo, y editar el valor con la función sigmoide
             if (nodes[i + 1][0]instanceof ConnectionNode) {
-                setUpConnections(values, i);
+                setUpConnections(values[i + 1], i + 1);
             }
-            // Add the biases of each node in the last layer and edit the value with the sigmoid function
+            // Añadir el bias de cada nodo en la última capa, y editar el valor con la función sigmoide
             else {
-                setUpOutputs(values);
+                setUpOutputs(values[i + 1], i + 1);
             }
         }
 
         return values;
     }
 
-    private void setUpConnections(double[][] values, int i) {
-        for (int j = 0; j < nodes[i + 1].length; j++) {
-            values[i + 1][j] += ((ConnectionNode) nodes[i + 1][j]).getBias();
-            values[i + 1][j] = NeuralMath.setSigmoid(values[i + 1][j]);
+    private void setUpConnections(double[] values, int capa) {
+        for (int j = 0; j < nodes[capa].length; j++) {
+            values[j] += ((ConnectionNode) nodes[capa][j]).getBias();
+            values[j] = NeuralMath.setSigmoid(values[j]);
         }
     }
 
-    private void setUpOutputs(double[][] values) {
-        for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-            values[nodes.length - 1][j] += ((OutputNode) nodes[nodes.length - 1][j]).getBias();
-            values[nodes.length - 1][j] = NeuralMath.setSigmoid(values[nodes.length - 1][j]);
+    private void setUpOutputs(double[] values, int capa) {
+        for (int j = 0; j < nodes[capa].length; j++) {
+            values[j] += ((OutputNode) nodes[capa][j]).getBias();
+            values[j] = NeuralMath.setSigmoid(values[j]);
         }
     }
 
@@ -433,105 +435,95 @@ public class NeuralNetwork implements Serializable {
                 throw new ExceptionInInitializerError("Error en los valores recibidos, la capa " + i + " no son del mismo tamaño que el de esa capa de nodos");
             }
         }
-
-        // El tamaño de difDatas es el tamaño del array de los nodos excepto de la primera, la de los inputs, ya que no necesitamos computarla
-        double[][] difDatas = new double[nodes.length - 1][];
-        for (int i = 0; i < difDatas.length; i++) {
-            difDatas[i] = new double[nodes[i + 1].length];
+        // difNodeData es la diferencia que debería de tener el valor de ese nodo para tener un mejor resultado
+        // El tamaño de difNodeData tiene el tamaño del array de los nodos excepto de la primera, la de los inputs, ya que no necesitamos computarla
+        double[][] difNodeData = new double[nodes.length - 1][];
+        for (int i = 0; i < difNodeData.length; i++) {
+            difNodeData[i] = new double[nodes[i + 1].length];
         }
 
-        double[] lastLayer = new double[values[values.length - 1].length];
-        // Copy the values of the last layer of values into lastLayer
-        System.arraycopy(values[values.length - 1], 0, lastLayer, 0, lastLayer.length);
+        difNodeData[nodes.length - 2] = NeuralMath.subtractArrays(expectedData, values[values.length - 1]);
 
-        double[] difOutputs = NeuralMath.subtractArrays(expectedData, lastLayer);
-
-        // Calculate the expectedDatas for the last layer
-        // We already have the expected data of the marginError in the targetOutputs
+        // Calcular los datos esperados de la última capa en expectedDatas
+        // Ya hemos calculado el margen de error de este nodo en el targetOutputs
         for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-            difDatas[nodes.length - 2][j] = (difOutputs[j] * NeuralMath.setDerivativeSigmoid(values[values.length - 1][j]));
+            difNodeData[nodes.length - 2][j] *= NeuralMath.setDerivativeSigmoid(values[values.length - 1][j]);
         }
 
-        // Calculate the expectedDatas of all the remaining layers
+        // Calcular los datos esperados del resto de capas
         for (int i = nodes.length - 2; i > 0; i--) {
-            // Since the next layer is always an instance of ai.ConnectionNode, we don't have any reason to verify it.
-            // We need to calculate the margin error
-            // Each layer I get the values of the previous layer (the layer in which we really are) to be used in the next step of backpropagation, node by node, not all the layer
+            // Ya que la siguiente capa es siempre una instancia de ConnectionNode, no tenemos ningún motivo para verificarlo
+            // En cada capa se obtienen el margen de error de la capa anterior para ser usado en el siguiente paso de retropropagación
             for (int j = 0; j < nodes[i].length; j++) {
-                difDatas[i - 1][j] = ((ConnectionNode) nodes[i][j]).calculateExpectedDataNode(values[i][j], difDatas[i]);
+                difNodeData[i - 1][j] = ((ConnectionNode) nodes[i][j]).calculateExpectedDataNode(values[i][j], difNodeData[i]);
             }
         }
 
-        // The size of the returned values is the same as the number of layers in the neural network.
-        // The last one is not used for the last layer, it's used for the biases
+        // El tamaño de los valores devueltos por esta función es el mismo que el número de capas en la red neuronal
+        // El último no es usado para la última capa, porque no tiene conexiones. Se usa para los cambios de los biases
+
         double[][][] ret_values = new double[nodes.length][][];
 
-        // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork in the first layer
+        // Usar los datos de los valores de los nodos en difNodeData de la red neuronal para obtener el cambio de cada peso en la primera capa
         ret_values[0] = new double[nodes[0].length][];
         for (int i = 0; i < nodes[0].length; i++) {
-            ret_values[0][i] = ((InputNode) nodes[0][i]).getExpectedDataWeights(difDatas[0], values[0][i], nodes[1].length);
+            ret_values[0][i] = ((InputNode) nodes[0][i]).getExpectedDataWeights(difNodeData[0], values[0][i], nodes[1].length);
         }
 
-        // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork in the remaining layers, except in the last one
+        // Usar los datos de los valores de los nodos en difNodeData de la red neuronal para obtener el cambio de cada peso en el resto de capas, menos la última
         for (int i = 1; i < nodes.length - 1; i++) {
             ret_values[i] = new double[nodes[i].length][];
             for (int j = 0; j < nodes[i].length; j++) {
-                ret_values[i][j] = ((ConnectionNode) nodes[i][j]).getExpectedDataWeights(difDatas[i], values[i][j], nodes[i + 1].length);
+                ret_values[i][j] = ((ConnectionNode) nodes[i][j]).getExpectedDataWeights(difNodeData[i], values[i][j], nodes[i + 1].length);
             }
         }
 
-        // Use the expectedDatas to get the changes of the biases of the Neural Network.
-        // it's saved in the last position of the array returned
-        ret_values[ret_values.length - 1] = new double[nodes.length - 1][];
-        for (int i = 1; i < nodes.length; i++) {
-            ret_values[ret_values.length - 1][i - 1] = new double[nodes[i].length];
-            System.arraycopy(difDatas[i - 1], 0, ret_values[ret_values.length - 1][i - 1], 0, nodes[i].length);
-        }
+        // Usar los datos de los valores de los nodos en difNodeData de la red neuronal para obtener el cambio de cada bias de la red neuronal
+        // Es guardado en la última posición del array devuelto
+        ret_values[ret_values.length - 1] = difNodeData;
         return ret_values;
     }
 
     /**
      *
-     * @param changes The changes applied to the neural Network
-     * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
+     * @param changes Los cambios aplicados a la red neuronal
+     * @param learningRate Un multiplicador para ver cuánto aprende de esta iteración
      */
     public void changeWeightsAndBiases(double[][][] changes, double learningRate) {
 
-        // Use the expectedDatas to change the weights of the ai.NeuralNetwork
-        for (int i = 0; i < nodes.length - 1; i++) {
-            if (nodes[i][0] instanceof InputNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    // Get the index of the weight. Then, it updates that weight
-                    for (int k = 0; k < ((InputNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
-                        int index = ((InputNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ((InputNode) nodes[i][j]).addWeightsFrontLayer(k, changes[i][j][index] * learningRate);
-                    }
-                }
+        // Usar los datos esperados de changes para cambiar los pesos de la primera capa de la red neuronal
+        for (int j = 0; j < nodes[0].length; j++) {
+            // Obtener el index del peso. Después, actualiza ese peso
+            for (int k = 0; k < ((InputNode) nodes[0][j]).getWeightsFrontLayer().size(); k++) {
+                int index = ((InputNode) nodes[0][j]).getIdNodeFrontLayer().get(k);
+                ((InputNode) nodes[0][j]).addWeightsFrontLayer(k, changes[0][j][index] * learningRate);
             }
-            else if (nodes[i][0] instanceof ConnectionNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    // Get the index of the weight. Then, it updates that weight
-                    for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
-                        int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ((ConnectionNode) nodes[i][j]).addWeightsFrontLayer(k, changes[i][j][index] * learningRate);
-                    }
+        }
+
+        // Usar los datos esperados de changes para cambiar los pesos del resto de capas de la red neuronal
+        for (int i = 1; i < nodes.length - 1; i++) {
+            for (int j = 0; j < nodes[i].length; j++) {
+                // Obtener el index del peso. Después, actualiza ese peso
+                for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
+                    int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
+                    ((ConnectionNode) nodes[i][j]).addWeightsFrontLayer(k, changes[i][j][index] * learningRate);
                 }
             }
         }
 
-        // Use the expectedDatas to change the biases of the Neural Network
-        for (int i = 1; i < nodes.length; i++) {
-            if (nodes[i][0] instanceof ConnectionNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    ((ConnectionNode) nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
-                }
-            }
-            else if (nodes[i][0] instanceof OutputNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    ((OutputNode) nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
-                }
+        // Usar los datos esperados de changes para cambiar todos los biases de la red neuronal
+        for (int i = 1; i < nodes.length - 1; i++) {
+            for (int j = 0; j < nodes[i].length; j++) {
+                ((ConnectionNode) nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
             }
         }
+
+        // Usar los datos esperados de changes para cambiar los biases de la última capa de la red neuronal
+        for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
+            ((OutputNode) nodes[nodes.length - 1][j]).addBias(changes[changes.length - 1][nodes.length - 2][j] * learningRate);
+        }
+
+
     }
 
     public void mutate() {
