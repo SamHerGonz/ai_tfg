@@ -272,6 +272,7 @@ public class NeuralNetwork implements Serializable {
             }
 
             // Obtener los cambios de los pesos y biases
+            // TODO: Aquí se pasa mucho tiempo haciendo cálculos, pero no mucho, optimizar si es posible
             if (learn) {
                 if (changes != null) {
                     changes = NeuralMath.addArrays(changes, learn(values, expectedData[i]));
@@ -356,20 +357,20 @@ public class NeuralNetwork implements Serializable {
             throw new ExceptionInInitializerError("Error en los datos recibidos. No son del mismo tamaño");
         }
 
-        // Change the values of all the InputNodes from a range of minRange to maxRange to a range of 0 to 1
+        // Cambiar los valores de todos los InputNodes desde el rango de min a max al rango de 0 a 1
         for (int i = 0; i < values[0].length; i++) {
             values[0][i] = InputNode.setSigmoid(data[i], minRange, maxRange);
         }
 
-
-        // Add the values of the next layer, without the sigmoid function in the first layer
+        // TODO: Aquí se pasa mucho tiempo haciendo cálculos, optimizar
+        // Añadir los valores de la siguiente capa, con la función sigmoide en la primera capa
         for (int j = 0; j < nodes[0].length; j++) {
             values[1] = NeuralMath.addArrays(
                     values[1], ((InputNode)nodes[0][j]).transferAllData(
                             values[0][j], nodes[1].length));
         }
 
-        // Add the bias of each node in the second layer, and edit the value with the sigmoid function
+        // Añadir el bias de cada nodo en la segunda capa, y editar el valor con la función sigmoide
         if (nodes[1][0]instanceof ConnectionNode) {
             setUpConnections(values, 0);
         }
@@ -377,20 +378,20 @@ public class NeuralNetwork implements Serializable {
             setUpOutputs(values);
         }
 
-
+        // TODO: Aquí se pasa mucho tiempo haciendo cálculos, optimizar
         for (int i = 1; i < nodes.length - 1; i++) {
-            // Add the values of the next layer
+            // Añadir los valores de la siguiente capa
             for (int j = 0; j < nodes[i].length; j++) {
                 values[i + 1] = NeuralMath.addArrays(
                         values[i + 1], ((ConnectionNode)nodes[i][j]).transferAllData(
                                 values[i][j], nodes[i + 1].length));
             }
 
-            // Add the biases of each node and edit the value with the sigmoid function
+            // Añadir el bias de cada nodo, y editar el valor con la función sigmoide
             if (nodes[i + 1][0]instanceof ConnectionNode) {
                 setUpConnections(values, i);
             }
-            // Add the biases of each node in the last layer and edit the value with the sigmoid function
+            // Añadir el bias de cada nodo en la última capa, y editar el valor con la función sigmoide
             else {
                 setUpOutputs(values);
             }
@@ -440,11 +441,7 @@ public class NeuralNetwork implements Serializable {
             difDatas[i] = new double[nodes[i + 1].length];
         }
 
-        double[] lastLayer = new double[values[values.length - 1].length];
-        // Copy the values of the last layer of values into lastLayer
-        System.arraycopy(values[values.length - 1], 0, lastLayer, 0, lastLayer.length);
-
-        double[] difOutputs = NeuralMath.subtractArrays(expectedData, lastLayer);
+        double[] difOutputs = NeuralMath.subtractArrays(expectedData, values[values.length - 1]);
 
         // Calculate the expectedDatas for the last layer
         // We already have the expected data of the marginError in the targetOutputs
@@ -482,11 +479,7 @@ public class NeuralNetwork implements Serializable {
 
         // Use the expectedDatas to get the changes of the biases of the Neural Network.
         // it's saved in the last position of the array returned
-        ret_values[ret_values.length - 1] = new double[nodes.length - 1][];
-        for (int i = 1; i < nodes.length; i++) {
-            ret_values[ret_values.length - 1][i - 1] = new double[nodes[i].length];
-            System.arraycopy(difDatas[i - 1], 0, ret_values[ret_values.length - 1][i - 1], 0, nodes[i].length);
-        }
+        ret_values[ret_values.length - 1] = difDatas;
         return ret_values;
     }
 
@@ -498,40 +491,34 @@ public class NeuralNetwork implements Serializable {
     public void changeWeightsAndBiases(double[][][] changes, double learningRate) {
 
         // Use the expectedDatas to change the weights of the ai.NeuralNetwork
-        for (int i = 0; i < nodes.length - 1; i++) {
-            if (nodes[i][0] instanceof InputNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    // Get the index of the weight. Then, it updates that weight
-                    for (int k = 0; k < ((InputNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
-                        int index = ((InputNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ((InputNode) nodes[i][j]).addWeightsFrontLayer(k, changes[i][j][index] * learningRate);
-                    }
-                }
+        for (int j = 0; j < nodes[0].length; j++) {
+            // Get the index of the weight. Then, it updates that weight
+            for (int k = 0; k < ((InputNode) nodes[0][j]).getWeightsFrontLayer().size(); k++) {
+                int index = ((InputNode) nodes[0][j]).getIdNodeFrontLayer().get(k);
+                ((InputNode) nodes[0][j]).addWeightsFrontLayer(k, changes[0][j][index] * learningRate);
             }
-            else if (nodes[i][0] instanceof ConnectionNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    // Get the index of the weight. Then, it updates that weight
-                    for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
-                        int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                        ((ConnectionNode) nodes[i][j]).addWeightsFrontLayer(k, changes[i][j][index] * learningRate);
-                    }
+        }
+        for (int i = 1; i < nodes.length - 1; i++) {
+            for (int j = 0; j < nodes[i].length; j++) {
+                // Get the index of the weight. Then, it updates that weight
+                for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
+                    int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
+                    ((ConnectionNode) nodes[i][j]).addWeightsFrontLayer(k, changes[i][j][index] * learningRate);
                 }
             }
         }
 
         // Use the expectedDatas to change the biases of the Neural Network
-        for (int i = 1; i < nodes.length; i++) {
-            if (nodes[i][0] instanceof ConnectionNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    ((ConnectionNode) nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
-                }
-            }
-            else if (nodes[i][0] instanceof OutputNode) {
-                for (int j = 0; j < nodes[i].length; j++) {
-                    ((OutputNode) nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
-                }
+        for (int i = 1; i < nodes.length - 1; i++) {
+            for (int j = 0; j < nodes[i].length; j++) {
+                ((ConnectionNode) nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
             }
         }
+        for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
+            ((OutputNode) nodes[nodes.length - 1][j]).addBias(changes[changes.length - 1][nodes.length - 2][j] * learningRate);
+        }
+
+
     }
 
     public void mutate() {

@@ -3,18 +3,18 @@ package ai;
 public class NeuralMath {
 
     /**
-     * Activation function of the nodes
-     * @param n value
-     * @return The function activated
+     * Función de activación de los nodos
+     * @param n Valor
+     * @return La funcion activada
      */
     public static double setSigmoid(double n) {
         return (1 / (1 + Math.exp(- n)));
     }
 
     /**
-     *  The derivative of the activation sigmoid function
-     * @param sigmoid value
-     * @return The derivative of the function activated
+     *  La derivada de la función de activación de los nodos
+     * @param sigmoid valor
+     * @return La derivada de la funcion activada
      */
     public static double setDerivativeSigmoid(double sigmoid) {
         return sigmoid * (1 - sigmoid);

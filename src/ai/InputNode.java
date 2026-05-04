@@ -12,7 +12,7 @@ public class InputNode extends Node implements Serializable{
 
 
     public InputNode() {
-        // Initialize the arrayLists of the connections of the next layer
+        // Inicializar los arrayLists de las conexiones de la siguiente capa
         setIdNodeFrontLayer(new ArrayList<>());
         setWeightsFrontLayer(new ArrayList<>());
     }
@@ -43,12 +43,12 @@ public class InputNode extends Node implements Serializable{
     }
 
     public void addNodeFront(int idNode, double max) {
-        // Initialize the value of a connection
+        // Inicializar el valor de un peso
         getIdNodeFrontLayer().add(idNode);
         getWeightsFrontLayer().add(Math.random() * (max * 2) - max);
     }
 
-    // Value added to the next layer of the neural network from this neuron in the forward pass
+    // Valor añadido a la siguiente capa de la red neuronal desde esta neurona en la alimentación hacia delante
     public double[] transferAllData(double value, int sizeNextLayer) {
         double[] ret_values = new double[sizeNextLayer];
         for (int i = 0; i < weightsFrontLayer.size(); i++) {

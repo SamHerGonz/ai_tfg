@@ -12,10 +12,10 @@ public class ConnectionNode extends Node implements Serializable {
     private static final long serialVersionUID = 8381313154060074511L;
 
     public ConnectionNode(double max) {
-        // Initialize the arrayLists of the connections of the next layer
+        // Inicializar los arrayLists de las conexiones de la siguiente capa
         setIdNodeFrontLayer(new ArrayList<>());
         setWeightsFrontLayer(new ArrayList<>());
-        // Set the bias to a random value
+        // Inicializar el bias en un valor aleatorio del -max al max
         setBias(Math.random() * (max * 2) - max);
     }
 
@@ -52,12 +52,12 @@ public class ConnectionNode extends Node implements Serializable {
     }
 
     public void addNodeFront(int idNode, double max) {
-        // Initialize the value of a connection
+        // Inicializar el valor de una conexión, con un rango del -max al max
         getIdNodeFrontLayer().add(idNode);
         getWeightsFrontLayer().add(Math.random() * (max * 2) - max);
     }
 
-    // Value added to the next layer of the neural network from this neuron in the forward pass
+    // Valor añadido a la siguiente capa de la red neuronal desde esta neurona en la alimentación hacia delante
     public double[] transferAllData(double value, int sizeNextLayer) {
         double[] ret_values = new double[sizeNextLayer];
         for (int i = 0; i < weightsFrontLayer.size(); i++) {
@@ -69,9 +69,9 @@ public class ConnectionNode extends Node implements Serializable {
 
     /**
      *
-     * @param nodeValue The value that this node had in the feedforward without the sigmoid function applied to it
-     * @param errorsNextLayer The errors of the next layer
-     * @return The error of the value of this node
+     * @param nodeValue El valor que este nodo tenía en la alimentación hacia delante con la función sigmoide aplicada
+     * @param errorsNextLayer El margen de error de la siguiente capa
+     * @return El error del valor de este nodo
      */
     public double calculateExpectedDataNode(double nodeValue, double[] errorsNextLayer) {
         double ret_values = 0;
