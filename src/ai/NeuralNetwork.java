@@ -254,18 +254,17 @@ public class NeuralNetwork implements Serializable {
         double[][][] changes = null;
         for (int i = 0; i < data.length; i++) {
             double[][] values = run(data[i], minRange, maxRange);
-            double[] ret_values = values[values.length - 1].clone();
 
             if (showMarginError) {
                 // Calculate the margin error of the feedforward (this function) respect to the expected value
                 double marginError = 0;
                 for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-                    marginError += Math.pow(expectedData[i][j] - ret_values[j], 2) / 2;
+                    marginError += Math.pow(expectedData[i][j] - values[values.length - 1][j], 2) / 2;
                 }
 
                 // Print all the output values
                 for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-                    System.out.println(ret_values[j]);
+                    System.out.println(values[values.length - 1][j]);
                 }
 
                 System.out.println("Error de margen: " + marginError);
@@ -332,8 +331,7 @@ public class NeuralNetwork implements Serializable {
         }
 
         if (learn) {
-            double[][][] changes = learn(values, expectedData);
-            changeWeightsAndBiases(changes, learningRate);
+            changeWeightsAndBiases(learn(values, expectedData), learningRate);
         }
     }
 

@@ -32,7 +32,7 @@ public class MainAI {
         } catch (Exception e) {
             try {
                 System.out.println("No se ha encontrado ninguna IA con el nombre indicado, creando nueva: ");
-                ai = createThinNeuralNetwork(shape);
+                ai = new NeuralNetwork(shape, 1);
                 System.out.println(ai);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -99,9 +99,6 @@ public class MainAI {
         double rate = lr;
         System.out.println("¿Cuántas iteraciones quieres que haya?");
         int iMax = reader.nextInt();
-        System.out.println("¿Quieres el modo avanzado? S/n");
-        reader.nextLine();
-        boolean advanced = reader.nextLine().equalsIgnoreCase("s");
         long time = System.nanoTime();
         try {
             // BufferedWriter bw = new BufferedWriter(new FileWriter("data.txt"));
@@ -115,13 +112,9 @@ public class MainAI {
 
                             double[] expectedData = new double[10];
                             expectedData[expectedTrain.get(j)] = 1;
-                            if (advanced) {
-                                ai.run(moveDrawing(recordsTrain.get(j), (int) (Math.random() * 20 - 10), (int) (Math.random() * 20 - 10)), 0, 255, expectedData, rate, false);
-                            } else {
-                                ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
-                            }
+                            ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
                         }
-                        verify(ai, recordsTest, expectedTest,advanced);
+                        verify(ai, recordsTest, expectedTest);
                         rate -= rate *0.02;
                     }
                     break;
@@ -152,17 +145,13 @@ public class MainAI {
                                 double[] expectedData = new double[10];
                                 expectedData[expectedTrain.get(index_records.get(j + k))] = 1;
 
-                                if (advanced) {
-                                    miniBatchData[k] = moveDrawing(recordsTrain.get(index_records.get(j + k)), (int) (Math.random() * 20 - 10), (int) (Math.random() * 20 - 10));
-                                }
-                                else {
-                                    miniBatchData[k] = recordsTrain.get(index_records.get(j + k));
-                                }
+                                miniBatchData[k] = recordsTrain.get(index_records.get(j + k));
+
                                 miniBatchExpected[k] = expectedData;
                             }
                             ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
                         }
-                        int v = verify(ai, recordsTest, expectedTest,advanced);
+                        int v = verify(ai, recordsTest, expectedTest);
                         lr -= lr * 0.001;
                         rate = lr * (10000 - v) / 1000;
                         System.out.println("Tasa de aprendizaje: " + rate);
@@ -170,7 +159,7 @@ public class MainAI {
                     break;
                 default:
                     time = System.nanoTime();
-                    verify(ai, recordsTest, expectedTest,false);
+                    verify(ai, recordsTest, expectedTest);
                     break;
             }
         } catch (Exception e) {
@@ -179,7 +168,7 @@ public class MainAI {
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
         System.out.println(ai);
         try {
-            verify(ai, recordsTest, expectedTest,advanced);
+            verify(ai, recordsTest, expectedTest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -193,14 +182,12 @@ public class MainAI {
         }
 	}
 
-    private static int verify(NeuralNetwork ai, List<double[]> recordsTest, List<Integer> expectedTest, boolean move) throws Exception {
+    private static int verify(NeuralNetwork ai, List<double[]> recordsTest, List<Integer> expectedTest) throws Exception {
         int n;
         ai.setLearn(false);
         n = 0;
         for (int i = 0; i < recordsTest.size(); i++) {
-            int max = move ?
-                    ai.getAnswer(moveDrawing(recordsTest.get(i),(int)(Math.random() * 20 - 10), (int)(Math.random() * 20 - 10)),0,255, false) :
-                    ai.getAnswer(recordsTest.get(i),0,255, false);
+            int max = ai.getAnswer(recordsTest.get(i),0,255, false);
             if (expectedTest.get(i) == max) {
                 n++;
             }
