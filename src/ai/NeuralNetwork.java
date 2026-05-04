@@ -9,13 +9,13 @@ public class NeuralNetwork implements Serializable {
     @Serial
     private static final long serialVersionUID = 3877515453607213504L;
 
-    public NeuralNetwork(int[] shape, double max) throws Exception {
+    public NeuralNetwork(int[] shape, float max) throws Exception {
         setNodes(createNodes(shape, max));
         setLearn(true);
         connectNodes(max);
     }
 
-    public NeuralNetwork(int nInput, int nOutput, double max) throws Exception {
+    public NeuralNetwork(int nInput, int nOutput, float max) throws Exception {
         int[] shape = new int[((int)(Math.sqrt(nInput)) - nOutput) / 2 + 1];
         for (int i = 0; i < shape.length; i++) {
             shape[i] = (int) Math.pow((int)(Math.sqrt(nInput)) - i * 2, 2);
@@ -69,7 +69,7 @@ public class NeuralNetwork implements Serializable {
         this.learn = learn;
     }
 
-    private Node[][] createNodes(int[] shape, double max) throws Exception {
+    private Node[][] createNodes(int[] shape, float max) throws Exception {
         if (shape.length <= 1) {
             throw new Exception("Tiene que tener más de una capa");
         }
@@ -102,7 +102,7 @@ public class NeuralNetwork implements Serializable {
         return nodes;
     }
 
-    private void connectNodes(double max) {
+    private void connectNodes(float max) {
         for (int i = 0; i < nodes.length; i++) {
             if (nodes[i][0] instanceof InputNode) {
                 for (int j = 0; j < nodes[i].length; j++) {
@@ -120,7 +120,7 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    private void connectNodesDeepMode(double max) {
+    private void connectNodesDeepMode(float max) {
         // Iterate through all layers except the last one
         for (int i = 0; i < nodes.length - 2; i++) {
             // Iterate through each node of each layer
@@ -147,7 +147,7 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    public void addWeight(int layer, int firstLayerIndex, int lastLayerIndex, double max) throws Exception {
+    public void addWeight(int layer, int firstLayerIndex, int lastLayerIndex, float max) throws Exception {
         /* if (lastLayerIndex <= nodes[layer + 1].length) {
             throw new Exception("No existe el nodo número " + lastLayerIndex + " de la capa " + (layer + 1));
         }*/
@@ -250,22 +250,21 @@ public class NeuralNetwork implements Serializable {
      * @param showMarginError if you want the result and the margin error to be shown
      * @throws ExceptionInInitializerError if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
      */
-    public void runMiniBatch(double[][] data, int minRange, int maxRange, double[][] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
-        double[][][] changes = null;
+    public void runMiniBatch(float[][] data, int minRange, int maxRange, float[][] expectedData, float learningRate, boolean showMarginError) throws ExceptionInInitializerError {
+        float[][][] changes = null;
         for (int i = 0; i < data.length; i++) {
-            double[][] values = run(data[i], minRange, maxRange);
-            double[] ret_values = values[values.length - 1].clone();
+            float[][] values = run(data[i], minRange, maxRange);
 
             if (showMarginError) {
                 // Calculate the margin error of the feedforward (this function) respect to the expected value
                 double marginError = 0;
                 for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-                    marginError += Math.pow(expectedData[i][j] - ret_values[j], 2) / 2;
+                    marginError += Math.pow(expectedData[i][j] - values[values.length - 1][j], 2) / 2;
                 }
 
                 // Print all the output values
                 for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
-                    System.out.println(ret_values[j]);
+                    System.out.println(values[values.length - 1][j]);
                 }
 
                 System.out.println("Error de margen: " + marginError);
@@ -285,8 +284,8 @@ public class NeuralNetwork implements Serializable {
         changeWeightsAndBiases(changes, learningRate);
     }
 
-    public int getAnswer(double[] data, int minRange, int maxRange, boolean show) throws ExceptionInInitializerError {
-        double[] values = run(data, minRange, maxRange)[nodes.length - 1];
+    public int getAnswer(float[] data, int minRange, int maxRange, boolean show) throws ExceptionInInitializerError {
+        float[] values = run(data, minRange, maxRange)[nodes.length - 1];
         int max = 0;
         for (int i = 1; i < values.length; i++) {
             if (values[i] > values[max]) {
@@ -312,15 +311,15 @@ public class NeuralNetwork implements Serializable {
      * @param showMarginError if you want the result and the margin error to be shown
      * @throws ExceptionInInitializerError if the data received is not valid. There are other internal verifications, but you shouldn't worry about them here
      */
-    public void run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
+    public void run(float[] data, int minRange, int maxRange, float[] expectedData, float learningRate, boolean showMarginError) throws ExceptionInInitializerError {
         // Run the Neural network and get the values of all the nodes during the feedforward
-        double[][] values = run(data, minRange, maxRange);
+        float[][] values = run(data, minRange, maxRange);
 
         if (showMarginError) {
             // Calculate the margin error of the feedforward (this function) respect to the expected value
             double marginError = 0;
             for (int i = 0; i < nodes[nodes.length - 1].length; i++) {
-                marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid(values[values.length - 1][i]), 2) / 2;
+                marginError += Math.pow(expectedData[i] - NeuralMath.setSigmoid((float) values[values.length - 1][i]), 2) / 2;
             }
 
             // Print all the output values
@@ -332,8 +331,7 @@ public class NeuralNetwork implements Serializable {
         }
 
         if (learn) {
-            double[][][] changes = learn(values, expectedData);
-            changeWeightsAndBiases(changes, learningRate);
+            changeWeightsAndBiases(learn(values, expectedData), learningRate);
         }
     }
 
@@ -345,11 +343,11 @@ public class NeuralNetwork implements Serializable {
      * @return The values of each node with the sigmoid function applied. The size is the same as the nodes
      * @throws ExceptionInInitializerError if the data received is not valid
      */
-    private double[][] run(double[] data, int minRange, int maxRange) throws ExceptionInInitializerError {
+    private float[][] run(float[] data, int minRange, int maxRange) throws ExceptionInInitializerError {
         // Creo un array para tener los valores de cada nodo
-        double[][] values = new double[nodes.length][];
+        float[][] values = new float[nodes.length][];
         for (int i = 0; i < values.length; i++) {
-            values[i] = new double[nodes[i].length];
+            values[i] = new float[nodes[i].length];
         }
         if (data.length != nodes[0].length) {
             throw new ExceptionInInitializerError("Error en los datos recibidos. No son del mismo tamaño");
@@ -398,14 +396,14 @@ public class NeuralNetwork implements Serializable {
         return values;
     }
 
-    private void setUpConnections(double[][] values, int i) {
+    private void setUpConnections(float[][] values, int i) {
         for (int j = 0; j < nodes[i + 1].length; j++) {
             values[i + 1][j] += ((ConnectionNode) nodes[i + 1][j]).getBias();
             values[i + 1][j] = NeuralMath.setSigmoid(values[i + 1][j]);
         }
     }
 
-    private void setUpOutputs(double[][] values) {
+    private void setUpOutputs(float[][] values) {
         for (int j = 0; j < nodes[nodes.length - 1].length; j++) {
             values[nodes.length - 1][j] += ((OutputNode) nodes[nodes.length - 1][j]).getBias();
             values[nodes.length - 1][j] = NeuralMath.setSigmoid(values[nodes.length - 1][j]);
@@ -419,7 +417,7 @@ public class NeuralNetwork implements Serializable {
      * @return All the changes the Neural network has to do
      * @throws ExceptionInInitializerError verify if all the values and expectedData are usable
      */
-    private double[][][] learn(double[][] values, double[] expectedData) throws ExceptionInInitializerError {
+    private float[][][] learn(float[][] values, float[] expectedData) throws ExceptionInInitializerError {
         // Exceptions. Verify if the data is usable
         if (expectedData.length != nodes[nodes.length - 1].length) {
             throw new ExceptionInInitializerError("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
@@ -434,16 +432,16 @@ public class NeuralNetwork implements Serializable {
         }
 
         // The size of difDatas is the size of the array of nodes except the input node layer, since we don't need to compute it
-        double[][] difDatas = new double[nodes.length - 1][];
+        float[][] difDatas = new float[nodes.length - 1][];
         for (int i = 0; i < difDatas.length; i++) {
-            difDatas[i] = new double[nodes[i + 1].length];
+            difDatas[i] = new float[nodes[i + 1].length];
         }
 
-        double[] lastLayer = new double[values[values.length - 1].length];
+        float[] lastLayer = new float[values[values.length - 1].length];
         // Copy the values of the last layer of values into lastLayer
         System.arraycopy(values[values.length - 1], 0, lastLayer, 0, lastLayer.length);
 
-        double[] difOutputs = NeuralMath.subtractArrays(expectedData, lastLayer);
+        float[] difOutputs = NeuralMath.subtractArrays(expectedData, lastLayer);
 
         // Calculate the expectedDatas for the last layer
         // We already have the expected data of the marginError in the targetOutputs
@@ -463,17 +461,17 @@ public class NeuralNetwork implements Serializable {
 
         // The size of the returned values is the same as the number of layers in the neural network.
         // The last one is not used for the last layer, it's used for the biases
-        double[][][] ret_values = new double[nodes.length][][];
+        float[][][] ret_values = new float[nodes.length][][];
 
         // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork in the first layer
-        ret_values[0] = new double[nodes[0].length][];
+        ret_values[0] = new float[nodes[0].length][];
         for (int i = 0; i < nodes[0].length; i++) {
             ret_values[0][i] = ((InputNode) nodes[0][i]).getExpectedDataWeights(difDatas[0], values[0][i], nodes[1].length);
         }
 
         // Use the expectedDatas to get the changes of the weights of the ai.NeuralNetwork in the remaining layers, except in the last one
         for (int i = 1; i < nodes.length - 1; i++) {
-            ret_values[i] = new double[nodes[i].length][];
+            ret_values[i] = new float[nodes[i].length][];
             for (int j = 0; j < nodes[i].length; j++) {
                 ret_values[i][j] = ((ConnectionNode) nodes[i][j]).getExpectedDataWeights(difDatas[i], values[i][j], nodes[i + 1].length);
             }
@@ -481,9 +479,9 @@ public class NeuralNetwork implements Serializable {
 
         // Use the expectedDatas to get the changes of the biases of the Neural Network.
         // it's saved in the last position of the array returned
-        ret_values[ret_values.length - 1] = new double[nodes.length - 1][];
+        ret_values[ret_values.length - 1] = new float[nodes.length - 1][];
         for (int i = 1; i < nodes.length; i++) {
-            ret_values[ret_values.length - 1][i - 1] = new double[nodes[i].length];
+            ret_values[ret_values.length - 1][i - 1] = new float[nodes[i].length];
             System.arraycopy(difDatas[i - 1], 0, ret_values[ret_values.length - 1][i - 1], 0, nodes[i].length);
         }
         return ret_values;
@@ -494,7 +492,7 @@ public class NeuralNetwork implements Serializable {
      * @param changes The changes applied to the neural Network
      * @param learningRate a multiplier to see how much it learns from this iteration. It has to be from 0 to 1
      */
-    public void changeWeightsAndBiases(double[][][] changes, double learningRate) {
+    public void changeWeightsAndBiases(float[][][] changes, float learningRate) {
 
         // Use the expectedDatas to change the weights of the ai.NeuralNetwork
         for (int i = 0; i < nodes.length - 1; i++) {
@@ -534,22 +532,22 @@ public class NeuralNetwork implements Serializable {
     }
 
     public void mutate() {
-        mutate((double) 1 / getWeightsCount(), 0.1);
+        mutate( (float) 1 / getWeightsCount(), 0.1F);
     }
 
-    public void mutate(double mutationChance, double mutationChange) {
+    public void mutate(float mutationChance, float mutationChange) {
         for (Node[] layer : nodes) {
             for (Node node : layer) {
                 if (node instanceof InputNode) {
                     for (int i = 0; i < ((InputNode) node).getWeightsFrontLayer().size(); i++) {
                         if (Math.random() <= mutationChance) {
-                            ((InputNode) node).addWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
+                            ((InputNode) node).addWeightsFrontLayer(i, (float) (Math.random() * mutationChange * 2 - mutationChange));
                         }
                     }
                 } else if (node instanceof ConnectionNode) {
                     for (int i = 0; i < ((ConnectionNode) node).getWeightsFrontLayer().size(); i++) {
                         if (Math.random() <= mutationChance) {
-                            ((ConnectionNode) node).addWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
+                            ((ConnectionNode) node).addWeightsFrontLayer(i, (float) (Math.random() * mutationChange * 2 - mutationChange));
                         }
                     }
                     if (Math.random() <= mutationChance) {
@@ -557,7 +555,7 @@ public class NeuralNetwork implements Serializable {
                     }
                 } else if (node instanceof OutputNode) {
                     if (Math.random() <= mutationChance) {
-                        ((OutputNode) node).addBias((Math.random() * mutationChange * 2 - mutationChange));
+                        ((OutputNode) node).addBias((float) (Math.random() * mutationChange * 2 - mutationChange));
                     }
                 }
             }

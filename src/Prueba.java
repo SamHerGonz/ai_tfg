@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class Prueba {
-    private static void verify(NeuralNetwork ai, List<double[]> recordsTest, List<Integer> expectedTest) throws Exception {
+    private static void verify(NeuralNetwork ai, List<float[]> recordsTest, List<Integer> expectedTest) throws Exception {
         int n;
         ai.setLearn(false);
         n = 0;

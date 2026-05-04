@@ -44,14 +44,14 @@ public class DrawingPanel extends JPanel implements Runnable {
         answer = ai.getAnswer(getDrawingBoard(true), 0, 255, show);
     }
 
-    public double[] getDrawingBoard(boolean center) {
+    public float[] getDrawingBoard(boolean center) {
         int[][] pos = center ? drawingBoard.centerPosition() : this.drawingBoard.getPositions();
-        double[] ret_value;
+        float[] ret_value;
         int n = 0;
         for (int[] v : pos) {
             n += v.length;
         }
-        ret_value = new double[n];
+        ret_value = new float[n];
 
         for (int i = 0; i < pos.length; i++) {
             for (int j = 0; j < pos[i].length; j++) {

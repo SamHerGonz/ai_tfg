@@ -7,8 +7,8 @@ public class NeuralMath {
      * @param n value
      * @return The function activated
      */
-    public static double setSigmoid(double n) {
-        return (1 / (1 + Math.exp(- n)));
+    public static float setSigmoid(float n) {
+        return (float) (1 / (1 + Math.exp(- n)));
     }
 
     /**
@@ -16,7 +16,7 @@ public class NeuralMath {
      * @param sigmoid value
      * @return The derivative of the function activated
      */
-    public static double setDerivativeSigmoid(double sigmoid) {
+    public static float setDerivativeSigmoid(float sigmoid) {
         return sigmoid * (1 - sigmoid);
     }
 
@@ -36,11 +36,11 @@ public class NeuralMath {
      * @param a2 the second array
      * @return An array with the sum of both arrays
      */
-    public static double[] addArrays(double[] a1, double[] a2) {
+    public static float[] addArrays(float[] a1, float[] a2) {
         if (a1 == null) {
-            a1 = new double[a2.length];
+            a1 = new float[a2.length];
         }
-        double[] ret_array = a1.clone();
+        float[] ret_array = a1.clone();
         for (int i = 0; i < a1.length; i++) {
             ret_array[i] = a1[i] + a2[i];
         }
@@ -53,8 +53,8 @@ public class NeuralMath {
      * @param a2 the second array
      * @return An array with the sum of both arrays
      */
-    public static double[][][] addArrays(double[][][] a1, double[][][] a2) {
-        double[][][] ret_array = a1.clone();
+    public static float[][][] addArrays(float[][][] a1, float[][][] a2) {
+        float[][][] ret_array = a1.clone();
         for (int i = 0; i < a2.length; i++) {
             for (int j = 0; j < a2[i].length; j++) {
                 for (int k = 0; k < a2[i][j].length; k++) {
@@ -71,8 +71,8 @@ public class NeuralMath {
      * @param a2 Array number 2
      * @return a1 - a2 in an array
      */
-    public static double[] subtractArrays(double[] a1, double[] a2) {
-        double[] ret_array = new double[a1.length];
+    public static float[] subtractArrays(float[] a1, float[] a2) {
+        float[] ret_array = new float[a1.length];
         for (int i = 0; i < ret_array.length; i++) {
             ret_array[i] = a1[i] - a2[i];
         }
