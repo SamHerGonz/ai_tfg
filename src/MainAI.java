@@ -117,7 +117,9 @@ public class MainAI {
 
                         }
                         verify(ai, recordsTest, expectedTest);
-                        rate -= rate *0.02;
+                        int v = verify(ai, recordsTest, expectedTest);
+                        lr -= (float) (lr * 0.001);
+                        rate = lr * (10000 - v) / 1000;
                     }
                     break;
                 case 1:
@@ -154,7 +156,7 @@ public class MainAI {
                             ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
                         }
                         int v = verify(ai, recordsTest, expectedTest);
-                        lr -= lr * 0.001;
+                        lr -= (float) (lr * 0.001);
                         rate = lr * (10000 - v) / 1000;
                         System.out.println("Tasa de aprendizaje: " + rate);
                     }
