@@ -15,9 +15,13 @@ public class MouseClick implements MouseMotionListener, MouseListener {
 
     public MouseClick(DrawingPanel dp, Rectangle board, double brushSize, int brushHardness) {
         this.dp = dp;
-        this.board = board;
+        setBoard(board);
         this.brushSize = brushSize;
         this.brushHardness = brushHardness;
+    }
+
+    public void setBoard(Rectangle board) {
+        this.board = board;
     }
 
     @Override
@@ -29,7 +33,7 @@ public class MouseClick implements MouseMotionListener, MouseListener {
     public void mousePressed(MouseEvent e) {
         paint = true;
         if (checkRange()) {
-            dp.draw(dp.window.getMousePosition().x - 7, dp.window.getMousePosition().y - 30, brushSize, brushHardness);
+            dp.drawingBoard.draw(dp.window.getMousePosition().x - 7, dp.window.getMousePosition().y - 30, brushSize, brushHardness);
         }
     }
 
@@ -51,7 +55,7 @@ public class MouseClick implements MouseMotionListener, MouseListener {
     @Override
     public void mouseDragged(MouseEvent e) {
         if (paint && checkRange()) {
-            dp.draw(dp.window.getMousePosition().x - 7, dp.window.getMousePosition().y - 30, brushSize, brushHardness);
+            dp.drawingBoard.draw(dp.window.getMousePosition().x - 7, dp.window.getMousePosition().y - 30, brushSize, brushHardness);
         }
     }
 

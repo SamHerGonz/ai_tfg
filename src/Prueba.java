@@ -5,6 +5,7 @@ import ai.OutputNode;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Prueba {
@@ -31,7 +32,23 @@ public class Prueba {
 
     public static void main(String[] args) {
         try{
-            List<double[]> recordsTest = new ArrayList<>();
+            BufferedReader br1 = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_test.csv"));
+            br1.readLine();
+            String s;
+            String s2;
+            int i = 0;
+            while ((s = br1.readLine()) != null) {
+                i++;
+                BufferedReader br2 = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_train.csv"));
+                while ((s2 = br2.readLine()) != null) {
+                    if (s.equals(s2)) {
+                        System.out.println(s);
+                    }
+                }
+                br2.close();
+                if (i % 1000 == 0) System.out.println("Vuelta " + i);
+            }
+            /*List<double[]> recordsTest = new ArrayList<>();
             List<Integer> expectedTest = new ArrayList<>();
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize10.obj"));
             try (BufferedReader br = new BufferedReader(new FileReader("src/data/mnist_test.csv"))) {

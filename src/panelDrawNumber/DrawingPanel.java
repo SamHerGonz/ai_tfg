@@ -16,51 +16,50 @@ public class DrawingPanel extends JPanel implements Runnable {
 
     Thread thread;
 
-    public int[][] drawingBoard;
+    public DrawingBoard drawingBoard;
     public boolean finished;
 
     public NeuralNetwork ai;
-
-    public int posPanelX;
-    public int posPanelY;
 
     public int expectedAnswer = 0;
     public int answer = 0;
     public int index;
 
     public DrawingPanel(JFrame window, int width, int height, NeuralNetwork ai, int posPanelX, int posPanelY, int index) {
+        Rectangle r = new Rectangle(posPanelX, posPanelY, TILESIZE * width, TILESIZE * height);
         this.globalAction = new GlobalAction(this);
-        mouse = new MouseClick(this, new Rectangle(posPanelX, posPanelY, TILESIZE * width, TILESIZE * height), 1.5, 100);
+        drawingBoard = new DrawingBoard(new int[width][height], r);
+        mouse = new MouseClick(this, r, 1.5, 120);
         this.window = window;
         addKeyListener(new KeyHandler(this));
-        drawingBoard = new int[width][height];
         this.buttonGroup = new ButtonGroup();
         this.ai = ai;
         this.index = index;
-        this.posPanelX = posPanelX;
-        this.posPanelY = posPanelY;
 
         addMouseListener(mouse);
         addMouseMotionListener(mouse);
     }
 
     public void setAnswer(boolean show) throws Exception {
-        answer = ai.getAnswer(getDrawingBoard(), 0, 255, show);
+        answer = ai.getAnswer(getDrawingBoard(true), 0, 255, show);
     }
 
-    public double[] getDrawingBoard() {
+    public double[] getDrawingBoard(boolean center) {
+        int[][] pos = center ? drawingBoard.centerPosition() : this.drawingBoard.getPositions();
         double[] ret_value;
         int n = 0;
-        for (int[] v : this.drawingBoard) {
+        for (int[] v : pos) {
             n += v.length;
         }
         ret_value = new double[n];
 
-        for (int i = 0; i < this.drawingBoard.length; i++) {
-            for (int j = 0; j < this.drawingBoard[i].length; j++) {
-                ret_value[i * this.drawingBoard.length + j] = this.drawingBoard[j][i];
+        for (int i = 0; i < pos.length; i++) {
+            for (int j = 0; j < pos[i].length; j++) {
+                ret_value[i * pos.length + j] = pos[j][i];
             }
         }
+
+
         return ret_value;
     }
 
@@ -81,12 +80,9 @@ public class DrawingPanel extends JPanel implements Runnable {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
-        for (int i = 0; i < drawingBoard.length; i++) {
-            for (int j = 0; j < drawingBoard[i].length; j++) {
-                g2.setColor(new Color(drawingBoard[i][j],drawingBoard[i][j],drawingBoard[i][j]));
-                g2.fillRect(posPanelX + i * TILESIZE,posPanelY + j * TILESIZE,TILESIZE,TILESIZE);
-            }
-        }
+
+        drawingBoard.draw(g2);
+
         // Draw answer expected from the csv
         g2.setFont(new Font("Arial",Font.BOLD,80));
         g2.setColor(new Color(0,0,0));
@@ -95,19 +91,6 @@ public class DrawingPanel extends JPanel implements Runnable {
         // Draw answer gave
         g2.setFont(new Font("Arial",Font.BOLD,200));
         g2.drawString(String.valueOf(answer), 950, 870);
-    }
-
-    public void draw(int posX, int posY, double brushSize, int brushHardness) {
-        int x = (posX - posPanelX) / TILESIZE;
-        int y = (posY - posPanelY) / TILESIZE;
-        for (int i = x - (int)(brushSize); i <= x + (brushSize - 1); i++) {
-            for (int j = y - (int)(brushSize); j <= y + (brushSize - 1); j++) {
-                int minus = (int) Math.sqrt(Math.pow((x + (brushSize - 1)) - i - brushSize + 1, 2) + Math.pow((y + (brushSize - 1)) - j - brushSize + 1, 2));
-                if (i >= 0 && j >= 0 && i < drawingBoard.length && j < drawingBoard[0].length && (brushHardness - (minus * brushSize * 3)) >= 0) {
-                    drawingBoard[i][j] = Math.min(255, drawingBoard[i][j] + (int)(brushHardness - (minus * brushSize * 3)));
-                }
-            }
-        }
     }
 
     public void addButton(AbstractButton button) {

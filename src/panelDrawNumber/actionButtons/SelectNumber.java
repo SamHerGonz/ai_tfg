@@ -25,7 +25,7 @@ public class SelectNumber implements ActionListener {
             String line = br.readLine();
             String[] values = line.split(";");
             double[] valuesDouble = new double[784];
-            int[][] records = new int[dp.drawingBoard.length][dp.drawingBoard[0].length];
+            int[][] records = new int[dp.drawingBoard.getPositions().length][dp.drawingBoard.getPositions()[0].length];
 
             for (int i = 0; i < valuesDouble.length; i++) {
                 valuesDouble[i] = Integer.parseInt(values[i + 2]);
@@ -37,7 +37,7 @@ public class SelectNumber implements ActionListener {
                 }
             }
             dp.expectedAnswer = Integer.parseInt(values[0]);
-            dp.drawingBoard = records;
+            dp.drawingBoard.setPositions(records);
             dp.index++;
             System.out.println(dp.index);
             dp.setAnswer(false);

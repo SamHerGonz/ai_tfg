@@ -17,7 +17,7 @@ public class MainAI {
         // Tamaño 784,16,16,10 con 1ª capa con el mínimo de pesos (784) 60 vueltas tiempo: 195.7935879 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 811,1674603 segundos (13,52 por vuelta, 70000 iteraciones)
         // DefAi tamaño 784,24,24,10 60 vueltas moviendo el panel tiempo:  segundos ( por vuelta, 70000 iteraciones)
-        int[] shape = {784,24,24,10};
+        int[] shape = {784,30,10};
 		NeuralNetwork ai;
         List<double[]> recordsTrain = new ArrayList<>();
         List<double[]> recordsTest = new ArrayList<>();
@@ -32,7 +32,7 @@ public class MainAI {
         } catch (Exception e) {
             try {
                 System.out.println("No se ha encontrado ninguna IA con el nombre indicado, creando nueva: ");
-                ai = new NeuralNetwork(shape,1);
+                ai = createThinNeuralNetwork(shape);
                 System.out.println(ai);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -95,7 +95,8 @@ public class MainAI {
         System.out.println("1: Aprendizaje con mini-batch de tamaño customizado");
         n = reader.nextInt();
         System.out.println("Cual quieres que sea la tasa de aprendizaje (recomendado: 0,3 )");
-        double rate = reader.nextDouble();
+        double lr = reader.nextDouble();
+        double rate = lr;
         System.out.println("¿Cuántas iteraciones quieres que haya?");
         int iMax = reader.nextInt();
         System.out.println("¿Quieres el modo avanzado? S/n");
@@ -121,6 +122,7 @@ public class MainAI {
                             }
                         }
                         verify(ai, recordsTest, expectedTest,advanced);
+                        rate -= rate *0.02;
                     }
                     break;
                 case 1:
@@ -160,7 +162,10 @@ public class MainAI {
                             }
                             ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
                         }
-                        verify(ai, recordsTest, expectedTest,advanced);
+                        int v = verify(ai, recordsTest, expectedTest,advanced);
+                        lr -= lr * 0.001;
+                        rate = lr * (10000 - v) / 1000;
+                        System.out.println("Tasa de aprendizaje: " + rate);
                     }
                     break;
                 default:
@@ -173,6 +178,12 @@ public class MainAI {
         }
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
         System.out.println(ai);
+        try {
+            verify(ai, recordsTest, expectedTest,advanced);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         try {
             System.out.println("Indique el nombre de la nueva red neuronal: ");
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"));
@@ -192,8 +203,8 @@ public class MainAI {
                     ai.getAnswer(recordsTest.get(i),0,255, false);
             if (expectedTest.get(i) == max) {
                 n++;
-            }/*
-            else {
+            }
+            /*else {
                 System.out.println("The realTrain data is the index " + i);
                 double[] expectedData = new double[10];
                 expectedData[expectedTest.get(i)] = 1;
@@ -209,7 +220,8 @@ public class MainAI {
     private static void readFile(List<double[]> records, List<Integer> real, BufferedReader br) throws IOException {
         br.readLine();
         String line;
-        while ((line = br.readLine()) != null) {
+        int j = 0;
+        while ((line = br.readLine()) != null && j <= 50000) {
             String[] values = line.split(",");
             double[] valuesDouble = new double[784];
 
@@ -219,6 +231,7 @@ public class MainAI {
                 valuesDouble[i] = Double.parseDouble(values[i]);
             }
             records.add(valuesDouble);
+            j++;
         }
     }
 
@@ -251,10 +264,6 @@ public class MainAI {
             }
         }
         return ai;
-    }
-
-    public static void centerDrawing(double[] record) {
-
     }
 
     public static double[] moveDrawing(double[] record, int x, int y) throws Exception {

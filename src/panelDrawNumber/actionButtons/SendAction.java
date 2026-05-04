@@ -14,6 +14,7 @@ public class SendAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
+            dp.drawingBoard.centerPosition();
             dp.setAnswer(true);
         } catch (Exception ex) {
             throw new RuntimeException(ex);

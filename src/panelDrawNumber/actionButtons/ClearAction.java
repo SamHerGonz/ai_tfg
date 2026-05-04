@@ -14,8 +14,8 @@ public class ClearAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (int i = 0; i < dp.drawingBoard.length; i++) {
-            Arrays.fill(dp.drawingBoard[i], 0);
+        for (int i = 0; i < dp.drawingBoard.getPositions().length; i++) {
+            Arrays.fill(dp.drawingBoard.getPositions()[i], 0);
         }
     }
 }

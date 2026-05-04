@@ -12,10 +12,17 @@ public class ShowNumber {
     public static final int WIDTHDP = 28;
     public static final int HEIGTHDP = 28;
 
+    public static final int POSBUTTON = 900;
+
     public static void main(String[] args) {
+        if (args.length != 1) {
+            throw new RuntimeException("Tiene que tener un argumento con el archivo de la IA");
+        }
         JFrame window = new JFrame("Título");
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("aiMaster.obj"))) {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args[0]));
             NeuralNetwork ai = (NeuralNetwork) ois.readObject();
+            ois.close();
             ai.setLearn(false);
 
             DrawingPanel dp = new DrawingPanel(window, WIDTHDP, HEIGTHDP, ai,80,80,0);
@@ -49,9 +56,9 @@ public class ShowNumber {
             moveLeft.setBounds(0, 442, 80, 80);
             moveRight.setBounds(864, 442, 80, 80);
 
-            clearButton.setBounds(900, 510, 200, 80);
-            sendButton.setBounds(900, 240, 200, 250);
-            selectNumber.setBounds(900, 610, 200, 80);
+            clearButton.setBounds(POSBUTTON, 510, 200, 80);
+            sendButton.setBounds(POSBUTTON, 240, 200, 250);
+            selectNumber.setBounds(POSBUTTON, 610, 200, 80);
 
             ok.setBounds(1150, 610, 80, 80);
             notOk.setBounds(1150, 700, 80, 80);
