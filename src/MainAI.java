@@ -5,7 +5,6 @@ import java.io.*;
 import java.util.*;
 
 public class MainAI {
-    // En esta versión voy a intentar hacer que no se guarden los valores que tienen los nodos en los nodos, más bien que los tenga la red neuronal en una matriz
 	public static void main(String[] args) {
         if (!(args.length == 2 || args.length == 3)) {
             throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación\t[Red neuronal a leer]");
@@ -208,7 +207,7 @@ public class MainAI {
         br.readLine();
         String line;
         int j = 0;
-        while ((line = br.readLine()) != null && j <= 50000) {
+        while ((line = br.readLine()) != null) {
             String[] values = line.split(",");
             double[] valuesDouble = new double[784];
 
