@@ -153,7 +153,6 @@ public class MainAI {
                         int v = verify(ai, recordsTest, expectedTest);
                         lr -= lr * 0.001;
                         rate = lr * (10000 - v) / 1000;
-                        System.out.println("Tasa de aprendizaje: " + rate);
                     }
                     break;
                 default:
@@ -206,7 +205,6 @@ public class MainAI {
     private static void readFile(List<double[]> records, List<Integer> real, BufferedReader br) throws IOException {
         br.readLine();
         String line;
-        int j = 0;
         while ((line = br.readLine()) != null) {
             String[] values = line.split(",");
             double[] valuesDouble = new double[784];
@@ -217,7 +215,6 @@ public class MainAI {
                 valuesDouble[i] = Double.parseDouble(values[i]);
             }
             records.add(valuesDouble);
-            j++;
         }
     }
 
