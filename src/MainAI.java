@@ -1,10 +1,14 @@
 import ai.ConnectionNode;
 import ai.InputNode;
+import ai.NeuralMath;
 import ai.NeuralNetwork;
 import java.io.*;
 import java.util.*;
 
 public class MainAI {
+    public static int minRange = 0;
+    public static int maxRange = 255;
+    public static boolean aBoolean = false;
 	public static void main(String[] args) {
         if (!(args.length == 2 || args.length == 3)) {
             throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación\t[Red neuronal a leer]");
@@ -20,8 +24,8 @@ public class MainAI {
 		NeuralNetwork ai;
         List<double[]> recordsTrain = new ArrayList<>();
         List<double[]> recordsTest = new ArrayList<>();
-        List<Integer> expectedTrain = new ArrayList<>();
-        List<Integer> expectedTest = new ArrayList<>();
+        List<double[]> expectedTrain = new ArrayList<>();
+        List<double[]> expectedTest = new ArrayList<>();
         Scanner reader = new Scanner(System.in);
 
         // Search the 'ai.obj' file (if there isn't a 3rd argument, if not the 3rd), which has a Neural Network. If it doesn't exist, it creates a Neural Network
@@ -31,7 +35,8 @@ public class MainAI {
         } catch (Exception e) {
             try {
                 System.out.println("No se ha encontrado ninguna IA con el nombre indicado, creando nueva: ");
-                ai = new NeuralNetwork(shape, 1);
+                // ai = createThinNeuralNetwork(shape);
+                ai = new NeuralNetwork(shape,1);
                 System.out.println(ai);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -65,13 +70,11 @@ public class MainAI {
             }*/
         }
 
-        // Read data of the database
+        // Leer datos de la base de datos
         try (BufferedReader br = new BufferedReader(new FileReader(args[0]))) {
             readFile(recordsTrain, expectedTrain, br);
         } catch (IOException e) {
             System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
         try (BufferedReader br = new BufferedReader(new FileReader(args[1]))) {
             readFile(recordsTest, expectedTest, br);
@@ -82,7 +85,6 @@ public class MainAI {
         for (int i = 0; i < temp.length; i++) {
             temp[i] = i;
         }
-        List<Integer> index_records = Arrays.asList(temp);
 
         // Run neural network
 
@@ -106,15 +108,11 @@ public class MainAI {
                     time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
                         System.out.println("Vuelta " + i);
-                        ai.setLearn(true);
-                        for (int j = 0; j < recordsTrain.size(); j++) {
-
-                            double[] expectedData = new double[10];
-                            expectedData[expectedTrain.get(j)] = 1;
-                            ai.run(recordsTrain.get(j), 0, 255, expectedData, rate, false);
-                        }
-                        verify(ai, recordsTest, expectedTest);
-                        rate -= rate *0.02;
+                        ai.train(recordsTrain, expectedTrain, minRange, maxRange, rate);
+                        int v = ai.verify(minRange,maxRange, recordsTest, expectedTest);
+                        System.out.println("Se han completado " + v + " de " + recordsTest.size());
+                        lr -= lr * 0.001;
+                        rate = lr * (10000 - v) / 1000;
                     }
                     break;
                 case 1:
@@ -123,41 +121,17 @@ public class MainAI {
                     reader.nextLine();
                     time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
-                        ai.setLearn(true);
                         System.out.println("Vuelta " + i);
-                        // 0.002 segundos
-                        Collections.shuffle(index_records);
-                        // Este bucle 8.3 segundos (con el modelo normal)
-                        // 3.1 segundos con el modelo con pocas conexiones
-                        for (int j = 0; j < recordsTrain.size(); j += sizeMiniBatch) {
-                            double[][] miniBatchData;
-                            double[][] miniBatchExpected;
-                            if (j + sizeMiniBatch > recordsTrain.size()) {
-                                miniBatchData = new double[recordsTrain.size() - j][];
-                                miniBatchExpected = new double[recordsTrain.size() - j][];
-                            }
-                            else {
-                                miniBatchData = new double[sizeMiniBatch][];
-                                miniBatchExpected = new double[sizeMiniBatch][];
-                            }
-                            for (int k = 0; k < miniBatchData.length; k++) {
-                                double[] expectedData = new double[10];
-                                expectedData[expectedTrain.get(index_records.get(j + k))] = 1;
-
-                                miniBatchData[k] = recordsTrain.get(index_records.get(j + k));
-
-                                miniBatchExpected[k] = expectedData;
-                            }
-                            ai.runMiniBatch(miniBatchData, 0, 255, miniBatchExpected, rate, false);
-                        }
-                        int v = verify(ai, recordsTest, expectedTest);
+                        ai.train(recordsTrain, expectedTrain, minRange, maxRange, sizeMiniBatch, rate);
+                        int v = ai.verify(minRange,maxRange, recordsTest, expectedTest);
+                        System.out.println("Se han completado " + v + " de " + recordsTest.size());
                         lr -= lr * 0.001;
                         rate = lr * (10000 - v) / 1000;
                     }
                     break;
                 default:
                     time = System.nanoTime();
-                    verify(ai, recordsTest, expectedTest);
+                    ai.verify(minRange,maxRange, recordsTest, expectedTest);
                     break;
             }
         } catch (Exception e) {
@@ -166,7 +140,16 @@ public class MainAI {
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
         System.out.println(ai);
         try {
-            verify(ai, recordsTest, expectedTest);
+            aBoolean = true;
+            ai.verify(minRange,maxRange, recordsTest, expectedTest);
+            for (int i = 0; i < ai.getNodes()[0].length; i++) {
+                for (int j = 0; j < ai.getNodes()[1].length; j++) {
+                    try {
+                        ai.addWeight(0, i, j, 0);
+                    } catch (Exception _) {}
+                }
+            }
+            ai.verify(minRange,maxRange, recordsTest, expectedTest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -180,45 +163,29 @@ public class MainAI {
         }
 	}
 
-    private static int verify(NeuralNetwork ai, List<double[]> recordsTest, List<Integer> expectedTest) throws Exception {
-        int n;
-        ai.setLearn(false);
-        n = 0;
-        for (int i = 0; i < recordsTest.size(); i++) {
-            int max = ai.getAnswer(recordsTest.get(i),0,255, false);
-            if (expectedTest.get(i) == max) {
-                n++;
-            }
-            /*else {
-                System.out.println("The realTrain data is the index " + i);
-                double[] expectedData = new double[10];
-                expectedData[expectedTest.get(i)] = 1;
-                ai.run(recordsTest.get(i), 0, 255, expectedData, 1, true);
-                System.out.println("Expected: " + expectedTest.get(i));
-                System.out.println("Value guessed: " + max);
-            }*/
-        }
-        System.out.println("Se han completado " + n + " de " + recordsTest.size());
-        return n;
-    }
-
-    private static void readFile(List<double[]> records, List<Integer> real, BufferedReader br) throws IOException {
+    private static void readFile(List<double[]> records, List<double[]> real, BufferedReader br) throws IOException {
         br.readLine();
         String line;
+        double max = 1;
         while ((line = br.readLine()) != null) {
             String[] values = line.split(",");
-            double[] valuesDouble = new double[784];
+            double[] valuesDouble = new double[values.length - 1];
+            double[] resultValue = new double[10];
 
-            real.add(Integer.parseInt(values[0]));
-
+            resultValue[Integer.parseInt(values[0])] = 1;
             for (int i = 1; i < valuesDouble.length; i++) {
                 valuesDouble[i] = Double.parseDouble(values[i]);
+                if (max <= valuesDouble[i]) {
+                    max = valuesDouble[i];
+                }
             }
             records.add(valuesDouble);
+            real.add(resultValue);
         }
+        maxRange = (int) max;
     }
 
-    // Una prueba tonta, no te preocupes. Además, no funciona, pero me sirve para una pequeña prueba
+    // Una prueba tonta, no te preocupes. Además, no funciona del t0d0 bien, pero me sirve para una pequeña prueba
     public static NeuralNetwork createThinNeuralNetwork(int[] shape) {
         NeuralNetwork ai;
         try {

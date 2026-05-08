@@ -17,18 +17,19 @@ public class SelectNumber implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        try (BufferedReader br = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_train_valid.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("src/data/test_data.txt"))) {
+//            BufferedReader br = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_train_valid.csv"))
             br.readLine();
             for (int i = 0; i < dp.index; i++) {
                 br.readLine();
             }
             String line = br.readLine();
-            String[] values = line.split(";");
+            String[] values = line.split(",");
             double[] valuesDouble = new double[784];
             int[][] records = new int[dp.drawingBoard.getPositions().length][dp.drawingBoard.getPositions()[0].length];
 
             for (int i = 0; i < valuesDouble.length; i++) {
-                valuesDouble[i] = Integer.parseInt(values[i + 2]);
+                valuesDouble[i] = (int)(Double.parseDouble(values[i + 1]) * 255);
             }
 
             for (int i = 0; i < records.length; i++) {

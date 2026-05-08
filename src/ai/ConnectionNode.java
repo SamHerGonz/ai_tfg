@@ -73,7 +73,7 @@ public class ConnectionNode extends Node implements Serializable {
      * @param errorsNextLayer El margen de error de la siguiente capa
      * @return El error del valor de este nodo
      */
-    public double calculateExpectedDataNode(double nodeValue, double[] errorsNextLayer) {
+    public double getExpectedDataNode(double nodeValue, double[] errorsNextLayer) {
         double ret_values = 0;
         for (int i = 0; i < weightsFrontLayer.size(); i++) {
             int id = idNodeFrontLayer.get(i);

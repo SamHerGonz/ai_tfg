@@ -1,5 +1,6 @@
 package panelDrawNumber;
 
+import ai.NeuralMath;
 import ai.NeuralNetwork;
 import panelDrawNumber.actionButtons.GlobalAction;
 
@@ -41,7 +42,7 @@ public class DrawingPanel extends JPanel implements Runnable {
     }
 
     public void setAnswer(boolean show) throws Exception {
-        answer = ai.getAnswer(getDrawingBoard(true), 0, 255, show);
+        answer = NeuralMath.getMaxPosition(ai.getAnswer(getDrawingBoard(true), 0, 255));
     }
 
     public double[] getDrawingBoard(boolean center) {

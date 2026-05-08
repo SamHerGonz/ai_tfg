@@ -20,16 +20,6 @@ public class NeuralMath {
         return sigmoid * (1 - sigmoid);
     }
 
-    public static double reverseSigmoid(double n) {
-        if (n == 0) {
-            return -999;
-        }
-        else if (n == 1){
-            return NeuralMath.reverseSigmoid(0.9999999999999999);
-        }
-        return Math.log(n / (1 - n));
-    }
-
     /**
      * Sum the values of the 2 arrays. They both need to have the same size
      * @param a1 the first array. It can be null
@@ -79,37 +69,13 @@ public class NeuralMath {
         return ret_array;
     }
 
-    public static double[][] multMatrix(double n, double[][] a1) {
-        double[][] ret_array = new double[a1.length][a1[0].length];
-        for (int i = 0; i < ret_array.length; i++) {
-            for (int j = 0; j < ret_array[0].length; j++) {
-                ret_array[i][j] += a1[i][j] * n;
+    public static int getMaxPosition(double[] array) {
+        int maxAnswer = 0;
+        for (int j = 1; j < array.length; j++) {
+            if (array[j] > array[maxAnswer]) {
+                maxAnswer = j;
             }
         }
-        return ret_array;
-
-    }
-
-    public static double[][] multMatrix(double[][] a1, double[][] a2) {
-        double[][] ret_array = new double[a1.length][a2[0].length];
-        for (int i = 0; i < ret_array.length; i++) {
-            for (int j = 0; j < ret_array[0].length; j++) {
-                for (int k = 0; k < a1[0].length; k++) {
-                    ret_array[i][j] += a1[i][k] * a2[k][j];
-                }
-            }
-        }
-        return ret_array;
-    }
-
-    public static double[][] transposeArray(double[][] array) {
-        double[][] nArray = new double[array.length][];
-        for (int i = 0; i < array.length; i++) {
-            nArray[i] = new double[array[i].length];
-            for (int j = 0; j < array[i].length; j++) {
-                nArray[i][j] = array[j][i];
-            }
-        }
-        return nArray;
+        return maxAnswer;
     }
 }

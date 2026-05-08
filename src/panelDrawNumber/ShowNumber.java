@@ -23,7 +23,6 @@ public class ShowNumber {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args[0]));
             NeuralNetwork ai = (NeuralNetwork) ois.readObject();
             ois.close();
-            ai.setLearn(false);
 
             DrawingPanel dp = new DrawingPanel(window, WIDTHDP, HEIGTHDP, ai,80,80,0);
 
