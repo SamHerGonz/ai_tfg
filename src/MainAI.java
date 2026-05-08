@@ -1,6 +1,5 @@
 import ai.ConnectionNode;
 import ai.InputNode;
-import ai.NeuralMath;
 import ai.NeuralNetwork;
 import java.io.*;
 import java.util.*;
@@ -14,7 +13,6 @@ public class MainAI {
             throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación\t[Red neuronal a leer]");
         }
         int n;
-        Integer [] temp;
         // Tamaño 784,30,10 60 vueltas tiempo: 582,71 segundos (9,71 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 370,453093 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 con 1ª capa con el mínimo de pesos (784) 60 vueltas tiempo: 195.7935879 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
@@ -80,10 +78,6 @@ public class MainAI {
             readFile(recordsTest, expectedTest, br);
         } catch (IOException e) {
             System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
-        }
-        temp = new Integer[recordsTrain.size()];
-        for (int i = 0; i < temp.length; i++) {
-            temp[i] = i;
         }
 
         // Run neural network

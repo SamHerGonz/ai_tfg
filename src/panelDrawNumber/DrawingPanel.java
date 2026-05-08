@@ -6,6 +6,7 @@ import panelDrawNumber.actionButtons.GlobalAction;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 public class DrawingPanel extends JPanel implements Runnable {
     public JFrame window;
@@ -41,8 +42,12 @@ public class DrawingPanel extends JPanel implements Runnable {
         addMouseMotionListener(mouse);
     }
 
-    public void setAnswer(boolean show) throws Exception {
-        answer = NeuralMath.getMaxPosition(ai.getAnswer(getDrawingBoard(true), 0, 255));
+    public void setAnswer(boolean show) {
+        double[] answer = ai.getAnswer(getDrawingBoard(true), 0, 255);
+        this.answer = NeuralMath.getMaxPosition(answer);
+        if (show) {
+            System.out.println(Arrays.toString(answer).replace(',','\n'));
+        }
     }
 
     public double[] getDrawingBoard(boolean center) {
