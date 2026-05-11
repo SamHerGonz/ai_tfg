@@ -439,19 +439,7 @@ public class NeuralNetwork implements Serializable {
      * @return Todos los cambios que la red neuronal debería de hacer
      * @throws ExceptionInInitializerError Verificar si expectedData es usable
      */
-    private double[][][] backpropagation(double[][] values, double[] expectedData) throws ExceptionInInitializerError {
-        // Excepciones. Verificar si los datos son usables
-        if (expectedData.length != nodes[shapeTotal - 1].length) {
-            throw new ExceptionInInitializerError("Error en los datos de aprendizaje recibidos. No es del tamaño correcto");
-        }
-        if (values.length != shapeTotal) {
-            throw new ExceptionInInitializerError("Error en los valores recibidos, no hay el mismo número de capas en los valores y en los nodos de la red neuronal");
-        }
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].length != nodes[i].length) {
-                throw new ExceptionInInitializerError("Error en los valores recibidos, la capa " + i + " no son del mismo tamaño que el de esa capa de nodos");
-            }
-        }
+    private double[][][] backpropagation(double[][] values, double[] expectedData) {
         // difNodeData es la diferencia que debería de tener el valor de ese nodo para tener un mejor resultado
         // El tamaño de difNodeData tiene el tamaño del array de los nodos excepto de la primera, la de los inputs, ya que no necesitamos computarla
         double[][] difNodeData = new double[shapeTotal - 1][];
