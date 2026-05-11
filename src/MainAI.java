@@ -70,12 +70,12 @@ public class MainAI {
         try (BufferedReader br = new BufferedReader(new FileReader(args[0]))) {
             readFile(recordsTrain, expectedTrain, br);
         } catch (IOException e) {
-            System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
+            throw new RuntimeException("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
         }
         try (BufferedReader br = new BufferedReader(new FileReader(args[1]))) {
             readFile(recordsTest, expectedTest, br);
         } catch (IOException e) {
-            System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
+            throw new RuntimeException("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
         }
 
         // Run neural network

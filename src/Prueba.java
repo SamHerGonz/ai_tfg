@@ -10,8 +10,8 @@ public class Prueba {
     public static void main(String[] args) {
         try{
             // Ejemplo valor inverso
-            /*int[] shape = {2,6,6,2};
-            NeuralNetwork ai1 = new NeuralNetwork(shape, 1);
+            int[] shape = {2,3,3,2};
+            NeuralNetwork ai1 = new NeuralNetwork(shape,2, 1);
             double[] temp = {1,1};
             long time = System.nanoTime();
             // A partir de la iteración 2000 (más o menos) empieza a aprender correctamente, eso cuando el rango de iniciación de los pesos y biases es 1.
@@ -21,7 +21,7 @@ public class Prueba {
                     data[j] = Math.random();
                 }
                 double[] answer = NeuralMath.subtractArrays(temp,data);
-                ai1.run(data,0,1,answer,0.1,false);
+                ai1.run(data,answer,0.1,false);
                 if (i % 1000000 == 0) {
                     System.out.println("Vuelta: " + i);
                 }
@@ -34,7 +34,7 @@ public class Prueba {
                 }
                 System.out.println("Input: " + Arrays.toString(data));
                 double marginError = 0;
-                double[] answer = ai1.getAnswer(data, 0, 1);
+                double[] answer = ai1.getAnswer(data);
                 double[] expectedAnswer = NeuralMath.subtractArrays(temp,data);
                 System.out.println("Output: " + Arrays.toString(answer));
 
@@ -49,7 +49,7 @@ public class Prueba {
 
 
             // Ejemplo XOR de 3 inputs
-            List<double[]> dataAnswer = new ArrayList<>();
+           /* List<double[]> dataAnswer = new ArrayList<>();
             double[][] dataUnparsed = {
                     {0,0,0},{0,0,1},
                     {0,1,0},
