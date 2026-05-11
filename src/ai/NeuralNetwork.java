@@ -5,16 +5,21 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NeuralNetwork implements Serializable {
     private Node[][] nodes;
     private short shapeTotal;
+
+    private ExecutorService threads;
     @Serial
     private static final long serialVersionUID = 3877515453607213504L;
 
-    public NeuralNetwork(int[] shape, double max) throws Exception {
+    public NeuralNetwork(int[] shape, int threadNumber, double max) throws Exception {
         setNodes(createNodes(shape, max));
         connectNodes(max);
+        this.threads = Executors.newFixedThreadPool(threadNumber);
     }
 
     public NeuralNetwork(int nInput, int nOutput, double max) throws Exception {

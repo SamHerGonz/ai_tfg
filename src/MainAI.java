@@ -32,7 +32,7 @@ public class MainAI {
             try {
                 System.out.println("No se ha encontrado ninguna IA con el nombre indicado, creando nueva: ");
                 // ai = createThinNeuralNetwork(shape);
-                ai = new NeuralNetwork(shape,1);
+                ai = new NeuralNetwork(shape,8,1);
                 System.out.println(ai);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -187,7 +187,7 @@ public class MainAI {
     public static NeuralNetwork createThinNeuralNetwork(int[] shape) {
         NeuralNetwork ai;
         try {
-            ai = new NeuralNetwork(shape, 1);
+            ai = new NeuralNetwork(shape,8, 1);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
