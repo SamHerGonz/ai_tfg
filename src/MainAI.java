@@ -5,8 +5,6 @@ import java.io.*;
 import java.util.*;
 
 public class MainAI {
-    public static int minRange = 0;
-    public static int maxRange = 255;
     public static boolean aBoolean = false;
 	public static void main(String[] args) {
         if (!(args.length == 2 || args.length == 3)) {
@@ -102,8 +100,8 @@ public class MainAI {
                     time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
                         System.out.println("Vuelta " + i);
-                        ai.train(recordsTrain, expectedTrain, minRange, maxRange, rate);
-                        int v = ai.verify(minRange,maxRange, recordsTest, expectedTest);
+                        ai.train(recordsTrain, expectedTrain, rate);
+                        int v = ai.verify(recordsTest, expectedTest);
                         System.out.println("Se han completado " + v + " de " + recordsTest.size());
                         lr -= lr * 0.001;
                         rate = lr * (10000 - v) / 1000;
@@ -116,8 +114,8 @@ public class MainAI {
                     time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
                         System.out.println("Vuelta " + i);
-                        ai.train(recordsTrain, expectedTrain, minRange, maxRange, sizeMiniBatch, rate);
-                        int v = ai.verify(minRange,maxRange, recordsTest, expectedTest);
+                        ai.train(recordsTrain, expectedTrain, sizeMiniBatch, rate);
+                        int v = ai.verify(recordsTest, expectedTest);
                         System.out.println("Se han completado " + v + " de " + recordsTest.size());
                         lr -= lr * 0.001;
                         rate = lr * (10000 - v) / 1000;
@@ -125,17 +123,17 @@ public class MainAI {
                     break;
                 default:
                     time = System.nanoTime();
-                    ai.verify(minRange,maxRange, recordsTest, expectedTest);
+                    ai.verify(recordsTest, expectedTest);
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
         System.out.println(ai);
         try {
             aBoolean = true;
-            ai.verify(minRange,maxRange, recordsTest, expectedTest);
+            ai.verify(recordsTest, expectedTest);
             for (int i = 0; i < ai.getNodes()[0].length; i++) {
                 for (int j = 0; j < ai.getNodes()[1].length; j++) {
                     try {
@@ -143,7 +141,7 @@ public class MainAI {
                     } catch (Exception _) {}
                 }
             }
-            ai.verify(minRange,maxRange, recordsTest, expectedTest);
+            ai.verify(recordsTest, expectedTest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -176,7 +174,13 @@ public class MainAI {
             records.add(valuesDouble);
             real.add(resultValue);
         }
-        maxRange = (int) max;
+
+        // Convertir los valores de los Inputs a un rango del 0 al 1. El motivo por el que no se calcula directamente en la red neuronal es que, en IAs más complejas, se va a necesitar varios datos de distintos rangos, con lo que
+        for (double[] record : records) {
+            for (int j = 0; j < record.length; j++) {
+                record[j] /= max;
+            }
+        }
     }
 
     // Una prueba tonta, no te preocupes. Además, no funciona del t0d0 bien, pero me sirve para una pequeña prueba

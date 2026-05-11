@@ -235,13 +235,13 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, int minRange, int maxRange, double learningRate) {
+    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, double learningRate) {
         for (int j = 0; j < trainingDatas.size(); j++) {
-            run(trainingDatas.get(j), minRange, maxRange, expectedDatas.get(j), learningRate, false);
+            run(trainingDatas.get(j), expectedDatas.get(j), learningRate, false);
         }
     }
 
-    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, int minRange, int maxRange, int miniBatchSize, double learningRate) {
+    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, int miniBatchSize, double learningRate) {
         Integer [] temp = new Integer[trainingDatas.size()];
         for (int i = 0; i < temp.length; i++) {
             temp[i] = i;
@@ -264,15 +264,15 @@ public class NeuralNetwork implements Serializable {
                 miniBatchData[k] = trainingDatas.get(index_records.get(j + k));
                 miniBatchExpected[k] = expectedDatas.get(index_records.get(j + k));
             }
-            runMiniBatch(miniBatchData, minRange, maxRange, miniBatchExpected, learningRate, false);
+            runMiniBatch(miniBatchData, miniBatchExpected, learningRate, false);
         }
 
     }
 
-    public int verify(int minRange, int maxRange, List<double[]> recordsTest, List<double[]> expectedTest) {
+    public int verify(List<double[]> recordsTest, List<double[]> expectedTest) {
         int n = 0;
         for (int i = 0; i < recordsTest.size(); i++) {
-            int maxAnswer = NeuralMath.getMaxPosition(getAnswer(recordsTest.get(i), minRange, maxRange));
+            int maxAnswer = NeuralMath.getMaxPosition(getAnswer(recordsTest.get(i)));
             int maxResult = NeuralMath.getMaxPosition(expectedTest.get(i));
             if (maxResult == maxAnswer) {
                 n++;
@@ -287,17 +287,15 @@ public class NeuralNetwork implements Serializable {
     /**
      *
      * @param data Un array con los datos que se van a usar
-     * @param minRange El número mínimo que el input puede tener
-     * @param maxRange El número máximo que el input puede tener
      * @param expectedData Un array con el dato esperado de cada minibatch
      * @param learningRate Un multiplicador para ver cuánto aprende de esta iteración
      * @param showMarginError Si quieres que se vea el resultado obtenido
      * @throws ExceptionInInitializerError Si los datos obtenidos se pueden usar, algunas de esas siendo verificaciones internas
      */
-    public void runMiniBatch(double[][] data, int minRange, int maxRange, double[][] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
+    public void runMiniBatch(double[][] data, double[][] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
         double[][][] changes = null;
         for (int i = 0; i < data.length; i++) {
-            double[][] values = feedforward(data[i], minRange, maxRange);
+            double[][] values = feedforward(data[i]);
 
             if (showMarginError) {
                 // Calcular el margen de error de la alimentación para delante respecto al dato esperado
@@ -327,23 +325,21 @@ public class NeuralNetwork implements Serializable {
         changeWeightsAndBiases(changes, learningRate);
     }
 
-    public double[] getAnswer(double[] data, int minRange, int maxRange) throws ExceptionInInitializerError {
-        return feedforward(data, minRange, maxRange)[shapeTotal - 1];
+    public double[] getAnswer(double[] data) throws ExceptionInInitializerError {
+        return feedforward(data)[shapeTotal - 1];
     }
 
     /**
      *
      * @param data Un array con los datos que se van a usar
-     * @param minRange El número mínimo que el input puede tener
-     * @param maxRange El número máximo que el input puede tener
      * @param expectedData Un array con el dato esperado de cada minibatch
      * @param learningRate Un multiplicador para ver cuánto aprende de esta iteración
      * @param showMarginError Si quieres que se vea el resultado obtenido
      * @throws ExceptionInInitializerError Si los datos obtenidos se pueden usar, algunas de esas siendo verificaciones internas
      */
-    public void run(double[] data, int minRange, int maxRange, double[] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
+    public void run(double[] data, double[] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
         // Ejecutar la red neuronal, y obtener los valores de todos los nodos durante la alimentación hacia delante
-        double[][] values = feedforward(data, minRange, maxRange);
+        double[][] values = feedforward(data);
 
         if (showMarginError) {
             // Calcular el margen de error de la alimentación para delante respecto al dato esperado
@@ -367,12 +363,10 @@ public class NeuralNetwork implements Serializable {
     /**
      *
      * @param data Un array con los datos que se van a usar
-     * @param minRange El número mínimo que el input puede tener
-     * @param maxRange El número máximo que el input puede tener
      * @return Los valores de cada nodo con la función sigmoide aplicada. El tamaño es el mismo que el de los nodos
      * @throws ExceptionInInitializerError if the data received is not valid
      */
-    private double[][] feedforward(double[] data, int minRange, int maxRange) throws ExceptionInInitializerError {
+    private double[][] feedforward(double[] data) throws ExceptionInInitializerError {
         // Creo un array para tener los valores de cada nodo
         double[][] values = new double[shapeTotal][];
         for (int i = 0; i < values.length; i++) {
@@ -382,10 +376,8 @@ public class NeuralNetwork implements Serializable {
             throw new ExceptionInInitializerError("Error en los datos recibidos. No son del mismo tamaño");
         }
 
-        // Cambiar los valores de todos los InputNodes desde el rango de min a max al rango de 0 a 1
-        for (int i = 0; i < values[0].length; i++) {
-            values[0][i] = InputNode.setSigmoid(data[i], minRange, maxRange);
-        }
+        // Pasar valores de todos los datos al primer array de los valores (InputNode)
+        System.arraycopy(data, 0, values[0], 0, values[0].length);
 
         // TODO: Aquí se pasa mucho tiempo haciendo cálculos, optimizar
         // Añadir los valores de la siguiente capa, con la función sigmoide en la primera capa

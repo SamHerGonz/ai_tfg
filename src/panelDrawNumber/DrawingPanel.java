@@ -43,7 +43,7 @@ public class DrawingPanel extends JPanel implements Runnable {
     }
 
     public void setAnswer(boolean show) {
-        double[] answer = ai.getAnswer(getDrawingBoard(true), 0, 255);
+        double[] answer = ai.getAnswer(getDrawingBoard(true));
         this.answer = NeuralMath.getMaxPosition(answer);
         if (show) {
             System.out.println(Arrays.toString(answer).replace(',','\n'));
@@ -63,6 +63,9 @@ public class DrawingPanel extends JPanel implements Runnable {
             for (int j = 0; j < pos[i].length; j++) {
                 ret_value[i * pos.length + j] = pos[j][i];
             }
+        }
+        for (int i = 0; i < ret_value.length; i++) {
+            ret_value[i] /= 255;
         }
 
 
