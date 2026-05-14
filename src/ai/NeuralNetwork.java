@@ -632,15 +632,7 @@ public class NeuralNetwork implements Serializable {
 
         s.append("\n\tCapa ").append(shapeTotal - 1).append(": ").append(nodes[shapeTotal - 1].length).append(" nodos");
 
-        s.append("\nNúmero total pesos (w): ");
-        int n = getWeightsCount();
-        s.append(n).append("\nNúmero total de parámetros (w y biases): ");
-
-        for (int i = 1; i < shapeTotal; i++) {
-            n += nodes[i].length;
-        }
-        s.append(n);
-        return s.toString();
+        return getTotalData(s);
     }
 
     public String printDetailed() {
@@ -648,17 +640,36 @@ public class NeuralNetwork implements Serializable {
 
         s.append("\nNúmero de capas: ").append(shapeTotal);
 
-        for (short i = 0; i < shapeTotal - 1; i++) {
-            s.append("\n\tCapa ").append(i).append(": ").append(nodes[i].length).append(" nodos, con ").append(getWeightsCount(i)).append(" pesos");
-            for (int j = 0; j < nodes[i].length; j++) {
-                s.append("\n\t\t").append(nodes[i][j].toString().replace("\n", "\n\t\t"));
-            }
+        for (short i = 0; i < shapeTotal; i++) {
+            s.append(printDetailed(i));
         }
 
-        s.append("\n\tCapa ").append(shapeTotal - 1).append(": ").append(nodes[shapeTotal - 1].length).append(" nodos");
-        for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
-            s.append("\n\t\t").append(nodes[shapeTotal - 1][j].toString().replace("\n", "\n\t\t"));
+        return getTotalData(s);
+    }
+
+    public String printDetailed(int layer) {
+        StringBuilder s = new StringBuilder();
+        if (layer == shapeTotal - 1) {
+            s.append("\n\tCapa ").append(layer).append(": ").append(nodes[layer].length).append(" nodos, con ").append(getWeightsCount(layer)).append(" pesos");
+            for (int j = 0; j < nodes[layer].length; j++) {
+                s.append(printDetailed(layer, j));
+            }
         }
+        else {
+            s.append("\n\tCapa ").append(shapeTotal - 1).append(": ").append(nodes[shapeTotal - 1].length).append(" nodos");
+            for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
+                s.append(printDetailed(layer, j));
+            }
+        }
+        return s.toString();
+    }
+
+    public String printDetailed(int layer, int nodeIndex) {
+        return "\n\t\t" + nodes[layer][nodeIndex].toString().replace("\n", "\n\t\t");
+    }
+
+
+    private String getTotalData(StringBuilder s) {
         s.append("\nNúmero total pesos (w): ");
         int n = getWeightsCount();
         s.append(n).append("\nNúmero total de parámetros (w y biases): ");

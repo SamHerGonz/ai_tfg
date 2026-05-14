@@ -7,152 +7,248 @@ import java.util.*;
 
 public class MainAI {
 	public static void main(String[] args) {
-        if (!(args.length == 2 || args.length == 3)) {
-            throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación\t[Red neuronal a leer]");
-        }
-        int n;
+        int n, n1, n2,n3;
         // Tamaño 784,30,10 60 vueltas tiempo: 582,71 segundos (9,71 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 370,453093 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 con 1ª capa con el mínimo de pesos (784) 60 vueltas tiempo: 195.7935879 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 811,1674603 segundos (13,52 por vuelta, 70000 iteraciones)
         // DefAi tamaño 784,24,24,10 60 vueltas moviendo el panel tiempo:  segundos ( por vuelta, 70000 iteraciones)
-        int[] shape = {784,30,10};
-		NeuralNetwork ai, ai2;
+        int[] shape = {784,10};
+        NeuralNetwork ai;
+        try {
+            ai = new NeuralNetwork(shape, 1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         List<double[]> recordsTrain = new ArrayList<>();
         List<double[]> recordsTest = new ArrayList<>();
         List<double[]> expectedTrain = new ArrayList<>();
         List<double[]> expectedTest = new ArrayList<>();
         Scanner reader = new Scanner(System.in);
 
-        // Search the 'ai.obj' file (if there isn't a 3rd argument, if not the 3rd), which has a Neural Network. If it doesn't exist, it creates a Neural Network
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args.length == 3 ? args[2] : "src/data/ai.obj"))){
-            ai = (NeuralNetwork)ois.readObject();
-            ai.mutate();
-            //ai2 = reverseNeuralNetwork(shape,ai);
-
-        } catch (Exception e) {
-            try {
-                System.out.println("No se ha encontrado ninguna IA con el nombre indicado, creando nueva: ");
-                // ai = createThinNeuralNetwork(shape);
-                ai = new NeuralNetwork(shape,1);
-                System.out.println(ai);
-                //ai2 = reverseNeuralNetwork(shape,ai);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-            /*ai = createThinNeuralNetwork(shape);
-            ai.addNode(1,1,true);
-            ai.addNode(1,1,false);
-            /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
-                try {
-                    ai.removeWeight(0,0,i);
-                } catch (Exception ex) {
-                    System.out.println("Error " + ex);
-                }
-            }
-            for (int i = 0; i < ai.getNodes()[1].length; i++) {
-                try {
-                    ai.addWeight(0,0,i,1);
-                } catch (Exception ex) {
-                    System.out.println("Error " + ex);
-                }
-            }
-            /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
-                try {
-                    ai.removeWeight(1,i,0);
-                } catch (Exception ex) {
-                    System.out.println("Error " + ex);
-                }
-            }
-            try {
-                ai.removeWeight(1,0,0);
-            } catch (Exception ex) {
-                System.out.println("Error " + ex);
-            }*/
-        }
-
         // Leer datos de la base de datos
         try (BufferedReader br = new BufferedReader(new FileReader(args[0]))) {
+            System.out.println("Leyendo " + args[0]);
             readFile(recordsTrain, expectedTrain, br);
         } catch (IOException e) {
             System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
         }
+        finally {
+            System.out.println(args[0] + " leído correctamente");
+        }
         try (BufferedReader br = new BufferedReader(new FileReader(args[1]))) {
+            System.out.println("Leyendo " + args[1]);
             readFile(recordsTest, expectedTest, br);
         } catch (IOException e) {
             System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
         }
+        finally {
+            System.out.println(args[1] + " leído correctamente");
+        }
 
         // Run neural network
 
-        // I did this 10 times each, in total each way did 100000 numbers. The first method ended doing almost 2000 more numbers correctly than the second one
-        // I thought it was just bad luck, since the second one should be better. But I realised it was because of the learning method, which, if its horribly wrong, the function doesn't change much the values.
-        // Since the first ones are the ones in which it is more wrong, it doesn't change a lot in the first ones, and in the second method, the weights and biases are changed 10 times less than in the first one
-        System.out.println("Inserte el método de aprendizaje:");
-        System.out.println("0: Aprendizaje normal");
-        System.out.println("1: Aprendizaje con mini-batch de tamaño customizado");
-        n = reader.nextInt();
-        System.out.println("Cual quieres que sea la tasa de aprendizaje (recomendado: 0,3 )");
-        double lr = reader.nextDouble();
-        double rate = lr;
-        System.out.println("¿Cuántas iteraciones quieres que haya?");
-        int iMax = reader.nextInt();
-        long time = System.nanoTime();
-        try {
-            // BufferedWriter bw = new BufferedWriter(new FileWriter("data.txt"));
-            int firstVal = 0;
-            switch (n) {
-                case 0:
-                    time = System.nanoTime();
-                    for (int i = 0; i < iMax; i++) {
-                        System.out.println("Vuelta " + i);
-                        ai.train(recordsTrain, expectedTrain, rate);
-                        int v = ai.verify(recordsTest, expectedTest);
-                        System.out.println("Se han completado " + v + " de " + recordsTest.size());
-                        if (firstVal == 0) {
-                            firstVal = recordsTest.size() - v;
-                        }
-                        lr -= lr * 0.001;
-                        rate = lr * (10000 - v) / firstVal;
-                    }
-                    break;
-                case 1:
-                    System.out.println("Indique el tamaño del mini-batch: ");
-                    int sizeMiniBatch = reader.nextInt();
-                    reader.nextLine();
-                    time = System.nanoTime();
-                    for (int i = 0; i < iMax; i++) {
-                        System.out.println("Vuelta " + i);
-                        List<double[]> records = moveAllData(recordsTrain, 1);
-                        ai.train(records, expectedTrain, sizeMiniBatch, rate);
-                        int v = ai.verify(recordsTest, expectedTest);
-                        System.out.println("Se han acertado " + v + " de " + recordsTest.size());
-                        // ai2.train(recordsTrain, expectedTrain, sizeMiniBatch, rate);
-                        // System.out.println("Se han acertado " + ai2.verify(recordsTest, expectedTest) + " de " + recordsTest.size());
-                        if (firstVal == 0) {
-                            firstVal = recordsTest.size() - v;
-                        }
-                        lr -= lr * 0.001;
-                        rate = lr * (10000 - v) / firstVal;
-                    }
-                    break;
-                default:
-                    time = System.nanoTime();
-                    ai.verify(recordsTest, expectedTest);
-                    break;
+        do {
+            boolean b = false;
+            System.out.println("¿Quieres usar una IA ya creada? (s/N)");
+            if (reader.nextLine().equalsIgnoreCase("s")) {
+                System.out.print("Inserte el nombre de la IA: ");
+                try {
+                    ObjectInputStream ois = new ObjectInputStream(new FileInputStream(reader.nextLine()));
+                    ai = (NeuralNetwork) ois.readObject();
+                } catch (Exception e) {
+                    System.out.println("No se ha encontrado, creando una red neuronal");
+                    b = true;
+                }
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
-        System.out.println(ai);
-        try {
-            System.out.println("Indique el nombre de la nueva red neuronal: ");
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"));
-            oos.writeObject(ai);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            else {
+                b = true;
+            }
+            if (b) {
+                System.out.println("Inserte el número de capas ocultas que va a tener la red neuronal: ");
+                n = 0;
+                do {
+                    try {
+                        n = reader.nextInt();
+                    } catch (Exception e) {
+                        System.out.println("Número no válido");
+                    }
+                } while (n < 0);
+                shape = new int[n + 2];
+                shape[0] = 784;
+                shape[shape.length - 1] = 10;
+                for (int i = 1; i < shape.length - 1; i++) {
+                    System.out.println("Inserte el tamaño de la capa " + i);
+                    n = 0;
+                    do {
+                        try {
+                            n = reader.nextInt();
+                        } catch (Exception e) {
+                            System.out.println("Número no válido");
+                        }
+                    } while (n < 0);
+                    shape[i] = n;
+                }
+                System.out.println("Inserte el valor máximo de iniciación de los pesos y biases");
+                try {
+                    n = 0;
+                    do {
+                        try {
+                            n = reader.nextInt();
+                        } catch (Exception e) {
+                            System.out.println("Número no válido");
+                        }
+                    } while (n < 0);
+                    ai = new NeuralNetwork(shape, n);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            System.out.println("Quieres hacer alguna modificación extra a la red neuronal? (s/N)");
+            reader.nextLine();
+            if (reader.nextLine().equalsIgnoreCase("s")) {
+                n = 0;
+                do {
+                    System.out.println("Inserte opción: ");
+                    System.out.println("0: Insertar nodo");
+                    System.out.println("1: Insertar peso");
+                    System.out.println("2: Eliminar peso");
+                    System.out.println("3: Ver las conexiones de la red neuronal a fondo");
+                    System.out.println("4: Salir");
+                    n = reader.nextInt();
+                    switch (n) {
+                        case 0:
+                            System.out.println("¿En qué capa?");
+                            do {
+                                n = reader.nextInt();
+                            } while (n <= 0 || n >= shape.length - 1);
+                            System.out.println("¿Quieres que tenga todas las conexiones o hacemos simplemente una aleatoria? (s/N)");
+                            ai.addNode(n, 1, reader.nextLine().equalsIgnoreCase("s"));
+                            n = 0;
+                            break;
+                        case 1:
+                            System.out.println("¿En qué capa?");
+                            n = reader.nextInt();
+                            System.out.println("¿En qué nodo?");
+                            n1 = reader.nextInt();
+                            System.out.println("¿A qué nodo de la siguiente capa?");
+                            n2 = reader.nextInt();
+                            System.out.println("Cual quieres que sea el valor máximo de la conexión");
+                            n3 = reader.nextInt();
+                            try {
+                                ai.addWeight(n, n1, n2, n3);
+                            } catch (Exception _) {}
+                            break;
+                        case 2:
+                            System.out.println("¿En qué capa?");
+                            n = reader.nextInt();
+                            System.out.println("¿En qué nodo?");
+                            n1 = reader.nextInt();
+                            System.out.println("¿A qué nodo de la siguiente capa?");
+                            n2 = reader.nextInt();
+                            try {
+                                ai.removeWeight(n, n1, n2);
+                            } catch (Exception _) {}
+                            break;
+                        case 3:
+                            System.out.println("IMPORTANTE: SE VAN A IMPRIMIR MUCHOS DATOS");
+                            do {
+                                System.out.println("1: Ver la red neuronal entera (detallado)");
+                                System.out.println("2: Ver la red neuronal entera");
+                                System.out.println("3: Ver una capa de la red neuronal (detallado)");
+                                System.out.println("4: Ver un nodo de la red neuronal (detallado)");
+                                System.out.println("5: Salir");
+                                n = reader.nextInt();
+                                switch (n) {
+                                    case 1:
+                                        System.out.println(ai.printDetailed());
+                                        break;
+                                    case 2:
+                                        System.out.println(ai);
+                                        break;
+                                    case 3:
+                                        System.out.println("¿Qué capa?");
+                                        n = reader.nextInt();
+                                        System.out.println(ai.printDetailed(n));
+                                        n = 3;
+                                        break;
+                                    case 4:
+                                        System.out.println("¿Qué capa?");
+                                        n = reader.nextInt();
+                                        System.out.println("¿Qué nodo?");
+                                        n2 = reader.nextInt();
+                                        System.out.println(ai.printDetailed(n, n2));
+                                        break;
+                                }
+                            } while(n != 5);
+                            break;
+                    }
+                } while(n != 4);
+            }
+            System.out.println("Inserte el método de aprendizaje:");
+            System.out.println("0: Aprendizaje normal");
+            System.out.println("1: Aprendizaje con mini-batch de tamaño customizado");
+            System.out.println("2: Salir del programa");
+            n = reader.nextInt();
+            System.out.println("Cual quieres que sea la tasa de aprendizaje (recomendado: 0,3 )");
+            double lr = reader.nextDouble();
+            double rate = lr;
+            System.out.println("¿Cuántas iteraciones quieres que haya?");
+            int iMax = reader.nextInt();
+            long time = System.nanoTime();
+            try {
+                // BufferedWriter bw = new BufferedWriter(new FileWriter("data.txt"));
+                int firstVal = 0;
+                switch (n) {
+                    case 0:
+                        time = System.nanoTime();
+                        for (int i = 0; i < iMax; i++) {
+                            System.out.println("Vuelta " + i);
+                            ai.train(recordsTrain, expectedTrain, rate);
+                            int v = ai.verify(recordsTest, expectedTest);
+                            System.out.println("Se han completado " + v + " de " + recordsTest.size());
+                            if (firstVal == 0) {
+                                firstVal = recordsTest.size() - v;
+                            }
+                            lr -= lr * 0.001;
+                            rate = lr * (10000 - v) / firstVal;
+                        }
+                        break;
+                    case 1:
+                        System.out.println("Indique el tamaño del mini-batch: ");
+                        int sizeMiniBatch = reader.nextInt();
+                        reader.nextLine();
+                        time = System.nanoTime();
+                        for (int i = 0; i < iMax; i++) {
+                            System.out.println("Vuelta " + i);
+                            List<double[]> records = moveAllData(recordsTrain, 1);
+                            ai.train(records, expectedTrain, sizeMiniBatch, rate);
+                            int v = ai.verify(recordsTest, expectedTest);
+                            System.out.println("Se han acertado " + v + " de " + recordsTest.size());
+                            // ai2.train(recordsTrain, expectedTrain, sizeMiniBatch, rate);
+                            // System.out.println("Se han acertado " + ai2.verify(recordsTest, expectedTest) + " de " + recordsTest.size());
+                            if (firstVal == 0) {
+                                firstVal = recordsTest.size() - v;
+                            }
+                            lr -= lr * 0.001;
+                            rate = lr * (10000 - v) / firstVal;
+                        }
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+            System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
+            System.out.println(ai);
+            try {
+                System.out.println("Indique el nombre de la nueva red neuronal: ");
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"));
+                oos.writeObject(ai);
+                oos.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } while (n != 2);
 	}
 
     private static void readFile(List<double[]> records, List<double[]> real, BufferedReader br) throws IOException {
