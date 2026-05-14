@@ -1,4 +1,4 @@
-package panelDrawNumber.actionButtons;
+package panelDrawNumber.buttons.actions;
 
 import panelDrawNumber.DrawingPanel;
 
@@ -41,7 +41,7 @@ public class SelectNumber implements ActionListener {
             dp.drawingBoard.setPositions(records);
             dp.index++;
             System.out.println(dp.index);
-            dp.setAnswer(false);
+            dp.setAnswer(true);
         } catch (IOException ex) {
             System.out.println("No se ha podido encontrar los casos de prueba. Por favor, verifique que el archivo está ahí y que es el correcto");
         } catch (Exception ex) {

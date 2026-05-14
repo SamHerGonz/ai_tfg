@@ -1,11 +1,11 @@
 import ai.ConnectionNode;
 import ai.InputNode;
+import ai.NeuralMath;
 import ai.NeuralNetwork;
 import java.io.*;
 import java.util.*;
 
 public class MainAI {
-    public static boolean aBoolean = false;
 	public static void main(String[] args) {
         if (!(args.length == 2 || args.length == 3)) {
             throw new RuntimeException("Error de sintaxis: los parámetros deben ser: datos de entrenamiento\tdatos de verificación\t[Red neuronal a leer]");
@@ -17,7 +17,7 @@ public class MainAI {
         // Tamaño 784,16,16,10 60 vueltas tiempo: 811,1674603 segundos (13,52 por vuelta, 70000 iteraciones)
         // DefAi tamaño 784,24,24,10 60 vueltas moviendo el panel tiempo:  segundos ( por vuelta, 70000 iteraciones)
         int[] shape = {784,30,10};
-		NeuralNetwork ai;
+		NeuralNetwork ai, ai2;
         List<double[]> recordsTrain = new ArrayList<>();
         List<double[]> recordsTest = new ArrayList<>();
         List<double[]> expectedTrain = new ArrayList<>();
@@ -28,16 +28,21 @@ public class MainAI {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args.length == 3 ? args[2] : "src/data/ai.obj"))){
             ai = (NeuralNetwork)ois.readObject();
             ai.mutate();
+            //ai2 = reverseNeuralNetwork(shape,ai);
+
         } catch (Exception e) {
             try {
                 System.out.println("No se ha encontrado ninguna IA con el nombre indicado, creando nueva: ");
                 // ai = createThinNeuralNetwork(shape);
                 ai = new NeuralNetwork(shape,1);
                 System.out.println(ai);
+                //ai2 = reverseNeuralNetwork(shape,ai);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-            // ai = createThinNeuralNetwork(shape);
+            /*ai = createThinNeuralNetwork(shape);
+            ai.addNode(1,1,true);
+            ai.addNode(1,1,false);
             /*for (int i = 0; i < ai.getNodes()[1].length; i++) {
                 try {
                     ai.removeWeight(0,0,i);
@@ -95,6 +100,7 @@ public class MainAI {
         long time = System.nanoTime();
         try {
             // BufferedWriter bw = new BufferedWriter(new FileWriter("data.txt"));
+            int firstVal = 0;
             switch (n) {
                 case 0:
                     time = System.nanoTime();
@@ -103,8 +109,11 @@ public class MainAI {
                         ai.train(recordsTrain, expectedTrain, rate);
                         int v = ai.verify(recordsTest, expectedTest);
                         System.out.println("Se han completado " + v + " de " + recordsTest.size());
+                        if (firstVal == 0) {
+                            firstVal = recordsTest.size() - v;
+                        }
                         lr -= lr * 0.001;
-                        rate = lr * (10000 - v) / 1000;
+                        rate = lr * (10000 - v) / firstVal;
                     }
                     break;
                 case 1:
@@ -114,11 +123,17 @@ public class MainAI {
                     time = System.nanoTime();
                     for (int i = 0; i < iMax; i++) {
                         System.out.println("Vuelta " + i);
-                        ai.train(recordsTrain, expectedTrain, sizeMiniBatch, rate);
+                        List<double[]> records = moveAllData(recordsTrain, 1);
+                        ai.train(records, expectedTrain, sizeMiniBatch, rate);
                         int v = ai.verify(recordsTest, expectedTest);
-                        System.out.println("Se han completado " + v + " de " + recordsTest.size());
+                        System.out.println("Se han acertado " + v + " de " + recordsTest.size());
+                        // ai2.train(recordsTrain, expectedTrain, sizeMiniBatch, rate);
+                        // System.out.println("Se han acertado " + ai2.verify(recordsTest, expectedTest) + " de " + recordsTest.size());
+                        if (firstVal == 0) {
+                            firstVal = recordsTest.size() - v;
+                        }
                         lr -= lr * 0.001;
-                        rate = lr * (10000 - v) / 1000;
+                        rate = lr * (10000 - v) / firstVal;
                     }
                     break;
                 default:
@@ -131,21 +146,6 @@ public class MainAI {
         }
         System.out.println("Took " + ((System.nanoTime() - time) / 1000000000.0) + " seconds");
         System.out.println(ai);
-        try {
-            aBoolean = true;
-            ai.verify(recordsTest, expectedTest);
-            for (int i = 0; i < ai.getNodes()[0].length; i++) {
-                for (int j = 0; j < ai.getNodes()[1].length; j++) {
-                    try {
-                        ai.addWeight(0, i, j, 0);
-                    } catch (Exception _) {}
-                }
-            }
-            ai.verify(recordsTest, expectedTest);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
         try {
             System.out.println("Indique el nombre de la nueva red neuronal: ");
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(reader.nextLine() + ".obj"));
@@ -183,6 +183,14 @@ public class MainAI {
         }
     }
 
+    public static List<double[]> moveAllData(List<double[]> list, int pixels) {
+        List<double[]> ret_value = new ArrayList<>();
+        for (double[] val : list) {
+            ret_value.add(NeuralMath.moveMatrix(val, 28, 28, (int) (Math.random() * (pixels * 2 + 1)) - pixels, (int) (Math.random() * (pixels * 2 + 1)) - pixels));
+        }
+        return ret_value;
+    }
+
     // Una prueba tonta, no te preocupes. Además, no funciona del t0d0 bien, pero me sirve para una pequeña prueba
     public static NeuralNetwork createThinNeuralNetwork(int[] shape) {
         NeuralNetwork ai;
@@ -212,5 +220,27 @@ public class MainAI {
             }
         }
         return ai;
+    }
+
+    private static NeuralNetwork reverseNeuralNetwork(int[] shape, NeuralNetwork ai) throws Exception {
+        NeuralNetwork ai2;
+        ai2 = new NeuralNetwork(shape, 1);
+        for (int i = 0; i < ai2.getNodes().length - 1; i++) {
+            for (int j = 0; j < ai2.getNodes()[i].length; j++) {
+                if (ai2.getNodes()[i][j] instanceof InputNode) {
+                    for (int k = 0; k < ((InputNode)ai2.getNodes()[i][j]).getWeightsFrontLayer().size(); k++) {
+                        ((InputNode)ai2.getNodes()[i][j]).getWeightsFrontLayer().set(k,
+                                -1 * ((InputNode)ai.getNodes()[i][j]).getWeightsFrontLayer().get(k));
+                    }
+                }
+                else {
+                    for (int k = 0; k < ((ConnectionNode)ai2.getNodes()[i][j]).getWeightsFrontLayer().size(); k++) {
+                        ((ConnectionNode)ai2.getNodes()[i][j]).getWeightsFrontLayer().set(k,
+                                -1 * ((ConnectionNode)ai.getNodes()[i][j]).getWeightsFrontLayer().get(k));
+                    }
+                }
+            }
+        }
+        return ai2;
     }
 }

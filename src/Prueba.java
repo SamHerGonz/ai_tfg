@@ -7,10 +7,20 @@ import java.io.*;
 import java.util.*;
 
 public class Prueba {
+    public static void verifyDuplicate(String[] s1, String[] s2) {
+        for (String s : s1) {
+            for (String string : s2) {
+                if (s.equals(string)) {
+                    System.out.println("Duplicado");
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) {
         try{
             // Ejemplo valor inverso
-            /*int[] shape = {2,6,6,2};
+            int[] shape = {2,2,2};
             NeuralNetwork ai1 = new NeuralNetwork(shape, 1);
             double[] temp = {1,1};
             long time = System.nanoTime();
@@ -21,8 +31,8 @@ public class Prueba {
                     data[j] = Math.random();
                 }
                 double[] answer = NeuralMath.subtractArrays(temp,data);
-                ai1.run(data,0,1,answer,0.1,false);
-                if (i % 1000000 == 0) {
+                ai1.run(data,answer,10,false);
+                if (i % 20000 == 0) {
                     System.out.println("Vuelta: " + i);
                 }
             }
@@ -34,7 +44,7 @@ public class Prueba {
                 }
                 System.out.println("Input: " + Arrays.toString(data));
                 double marginError = 0;
-                double[] answer = ai1.getAnswer(data, 0, 1);
+                double[] answer = ai1.getAnswer(data);
                 double[] expectedAnswer = NeuralMath.subtractArrays(temp,data);
                 System.out.println("Output: " + Arrays.toString(answer));
 
@@ -46,8 +56,8 @@ public class Prueba {
 
             }
             System.out.println("Tiempo: " + ((System.nanoTime() - time) / 1000000000.0) + "\n\n\n");
-
-
+            System.out.println(ai1);
+            System.out.println(ai1.printDetailed());
             // Ejemplo XOR de 3 inputs
             List<double[]> dataAnswer = new ArrayList<>();
             double[][] dataUnparsed = {
@@ -69,14 +79,15 @@ public class Prueba {
             data2.add(new double[]{0,1,1});
 
             for (int i = 0; i < 100000; i++) {
-                ai2.train(data2,dataAnswer,0,1,0.2);
+                ai2.train(data2,dataAnswer,0.2);
             }
 
             for (int i = 0; i < data2.size(); i++) {
                 System.out.println("Input: " + Arrays.toString(data2.get(i)));
-                System.out.println("Output: " + Arrays.toString(ai2.getAnswer(data2.get(i), 0, 1)) + "\tEsperado: " + Arrays.toString(dataAnswer.get(i)));
+                System.out.println("Output: " + Arrays.toString(ai2.getAnswer(data2.get(i))) + "\tEsperado: " + Arrays.toString(dataAnswer.get(i)));
             }
             System.out.println(ai2);
+            System.out.println(ai2.printDetailed());
 
             dataUnparsed = new double[16][4];
             int mult = 1;
@@ -107,81 +118,90 @@ public class Prueba {
             NeuralNetwork ai3 = new NeuralNetwork(shape,1);
 
             for (int i = 0; i < 100000; i++) {
-                ai3.train(data3,dataAnswer,0,1,0.2);
+                ai3.train(data3,dataAnswer,0.2);
             }
 
             for (int i = 0; i < data3.size(); i++) {
                 System.out.println("Input: " + Arrays.toString(data3.get(i)));
-                System.out.println("Output: " + Arrays.toString(ai3.getAnswer(data3.get(i), 0, 1)) + "\tEsperado: " + Arrays.toString(dataAnswer.get(i)));
-            }*/
-            BufferedReader br1 = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_test.csv"));
-            br1.readLine();
-            String s;
-            String s2;
-            int i = 0;
-            while ((s = br1.readLine()) != null) {
-                i++;
-                /*BufferedReader br2 = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_train.csv"));
-                br2.readLine();
-                BufferedReader br3 = new BufferedReader(new FileReader("src/data/test_data.txt"));
-                br3.readLine();*/
-                BufferedReader br4 = new BufferedReader(new FileReader("src/data/test_data.txt"));
-                br4.readLine();
-                /*while ((s2 = br2.readLine()) != null) {
-                    if (s.equals(s2)) {
-                        System.out.println(s);
-                    }
-                }
-                while ((s2 = br3.readLine()) != null) {
-                    if (s.equals(s2)) {
-                        System.out.println(s);
-                    }
-                }*/
-                while ((s2 = br4.readLine()) != null) {
-                    if (s.equals(s2)) {
-                        System.out.println(s);
-                    }
-                }
-
-                if (i % 100 == 0) System.out.println("Vuelta " + i);
+                System.out.println("Output: " + Arrays.toString(ai3.getAnswer(data3.get(i))) + "\tEsperado: " + Arrays.toString(dataAnswer.get(i)));
             }
-            System.out.println("BR1 implementado");
+            // Ejemplo de prueba en el que se puede ver que comprende qué es cada input, porque descubre que el número deseado es el primer input
+            /*shape = new int[]{10,5,1};
+            NeuralNetwork ai = new NeuralNetwork(shape, 1);
+
+            for (int i = 0; i < 10000; i++) {
+                double[] data = new double[10];
+                double[] answer = new double[1];
+                for (int j = 0; j < data.length; j++) {
+                    data[j] = Math.random();
+                }
+                answer[0] = data[0];
+                ai.run(data,answer,0.3,false);
+            }
+            for (int i = 0; i < 100; i++) {
+                double[] data = new double[10];
+                for (int j = 0; j < data.length; j++) {
+                    data[j] = Math.random();
+                }
+                System.out.println(Arrays.toString(data));
+                System.out.println(Arrays.toString(ai.getAnswer(data)));
+            }*/
+            /*BufferedReader br1 = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_test.csv"));
+            br1.readLine();
+            String[] lineas1 = new String[10000];
+            for (int i = 0; i <lineas1.length ; i++) {
+                lineas1[i] = br1.readLine();
+                if (lineas1[i] == null) {
+                    break;
+                }
+            }
+            br1.close();
+
             br1 = new BufferedReader(new FileReader("out/artifacts/AI_jar/mnist_train.csv"));
             br1.readLine();
-            while ((s = br1.readLine()) != null) {
-                i++;
-                BufferedReader br3 = new BufferedReader(new FileReader("src/data/test_data.txt"));
-                br3.readLine();
-                BufferedReader br4 = new BufferedReader(new FileReader("src/data/training_data.txt"));
-                br4.readLine();
-                while ((s2 = br3.readLine()) != null) {
-                    if (s.equals(s2)) {
-                        System.out.println(s);
-                    }
+            String[] lineas2 = new String[60000];
+            for (int i = 0; i <lineas2.length ; i++) {
+                lineas2[i] = br1.readLine();
+                if (lineas2[i] == null) {
+                    break;
                 }
-                while ((s2 = br4.readLine()) != null) {
-                    if (s.equals(s2)) {
-                        System.out.println(s);
-                    }
-                }
-                if (i % 1000 == 0) System.out.println("Vuelta " + i);
             }
-            System.out.println("BR2 implementado");
-            br1 = new BufferedReader(new FileReader("src/data/test_data.txt"));
-            br1.readLine();
-            while ((s = br1.readLine()) != null) {
-                i++;
-                BufferedReader br4 = new BufferedReader(new FileReader("src/data/training_data.txt"));
-                br4.readLine();
-                while ((s2 = br4.readLine()) != null) {
-                    if (s.equals(s2)) {
-                        System.out.println(s);
-                    }
-                }
-                if (i % 1000 == 0) System.out.println("Vuelta " + i);
-            }
-            System.out.println("BR3 implementado");
+            br1.close();
 
+            br1 = new BufferedReader(new FileReader("out/artifacts/AI_jar/test_data.txt"));
+            br1.readLine();
+            String[] lineas3 = new String[10000];
+            for (int i = 0; i <lineas3.length ; i++) {
+                lineas3[i] = br1.readLine();
+                if (lineas3[i] == null) {
+                    break;
+                }
+            }
+            br1.close();
+
+            br1 = new BufferedReader(new FileReader("out/artifacts/AI_jar/training_data.txt"));
+            br1.readLine();
+            String[] lineas4 = new String[10000];
+            for (int i = 0; i <lineas4.length ; i++) {
+                lineas4[i] = br1.readLine();
+                if (lineas4[i] == null) {
+                    break;
+                }
+            }
+            br1.close();
+
+            verifyDuplicate(lineas1, lineas2);
+            System.out.println("No hay duplicidad entre 1 y 2");
+            verifyDuplicate(lineas1, lineas3);
+            System.out.println("No hay duplicidad entre 1 y 3");
+            verifyDuplicate(lineas1, lineas4);
+            System.out.println("No hay duplicidad entre 1 y 4");
+            verifyDuplicate(lineas2, lineas3);
+            System.out.println("No hay duplicidad entre 2 y 3");
+            verifyDuplicate(lineas2, lineas4);
+            System.out.println("No hay duplicidad entre 2 y 4");
+            verifyDuplicate(lineas3, lineas4);
+            System.out.println("No hay duplicidad entre 3 y 4");
             /*List<double[]> recordsTest = new ArrayList<>();
             List<Integer> expectedTest = new ArrayList<>();
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("src/data/aiMBSize10.obj"));

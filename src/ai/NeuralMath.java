@@ -78,4 +78,70 @@ public class NeuralMath {
         }
         return maxAnswer;
     }
+
+    public static double[] moveMatrix(double[] record, int width, int height, int x, int y) {
+        double[] ret_value = new double[record.length];
+        System.arraycopy(record, 0, ret_value, 0, ret_value.length);
+        for (int i = 0; i < x; i++) {
+            if (canMoveMatrix(record,4, height)) {
+                if (ret_value.length - 1 >= 0) System.arraycopy(ret_value, 0, ret_value, 1, ret_value.length - 1);
+            }
+        }
+        for (int i = 0; i > x; i--) {
+            if (canMoveMatrix(record,2, height)) {
+                if (ret_value.length - 1 >= 0) System.arraycopy(ret_value, 1, ret_value, 0, ret_value.length - 1);
+            }
+        }
+        for (int i = 0; i < y; i++) {
+            if (canMoveMatrix(record,3, width)) {
+                if (ret_value.length - 1 - width >= 0) System.arraycopy(ret_value, 1, ret_value, width + 1, ret_value.length - 1 - width);
+            }
+        }
+        for (int i = 0; i > y; i--) {
+            if (canMoveMatrix(record,1, width)) {
+                if (ret_value.length - width >= 0) System.arraycopy(ret_value, width, ret_value, 0, ret_value.length - width);
+            }
+        }
+        return ret_value;
+    }
+
+    private static boolean canMoveMatrix(double[] record, int direction, int size) {
+        boolean b = true;
+        switch (direction) {
+            case 1:
+                for (int i = 0; i < size; i++) {
+                    if (record[i] != 0) {
+                        b = false;
+                        break;
+                    }
+                }
+                break;
+            case 2:
+                for (int i = 0; i < size; i++) {
+                    if (record[i * size] != 0) {
+                        b = false;
+                        break;
+                    }
+                }
+                break;
+            case 3:
+                for (int i = 0; i < size; i++) {
+                    if (record[(size - 1) * size + i] != 0) {
+                        b = false;
+                        break;
+                    }
+                }
+                break;
+            case 4:
+                for (int i = 0; i < size; i++) {
+                    if (record[i * size + (size - 1)] != 0) {
+                        b = false;
+                        break;
+                    }
+                }
+                break;
+        }
+        return b;
+    }
+
 }

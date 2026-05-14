@@ -25,4 +25,9 @@ public class OutputNode extends Node implements Serializable {
         this.bias = getBias() + bias;
     }
 
+    @Override
+    public String toString() {
+        return ("Output node:\n\t Bias: " + getBias());
+    }
+
 }

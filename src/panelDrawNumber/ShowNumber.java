@@ -1,7 +1,8 @@
 package panelDrawNumber;
 
 import ai.NeuralNetwork;
-import panelDrawNumber.actionButtons.*;
+import panelDrawNumber.buttons.PanelButton;
+import panelDrawNumber.buttons.actions.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,7 @@ public class ShowNumber {
     public static final int WIDTHDP = 28;
     public static final int HEIGTHDP = 28;
 
-    public static final int POSBUTTON = 900;
+    public static final int POSBUTTON = 720;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -23,20 +24,18 @@ public class ShowNumber {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args[0]));
             NeuralNetwork ai = (NeuralNetwork) ois.readObject();
             ois.close();
+            System.out.println(ai);
 
-            DrawingPanel dp = new DrawingPanel(window, WIDTHDP, HEIGTHDP, ai,80,80,0);
+            DrawingPanel dp = new DrawingPanel(window, WIDTHDP, HEIGTHDP, ai,100,100,0);
 
-            JButton moveUp = new JButton("^");
-            JButton moveDown = new JButton("v");
-            JButton moveLeft = new JButton("<");
-            JButton moveRight = new JButton(">");
+            PanelButton moveUp = new PanelButton("^");
+            PanelButton moveDown = new PanelButton("v");
+            PanelButton moveLeft = new PanelButton("<");
+            PanelButton moveRight = new PanelButton(">");
 
-            JButton clearButton = new JButton("Clear");
-            JButton sendButton = new JButton("Send to ai");
-            JButton selectNumber = new JButton("Select next number from training data");
-
-            JButton ok = new JButton("OK");
-            JButton notOk = new JButton("NO");
+            PanelButton clearButton = new PanelButton("Clear");
+            PanelButton sendButton = new PanelButton("Send to ai");
+            PanelButton selectNumber = new PanelButton("Select next number from training data");
 
             moveUp.addActionListener(new MovePanel(dp, "up"));
             moveDown.addActionListener(new MovePanel(dp, "down"));
@@ -47,22 +46,16 @@ public class ShowNumber {
             sendButton.addActionListener(new SendAction(dp));
             selectNumber.addActionListener(new SelectNumber(dp));
 
-            ok.addActionListener(new WriteVerificationAction(dp, "V"));
-            notOk.addActionListener(new WriteVerificationAction(dp, "X"));
+            moveUp.setBounds(DrawingPanel.TILESIZE * WIDTHDP / 2 + 50, 10, 80, 80);
+            moveDown.setBounds(DrawingPanel.TILESIZE * HEIGTHDP / 2 + 50, DrawingPanel.TILESIZE * WIDTHDP + 110, 80, 80);
+            moveLeft.setBounds(10, DrawingPanel.TILESIZE * WIDTHDP / 2 + 50, 80, 80);
+            moveRight.setBounds(DrawingPanel.TILESIZE * WIDTHDP + 110, DrawingPanel.TILESIZE * HEIGTHDP / 2 + 50, 80, 80);
 
-            moveUp.setBounds(442, 0, 80, 80);
-            moveDown.setBounds(442, 864, 80, 80);
-            moveLeft.setBounds(0, 442, 80, 80);
-            moveRight.setBounds(864, 442, 80, 80);
+            clearButton.setBounds(POSBUTTON, 310, 400, 180);
+            sendButton.setBounds(POSBUTTON, 40, 400, 250);
+            selectNumber.setBounds(POSBUTTON, 510, 300, 80);
 
-            clearButton.setBounds(POSBUTTON, 510, 200, 80);
-            sendButton.setBounds(POSBUTTON, 240, 200, 250);
-            selectNumber.setBounds(POSBUTTON, 610, 200, 80);
-
-            ok.setBounds(1150, 610, 80, 80);
-            notOk.setBounds(1150, 700, 80, 80);
-
-            window.setSize(dp.TILESIZE * WIDTHDP + 600, dp.TILESIZE * WIDTHDP + 200);
+            window.setSize(DrawingPanel.TILESIZE * WIDTHDP + 700, DrawingPanel.TILESIZE * WIDTHDP + 250);
             window.setResizable(false);
             window.setVisible(true);
             window.setTitle("Inteligencia artificial");
@@ -81,9 +74,6 @@ public class ShowNumber {
             dp.addButton(sendButton);
             // R
             dp.addButton(selectNumber);
-
-            dp.addButton(ok);
-            dp.addButton(notOk);
 
             dp.startThread();
             dp.requestFocusInWindow();

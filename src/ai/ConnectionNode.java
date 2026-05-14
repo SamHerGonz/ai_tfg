@@ -19,6 +19,14 @@ public class ConnectionNode extends Node implements Serializable {
         setBias(Math.random() * (max * 2) - max);
     }
 
+    public ConnectionNode(OutputNode outputNode) {
+        // Inicializar los arrayLists de las conexiones de la siguiente capa
+        setIdNodeFrontLayer(new ArrayList<>());
+        setWeightsFrontLayer(new ArrayList<>());
+        // Inicializar el bias con el valor del output
+        setBias(outputNode.getBias());
+    }
+
     public ArrayList<Integer> getIdNodeFrontLayer() {
         return idNodeFrontLayer;
     }
@@ -91,4 +99,15 @@ public class ConnectionNode extends Node implements Serializable {
         }
         return ret_values;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder("Connection node:\n\t");
+        s.append("Pesos:");
+        for (int i = 0; i < getIdNodeFrontLayer().size(); i++) {
+            s.append("\n\tPeso con dirección al nodo ").append(getIdNodeFrontLayer().get(i)).append(": ").append(getWeightsFrontLayer().get(i));
+        }
+        return s.append("\n\tBias: ").append(getBias()).toString();
+    }
+
 }

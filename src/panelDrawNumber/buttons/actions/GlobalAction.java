@@ -1,4 +1,4 @@
-package panelDrawNumber.actionButtons;
+package panelDrawNumber.buttons.actions;
 
 import panelDrawNumber.DrawingPanel;
 

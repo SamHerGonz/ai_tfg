@@ -2,7 +2,7 @@ package panelDrawNumber;
 
 import ai.NeuralMath;
 import ai.NeuralNetwork;
-import panelDrawNumber.actionButtons.GlobalAction;
+import panelDrawNumber.buttons.actions.GlobalAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +14,7 @@ public class DrawingPanel extends JPanel implements Runnable {
     public ButtonGroup buttonGroup;
     public GlobalAction globalAction;
 
-    public final int TILESIZE = 28;
+    public static final int TILESIZE = 18;
 
     Thread thread;
 
@@ -24,7 +24,7 @@ public class DrawingPanel extends JPanel implements Runnable {
     public NeuralNetwork ai;
 
     public int expectedAnswer = 0;
-    public int answer = 0;
+    public String answer = "";
     public int index;
 
     public DrawingPanel(JFrame window, int width, int height, NeuralNetwork ai, int posPanelX, int posPanelY, int index) {
@@ -37,14 +37,13 @@ public class DrawingPanel extends JPanel implements Runnable {
         this.buttonGroup = new ButtonGroup();
         this.ai = ai;
         this.index = index;
-
         addMouseListener(mouse);
         addMouseMotionListener(mouse);
     }
 
     public void setAnswer(boolean show) {
-        double[] answer = ai.getAnswer(getDrawingBoard(true));
-        this.answer = NeuralMath.getMaxPosition(answer);
+        double[] answer = ai.getAnswer(getDrawingBoard(false));
+        this.answer = String.valueOf(NeuralMath.getMaxPosition(answer));
         if (show) {
             System.out.println(Arrays.toString(answer).replace(',','\n'));
         }
@@ -86,20 +85,21 @@ public class DrawingPanel extends JPanel implements Runnable {
 
     @Override
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
 
+        super.paintComponent(g);
+
+        // Dibujar el panel
         drawingBoard.draw(g2);
 
-        // Draw answer expected from the csv
-        g2.setFont(new Font("Arial",Font.BOLD,80));
-        g2.setColor(new Color(0,0,0));
-        g2.drawString("CSV: " + expectedAnswer, 900, 570);
+        // Dibujar la respuesta dada por la IA
+        g2.setFont(new Font("Arial",Font.BOLD,150));
+        g2.drawString(answer, 1050, 700);
 
-        // Draw answer gave
-        g2.setFont(new Font("Arial",Font.BOLD,200));
-        g2.drawString(String.valueOf(answer), 950, 870);
+        // Dibujar la respuesta esperada por los datos
+        g2.setFont(new Font("Arial",Font.BOLD,80));
+        g2.drawString(String.valueOf(expectedAnswer), 1300, 800);
     }
 
     public void addButton(AbstractButton button) {

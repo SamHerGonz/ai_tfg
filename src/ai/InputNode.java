@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class InputNode extends Node implements Serializable{
+public class InputNode extends Node implements Serializable {
     private ArrayList<Integer> idNodeFrontLayer;
     private ArrayList<Double> weightsFrontLayer;
     @Serial
@@ -61,5 +61,15 @@ public class InputNode extends Node implements Serializable{
             ret_values[index] = difDatas[index] * value;
         }
         return ret_values;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder("Input node:\n\t");
+        s.append("Pesos:");
+        for (int i = 0; i < getIdNodeFrontLayer().size(); i++) {
+            s.append("\n\tPeso con dirección al nodo ").append(getIdNodeFrontLayer().get(i)).append(": ").append(getWeightsFrontLayer().get(i));
+        }
+        return s.toString();
     }
 }
