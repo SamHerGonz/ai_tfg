@@ -66,13 +66,11 @@ public class ConnectionNode extends Node implements Serializable {
     }
 
     // Valor añadido a la siguiente capa de la red neuronal desde esta neurona en la alimentación hacia delante
-    public double[] transferAllData(double value, int sizeNextLayer) {
-        double[] ret_values = new double[sizeNextLayer];
+    public void transferAllData(double[] values, double value) {
         for (int i = 0; i < weightsFrontLayer.size(); i++) {
             int id = idNodeFrontLayer.get(i);
-            ret_values[id] = value * weightsFrontLayer.get(i);
+            values[id] += value * weightsFrontLayer.get(i);
         }
-        return ret_values;
     }
 
     /**

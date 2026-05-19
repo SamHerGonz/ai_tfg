@@ -21,23 +21,6 @@ public class NeuralMath {
     }
 
     /**
-     * Sum the values of the 2 arrays. They both need to have the same size
-     * @param a1 the first array. It can be null
-     * @param a2 the second array
-     * @return An array with the sum of both arrays
-     */
-    public static double[] addArrays(double[] a1, double[] a2) {
-        if (a1 == null) {
-            a1 = new double[a2.length];
-        }
-        double[] ret_array = a1.clone();
-        for (int i = 0; i < a1.length; i++) {
-            ret_array[i] = a1[i] + a2[i];
-        }
-        return ret_array;
-    }
-
-    /**
      * Sum the values of the 2 arrays. They both need to have the same size, in all of its dimensions
      * @param a1 the first array. It can be null
      * @param a2 the second array

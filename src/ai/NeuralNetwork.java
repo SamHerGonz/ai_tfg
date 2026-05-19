@@ -455,9 +455,7 @@ public class NeuralNetwork implements Serializable {
 
         // Añadir los valores de la siguiente capa, con la función sigmoide en la primera capa
         for (int j = 0; j < nodes[0].length; j++) {
-            values[1] = NeuralMath.addArrays(
-                    values[1], ((InputNode)nodes[0][j]).transferAllData(
-                            values[0][j], nodes[1].length));
+            ((InputNode)nodes[0][j]).transferAllData(values[1], values[0][j]);
         }
 
         // Añadir el bias de cada nodo en la segunda capa, y editar el valor con la función sigmoide
@@ -472,9 +470,7 @@ public class NeuralNetwork implements Serializable {
         for (short i = 1; i < shapeTotal - 1; i++) {
             // Añadir los valores de la siguiente capa
             for (int j = 0; j < nodes[i].length; j++) {
-                values[i + 1] = NeuralMath.addArrays(
-                        values[i + 1], ((ConnectionNode)nodes[i][j]).transferAllData(
-                                values[i][j], nodes[i + 1].length));
+                ((ConnectionNode)nodes[i][j]).transferAllData(values[i + 1], values[i][j]);
             }
 
             // Añadir el bias de cada nodo, y editar el valor con la función sigmoide

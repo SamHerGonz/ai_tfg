@@ -100,7 +100,7 @@ public class MainAI {
                             System.out.println("Número no válido");
                         }
                     } while (n < 0);
-                    ai = new NeuralNetwork(784,10,2, 1);
+                    ai = new NeuralNetwork(shape,n);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
