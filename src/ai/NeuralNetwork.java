@@ -21,14 +21,14 @@ public class NeuralNetwork implements Serializable {
         connectNodes(max);
     }
 
-    public NeuralNetwork(int nInput, int nOutput, double max) throws Exception {
-        int[] shape = new int[((int)(Math.sqrt(nInput)) - nOutput) / 2 + 1];
+    public NeuralNetwork(int nInput, int nOutput, int minimization, double max) throws Exception {
+        int[] shape = new int[((int)(Math.sqrt(nInput)) - nOutput) / (minimization * 2) + 1];
         for (int i = 0; i < shape.length; i++) {
-            shape[i] = (int) Math.pow((int)(Math.sqrt(nInput)) - i * 2, 2);
+            shape[i] = (int) Math.pow((int)(Math.sqrt(nInput)) - i * minimization * 2, 2);
         }
         shape[shape.length - 1] = nOutput;
         setNodes(createNodes(shape, max));
-        connectNodesDeepMode(max);
+        connectNodesDeepMode(minimization, max);
     }
 
 
@@ -171,20 +171,29 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    private void connectNodesDeepMode(double max) {
+    private void connectNodesDeepMode(int minimization, double max) {
         // Iterar sobre todas las capas excepto la última
-        for (int i = 0; i < nodes.length - 2; i++) {
+        for (int i = 1; i < nodes.length - 1; i++) {
+            int sqrtLength = (int) Math.sqrt(nodes[i].length);
             // Iterar sobre cada nodo de cada capa
-            for (int j = 0; j < nodes[i].length; j++) {
-                for (int k = -1; k <= 1; k++) {
-                    for (int l = -1; l <= 1; l++) {
-                        if (j + k >= 0 && j + l >= 0 && j + k + (l * (int)Math.sqrt(nodes[i + 1].length)) >= 0 && j + k + (l * (int)Math.sqrt(nodes[i + 1].length)) < nodes[i + 1].length) {
-                            if (nodes[i][j] instanceof InputNode) {
-                                ((InputNode)nodes[i][j]).addNodeFront(j + k + (l * 28), max);
-                            }
-                            else if (nodes[i][j] instanceof ConnectionNode) {
-                                ((ConnectionNode)nodes[i][j]).addNodeFront(j + k + (l * 28), max);
-                            }
+            if (nodes[i - 1][0] instanceof InputNode) {
+                for (int j = 0; j < nodes[i].length; j++) {
+                    int posX = (j % sqrtLength) + minimization;
+                    int posY = (j / sqrtLength) + minimization;
+                    for (int k = -minimization; k <= minimization; k++) {
+                        for (int l = -minimization; l <= minimization; l++) {
+                            ((InputNode)nodes[i - 1][((posY + k) * sqrtLength) + (posX + l)]).addNodeFront(j,max);
+                        }
+                    }
+                }
+            }
+            else {
+                for (int j = 0; j < nodes[i].length; j++) {
+                    int posX = (j % sqrtLength) + minimization;
+                    int posY = (j / sqrtLength) + minimization;
+                    for (int k = -minimization; k <= minimization; k++) {
+                        for (int l = -minimization; l <= minimization; l++) {
+                            ((ConnectionNode)nodes[i - 1][((posY + k) * sqrtLength) + (posX + l)]).addNodeFront(j,max);
                         }
                     }
                 }
@@ -200,9 +209,7 @@ public class NeuralNetwork implements Serializable {
     }
 
     public void addWeight(int layer, int firstLayerIndex, int lastLayerIndex, double max) throws Exception {
-        /* if (lastLayerIndex <= nodes[layer + 1].length) {
-            throw new Exception("No existe el nodo número " + lastLayerIndex + " de la capa " + (layer + 1));
-        }*/
+        weightErrorVerification(layer, firstLayerIndex, lastLayerIndex);
         if (nodes[layer][firstLayerIndex] instanceof InputNode) {
             if (((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
                 throw new Exception("Esta conexión ya existe");
@@ -225,6 +232,7 @@ public class NeuralNetwork implements Serializable {
      * @throws Exception Si el peso no existe, no está conectado a nada más o el nodo al que está conectado no tiene ninguna conexión más
      */
     public void removeWeight(int layer, int firstLayerIndex, int lastLayerIndex) throws Exception {
+        weightErrorVerification(layer, firstLayerIndex, lastLayerIndex);
         boolean b = false;
         if (nodes[layer][firstLayerIndex] instanceof InputNode) {
             // Solo si el nodo tiene más de 2 conexiones por delante
@@ -292,13 +300,25 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, double learningRate) {
+    private void weightErrorVerification(int layer, int firstLayerIndex, int lastLayerIndex) throws Exception {
+        if (layer <= shapeTotal) {
+            throw new Exception("No existe la capa número " + layer);
+        }
+        if (firstLayerIndex <= nodes[layer].length) {
+            throw new Exception("No existe el nodo número " + firstLayerIndex + " de la capa " + layer);
+        }
+        if (lastLayerIndex <= nodes[layer + 1].length) {
+            throw new Exception("No existe el nodo número " + lastLayerIndex + " de la capa " + (layer + 1));
+        }
+    }
+
+    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, double learningRate) throws ExceptionInInitializerError {
         for (int j = 0; j < trainingDatas.size(); j++) {
             run(trainingDatas.get(j), expectedDatas.get(j), learningRate, false);
         }
     }
 
-    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, int miniBatchSize, double learningRate) {
+    public void train(List<double[]> trainingDatas, List<double[]> expectedDatas, int miniBatchSize, double learningRate) throws ExceptionInInitializerError {
         Integer [] temp = new Integer[trainingDatas.size()];
         for (int i = 0; i < temp.length; i++) {
             temp[i] = i;
@@ -321,12 +341,13 @@ public class NeuralNetwork implements Serializable {
                 miniBatchData[k] = trainingDatas.get(index_records.get(j + k));
                 miniBatchExpected[k] = expectedDatas.get(index_records.get(j + k));
             }
+
             runMiniBatch(miniBatchData, miniBatchExpected, learningRate, false);
         }
 
     }
 
-    public int verify(List<double[]> recordsTest, List<double[]> expectedTest) {
+    public int verify(List<double[]> recordsTest, List<double[]> expectedTest) throws ExceptionInInitializerError {
         int n = 0;
         for (int i = 0; i < recordsTest.size(); i++) {
             int maxAnswer = NeuralMath.getMaxPosition(getAnswer(recordsTest.get(i)));
@@ -334,10 +355,6 @@ public class NeuralNetwork implements Serializable {
             if (maxResult == maxAnswer) {
                 n++;
             }
-            /*else {
-                System.out.println("The realTrain data is the index " + i);
-                System.out.println(Arrays.toString(getAnswer(recordsTest.get(i), minRange, maxRange)));
-            }*/
         }
         return n;
     }
@@ -375,7 +392,6 @@ public class NeuralNetwork implements Serializable {
             }
 
             // Obtener los cambios de los pesos y biases
-            // TODO: Aquí se pasa mucho tiempo haciendo cálculos, pero no mucho, optimizar si es posible
             if (changes != null) {
                 changes = NeuralMath.addArrays(changes, backpropagation(values, expectedData[i]));
             }
@@ -407,9 +423,9 @@ public class NeuralNetwork implements Serializable {
             }
 
             // Imprimir los outputs
-            // for (int i = 0; i < nodes[shapeTotal - 1].length; i++) {
-            //     System.out.println((values[values.length - 1][i]));
-            // }
+            for (int i = 0; i < nodes[shapeTotal - 1].length; i++) {
+                System.out.println((values[values.length - 1][i]));
+            }
 
             System.out.println("Error de margen: " + marginError);
         }
@@ -437,7 +453,6 @@ public class NeuralNetwork implements Serializable {
         // Pasar valores de todos los datos al primer array de los valores (InputNode)
         System.arraycopy(data, 0, values[0], 0, values[0].length);
 
-        // TODO: Aquí se pasa mucho tiempo haciendo cálculos, optimizar
         // Añadir los valores de la siguiente capa, con la función sigmoide en la primera capa
         for (int j = 0; j < nodes[0].length; j++) {
             values[1] = NeuralMath.addArrays(
@@ -454,7 +469,6 @@ public class NeuralNetwork implements Serializable {
             setUpOutputs(values[1], 1);
         }
 
-        // TODO: Aquí se pasa mucho tiempo haciendo cálculos, optimizar
         for (short i = 1; i < shapeTotal - 1; i++) {
             // Añadir los valores de la siguiente capa
             for (int j = 0; j < nodes[i].length; j++) {
@@ -524,7 +538,6 @@ public class NeuralNetwork implements Serializable {
 
         // El tamaño de los valores devueltos por esta función es el mismo que el número de capas en la red neuronal
         // El último no es usado para la última capa, porque no tiene conexiones. Se usa para los cambios de los biases
-
         double[][][] ret_values = new double[shapeTotal][][];
 
         // Usar los datos de los valores de los nodos en difNodeData de la red neuronal para obtener el cambio de cada peso en la primera capa
@@ -559,7 +572,7 @@ public class NeuralNetwork implements Serializable {
             // Obtener el index del peso. Después, actualiza ese peso
             for (int k = 0; k < ((InputNode) nodes[0][j]).getWeightsFrontLayer().size(); k++) {
                 int index = ((InputNode) nodes[0][j]).getIdNodeFrontLayer().get(k);
-                ((InputNode) nodes[0][j]).addWeightsFrontLayer(k, changes[0][j][index] * learningRate);
+                ((InputNode) nodes[0][j]).addToWeightsFrontLayer(k, changes[0][j][index] * learningRate);
             }
         }
 
@@ -569,7 +582,7 @@ public class NeuralNetwork implements Serializable {
                 // Obtener el index del peso. Después, actualiza ese peso
                 for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
                     int index = ((ConnectionNode) nodes[i][j]).getIdNodeFrontLayer().get(k);
-                    ((ConnectionNode) nodes[i][j]).addWeightsFrontLayer(k, changes[i][j][index] * learningRate);
+                    ((ConnectionNode) nodes[i][j]).addToWeightsFrontLayer(k, changes[i][j][index] * learningRate);
                 }
             }
         }
@@ -585,8 +598,6 @@ public class NeuralNetwork implements Serializable {
         for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
             ((OutputNode) nodes[shapeTotal - 1][j]).addBias(changes[changes.length - 1][shapeTotal - 2][j] * learningRate);
         }
-
-
     }
 
     public void mutate() {
@@ -599,13 +610,13 @@ public class NeuralNetwork implements Serializable {
                 if (node instanceof InputNode) {
                     for (int i = 0; i < ((InputNode) node).getWeightsFrontLayer().size(); i++) {
                         if (Math.random() <= mutationChance) {
-                            ((InputNode) node).addWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
+                            ((InputNode) node).addToWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
                         }
                     }
                 } else if (node instanceof ConnectionNode) {
                     for (int i = 0; i < ((ConnectionNode) node).getWeightsFrontLayer().size(); i++) {
                         if (Math.random() <= mutationChance) {
-                            ((ConnectionNode) node).addWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
+                            ((ConnectionNode) node).addToWeightsFrontLayer(i, (Math.random() * mutationChange * 2 - mutationChange));
                         }
                     }
                     if (Math.random() <= mutationChance) {

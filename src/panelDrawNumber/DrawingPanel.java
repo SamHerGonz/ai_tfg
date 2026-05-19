@@ -94,12 +94,9 @@ public class DrawingPanel extends JPanel implements Runnable {
         drawingBoard.draw(g2);
 
         // Dibujar la respuesta dada por la IA
+        g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial",Font.BOLD,150));
         g2.drawString(answer, 1050, 700);
-
-        // Dibujar la respuesta esperada por los datos
-        g2.setFont(new Font("Arial",Font.BOLD,80));
-        g2.drawString(String.valueOf(expectedAnswer), 1300, 800);
     }
 
     public void addButton(AbstractButton button) {

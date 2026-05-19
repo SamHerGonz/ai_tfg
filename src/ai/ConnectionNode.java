@@ -43,7 +43,7 @@ public class ConnectionNode extends Node implements Serializable {
         this.weightsFrontLayer = weightsFrontLayer;
     }
 
-    public void addWeightsFrontLayer(int index, double value) {
+    public void addToWeightsFrontLayer(int index, double value) {
         this.getWeightsFrontLayer().set(index, this.getWeightsFrontLayer().get(index) + value);
     }
 

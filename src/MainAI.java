@@ -16,7 +16,8 @@ public class MainAI {
         int[] shape = {784,10};
         NeuralNetwork ai;
         try {
-            ai = new NeuralNetwork(shape, 1);
+            ai = new NeuralNetwork(784,10,2, 1);
+            System.out.println(ai);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -99,7 +100,7 @@ public class MainAI {
                             System.out.println("Número no válido");
                         }
                     } while (n < 0);
-                    ai = new NeuralNetwork(shape, n);
+                    ai = new NeuralNetwork(784,10,2, 1);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -107,7 +108,6 @@ public class MainAI {
             System.out.println("Quieres hacer alguna modificación extra a la red neuronal? (s/N)");
             reader.nextLine();
             if (reader.nextLine().equalsIgnoreCase("s")) {
-                n = 0;
                 do {
                     System.out.println("Inserte opción: ");
                     System.out.println("0: Insertar nodo");
@@ -123,6 +123,7 @@ public class MainAI {
                                 n = reader.nextInt();
                             } while (n <= 0 || n >= shape.length - 1);
                             System.out.println("¿Quieres que tenga todas las conexiones o hacemos simplemente una aleatoria? (s/N)");
+                            reader.nextLine();
                             ai.addNode(n, 1, reader.nextLine().equalsIgnoreCase("s"));
                             n = 0;
                             break;
@@ -225,8 +226,6 @@ public class MainAI {
                             ai.train(records, expectedTrain, sizeMiniBatch, rate);
                             int v = ai.verify(recordsTest, expectedTest);
                             System.out.println("Se han acertado " + v + " de " + recordsTest.size());
-                            // ai2.train(recordsTrain, expectedTrain, sizeMiniBatch, rate);
-                            // System.out.println("Se han acertado " + ai2.verify(recordsTest, expectedTest) + " de " + recordsTest.size());
                             if (firstVal == 0) {
                                 firstVal = recordsTest.size() - v;
                             }
@@ -288,10 +287,10 @@ public class MainAI {
     }
 
     // Una prueba tonta, no te preocupes. Además, no funciona del t0d0 bien, pero me sirve para una pequeña prueba
-    public static NeuralNetwork createThinNeuralNetwork(int[] shape) {
+    public static NeuralNetwork createThinNeuralNetwork(int[] shape, int max) {
         NeuralNetwork ai;
         try {
-            ai = new NeuralNetwork(shape, 1);
+            ai = new NeuralNetwork(shape, max);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
