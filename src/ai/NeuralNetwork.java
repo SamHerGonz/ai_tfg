@@ -443,7 +443,7 @@ public class NeuralNetwork implements Serializable {
     private double[][] feedforward(double[] data) throws ExceptionInInitializerError {
         // Creo un array para tener los valores de cada nodo
         double[][] values = new double[shapeTotal][];
-        for (int i = 0; i < values.length; i++) {
+        for (int i = 1; i < values.length; i++) {
             values[i] = new double[nodes[i].length];
         }
         if (data.length != nodes[0].length) {
@@ -451,7 +451,7 @@ public class NeuralNetwork implements Serializable {
         }
 
         // Pasar valores de todos los datos al primer array de los valores (InputNode)
-        System.arraycopy(data, 0, values[0], 0, values[0].length);
+        values[0] = data;
 
         // Añadir los valores de la siguiente capa, con la función sigmoide en la primera capa
         for (int j = 0; j < nodes[0].length; j++) {
