@@ -8,12 +8,12 @@ import java.util.List;
 
 public class NeuralNetwork implements Serializable {
     private Node[][] nodes;
-    private short shapeTotal;
+    private short sizeTotal;
     @Serial
     private static final long serialVersionUID = 3877515453607213504L;
 
     public NeuralNetwork(NeuralNetwork ai) {
-        setNodes(Arrays.copyOf(ai.getNodes(), ai.shapeTotal));
+        setNodes(Arrays.copyOf(ai.getNodes(), ai.sizeTotal));
     }
 
     public NeuralNetwork(int[] shape, double max) throws Exception {
@@ -38,7 +38,7 @@ public class NeuralNetwork implements Serializable {
 
     public int getWeightsCount() {
         int n = 0;
-        for (int i = 0; i < shapeTotal; i++) {
+        for (int i = 0; i < sizeTotal; i++) {
             n += getWeightsCount(i);
         }
         return n;
@@ -58,7 +58,7 @@ public class NeuralNetwork implements Serializable {
 
     private void setNodes(Node[][] nodes) {
         this.nodes = nodes;
-        shapeTotal = (short) nodes.length;
+        sizeTotal = (short) nodes.length;
     }
 
     private Node[][] createNodes(int[] shape, double max) throws Exception {
@@ -95,7 +95,7 @@ public class NeuralNetwork implements Serializable {
     }
 
     public void addNode(int layerNumber, double max, boolean connectAll) {
-        if (layerNumber < 0 || layerNumber >= shapeTotal) {
+        if (layerNumber < 0 || layerNumber >= sizeTotal) {
             throw new ExceptionInInitializerError("La capa insertada no está en el rango");
         }
         //Crear el nuevo nodo
@@ -103,7 +103,7 @@ public class NeuralNetwork implements Serializable {
         if (layerNumber == 0) {
             node = new InputNode();
         }
-        else if (layerNumber != shapeTotal - 1) {
+        else if (layerNumber != sizeTotal - 1) {
             node = new ConnectionNode(max);
         }
         else {
@@ -126,7 +126,7 @@ public class NeuralNetwork implements Serializable {
             }
 
             // Conectar el nuevo nodo con todos los nodos de delante
-            if (layerNumber != shapeTotal - 1) {
+            if (layerNumber != sizeTotal - 1) {
                 for (int i = 0; i < nodes[layerNumber + 1].length; i++) {
                     try {
                         addWeight(layerNumber, nodes[layerNumber].length - 1, i, max);
@@ -144,7 +144,7 @@ public class NeuralNetwork implements Serializable {
             }
 
             // Conectar el nuevo nodo con un nodo aleatorio de delante
-            if (layerNumber != shapeTotal - 1) {
+            if (layerNumber != sizeTotal - 1) {
                 try {
                     addWeight(layerNumber,nodes[layerNumber].length - 1,
                             (int)(Math.random() * nodes[layerNumber + 1].length), max);
@@ -301,13 +301,13 @@ public class NeuralNetwork implements Serializable {
     }
 
     private void weightErrorVerification(int layer, int firstLayerIndex, int lastLayerIndex) throws Exception {
-        if (layer <= shapeTotal) {
+        if (layer >= sizeTotal) {
             throw new Exception("No existe la capa número " + layer);
         }
-        if (firstLayerIndex <= nodes[layer].length) {
+        if (firstLayerIndex > nodes[layer].length) {
             throw new Exception("No existe el nodo número " + firstLayerIndex + " de la capa " + layer);
         }
-        if (lastLayerIndex <= nodes[layer + 1].length) {
+        if (lastLayerIndex > nodes[layer + 1].length) {
             throw new Exception("No existe el nodo número " + lastLayerIndex + " de la capa " + (layer + 1));
         }
     }
@@ -360,7 +360,7 @@ public class NeuralNetwork implements Serializable {
     }
 
     public double[] getAnswer(double[] data) throws ExceptionInInitializerError {
-        return feedforward(data)[shapeTotal - 1];
+        return feedforward(data)[sizeTotal - 1];
     }
 
     /**
@@ -379,12 +379,12 @@ public class NeuralNetwork implements Serializable {
             if (showMarginError) {
                 // Calcular el margen de error de la alimentación para delante respecto al dato esperado
                 double marginError = 0;
-                for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
+                for (int j = 0; j < nodes[sizeTotal - 1].length; j++) {
                     marginError += Math.pow(expectedData[i][j] - values[values.length - 1][j], 2) / 2;
                 }
 
                 // Imprimir los outputs
-                for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
+                for (int j = 0; j < nodes[sizeTotal - 1].length; j++) {
                     System.out.println(values[values.length - 1][j]);
                 }
 
@@ -418,12 +418,12 @@ public class NeuralNetwork implements Serializable {
         if (showMarginError) {
             // Calcular el margen de error de la alimentación para delante respecto al dato esperado
             double marginError = 0;
-            for (int i = 0; i < nodes[shapeTotal - 1].length; i++) {
+            for (int i = 0; i < nodes[sizeTotal - 1].length; i++) {
                 marginError += Math.pow(expectedData[i] - values[values.length - 1][i], 2) / 2;
             }
 
             // Imprimir los outputs
-            for (int i = 0; i < nodes[shapeTotal - 1].length; i++) {
+            for (int i = 0; i < nodes[sizeTotal - 1].length; i++) {
                 System.out.println((values[values.length - 1][i]));
             }
 
@@ -442,7 +442,7 @@ public class NeuralNetwork implements Serializable {
      */
     private double[][] feedforward(double[] data) throws ExceptionInInitializerError {
         // Creo un array para tener los valores de cada nodo
-        double[][] values = new double[shapeTotal][];
+        double[][] values = new double[sizeTotal][];
         for (int i = 1; i < values.length; i++) {
             values[i] = new double[nodes[i].length];
         }
@@ -467,7 +467,7 @@ public class NeuralNetwork implements Serializable {
             setUpOutputs(values[1], 1);
         }
 
-        for (short i = 1; i < shapeTotal - 1; i++) {
+        for (short i = 1; i < sizeTotal - 1; i++) {
             // Añadir los valores de la siguiente capa
             for (int j = 0; j < nodes[i].length; j++) {
                 ((ConnectionNode)nodes[i][j]).transferAllData(values[i + 1], values[i][j]);
@@ -510,21 +510,21 @@ public class NeuralNetwork implements Serializable {
     private double[][][] backpropagation(double[][] values, double[] expectedData) {
         // difNodeData es la diferencia que debería de tener el valor de ese nodo para tener un mejor resultado
         // El tamaño de difNodeData tiene el tamaño del array de los nodos excepto de la primera, la de los inputs, ya que no necesitamos computarla
-        double[][] difNodeData = new double[shapeTotal - 1][];
+        double[][] difNodeData = new double[sizeTotal - 1][];
         for (int i = 0; i < difNodeData.length; i++) {
             difNodeData[i] = new double[nodes[i + 1].length];
         }
 
-        difNodeData[shapeTotal - 2] = NeuralMath.subtractArrays(expectedData, values[values.length - 1]);
+        difNodeData[sizeTotal - 2] = NeuralMath.subtractArrays(expectedData, values[values.length - 1]);
 
         // Calcular los datos esperados de la última capa en expectedDatas
         // Ya hemos calculado el margen de error de este nodo en el targetOutputs
-        for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
-            difNodeData[shapeTotal - 2][j] *= NeuralMath.setDerivativeSigmoid(values[values.length - 1][j]);
+        for (int j = 0; j < nodes[sizeTotal - 1].length; j++) {
+            difNodeData[sizeTotal - 2][j] *= NeuralMath.setDerivativeSigmoid(values[values.length - 1][j]);
         }
 
         // Calcular los datos esperados del resto de capas
-        for (short i = (short) (shapeTotal - 2); i > 0; i--) {
+        for (short i = (short) (sizeTotal - 2); i > 0; i--) {
             // Ya que la siguiente capa es siempre una instancia de ConnectionNode, no tenemos ningún motivo para verificarlo
             // En cada capa se obtienen el margen de error de la capa anterior para ser usado en el siguiente paso de retropropagación
             for (int j = 0; j < nodes[i].length; j++) {
@@ -534,7 +534,7 @@ public class NeuralNetwork implements Serializable {
 
         // El tamaño de los valores devueltos por esta función es el mismo que el número de capas en la red neuronal
         // El último no es usado para la última capa, porque no tiene conexiones. Se usa para los cambios de los biases
-        double[][][] ret_values = new double[shapeTotal][][];
+        double[][][] ret_values = new double[sizeTotal][][];
 
         // Usar los datos de los valores de los nodos en difNodeData de la red neuronal para obtener el cambio de cada peso en la primera capa
         ret_values[0] = new double[nodes[0].length][];
@@ -543,7 +543,7 @@ public class NeuralNetwork implements Serializable {
         }
 
         // Usar los datos de los valores de los nodos en difNodeData de la red neuronal para obtener el cambio de cada peso en el resto de capas, menos la última
-        for (short i = 1; i < shapeTotal - 1; i++) {
+        for (short i = 1; i < sizeTotal - 1; i++) {
             ret_values[i] = new double[nodes[i].length][];
             for (int j = 0; j < nodes[i].length; j++) {
                 ret_values[i][j] = ((ConnectionNode) nodes[i][j]).getExpectedDataWeights(difNodeData[i], values[i][j], nodes[i + 1].length);
@@ -573,7 +573,7 @@ public class NeuralNetwork implements Serializable {
         }
 
         // Usar los datos esperados de changes para cambiar los pesos del resto de capas de la red neuronal
-        for (short i = 1; i < shapeTotal - 1; i++) {
+        for (short i = 1; i < sizeTotal - 1; i++) {
             for (int j = 0; j < nodes[i].length; j++) {
                 // Obtener el index del peso. Después, actualiza ese peso
                 for (int k = 0; k < ((ConnectionNode) nodes[i][j]).getWeightsFrontLayer().size(); k++) {
@@ -584,15 +584,15 @@ public class NeuralNetwork implements Serializable {
         }
 
         // Usar los datos esperados de changes para cambiar todos los biases de la red neuronal
-        for (short i = 1; i < shapeTotal - 1; i++) {
+        for (short i = 1; i < sizeTotal - 1; i++) {
             for (int j = 0; j < nodes[i].length; j++) {
                 ((ConnectionNode) nodes[i][j]).addBias(changes[changes.length - 1][i - 1][j] * learningRate);
             }
         }
 
         // Usar los datos esperados de changes para cambiar los biases de la última capa de la red neuronal
-        for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
-            ((OutputNode) nodes[shapeTotal - 1][j]).addBias(changes[changes.length - 1][shapeTotal - 2][j] * learningRate);
+        for (int j = 0; j < nodes[sizeTotal - 1].length; j++) {
+            ((OutputNode) nodes[sizeTotal - 1][j]).addBias(changes[changes.length - 1][sizeTotal - 2][j] * learningRate);
         }
     }
 
@@ -631,13 +631,13 @@ public class NeuralNetwork implements Serializable {
     public String toString() {
         StringBuilder s = new StringBuilder("Neural Network: ");
 
-        s.append("\nNúmero de capas: ").append(shapeTotal);
+        s.append("\nNúmero de capas: ").append(sizeTotal);
 
-        for (short i = 0; i < shapeTotal - 1; i++) {
+        for (short i = 0; i < sizeTotal - 1; i++) {
             s.append("\n\tCapa ").append(i).append(": ").append(nodes[i].length).append(" nodos, con ").append(getWeightsCount(i)).append(" pesos");
         }
 
-        s.append("\n\tCapa ").append(shapeTotal - 1).append(": ").append(nodes[shapeTotal - 1].length).append(" nodos");
+        s.append("\n\tCapa ").append(sizeTotal - 1).append(": ").append(nodes[sizeTotal - 1].length).append(" nodos");
 
         return getTotalData(s);
     }
@@ -645,9 +645,9 @@ public class NeuralNetwork implements Serializable {
     public String printDetailed() {
         StringBuilder s = new StringBuilder("Neural Network: ");
 
-        s.append("\nNúmero de capas: ").append(shapeTotal);
+        s.append("\nNúmero de capas: ").append(sizeTotal);
 
-        for (short i = 0; i < shapeTotal; i++) {
+        for (short i = 0; i < sizeTotal; i++) {
             s.append(printDetailed(i));
         }
 
@@ -656,15 +656,15 @@ public class NeuralNetwork implements Serializable {
 
     public String printDetailed(int layer) {
         StringBuilder s = new StringBuilder();
-        if (layer == shapeTotal - 1) {
+        if (layer == sizeTotal - 1) {
             s.append("\n\tCapa ").append(layer).append(": ").append(nodes[layer].length).append(" nodos, con ").append(getWeightsCount(layer)).append(" pesos");
             for (int j = 0; j < nodes[layer].length; j++) {
                 s.append(printDetailed(layer, j));
             }
         }
         else {
-            s.append("\n\tCapa ").append(shapeTotal - 1).append(": ").append(nodes[shapeTotal - 1].length).append(" nodos");
-            for (int j = 0; j < nodes[shapeTotal - 1].length; j++) {
+            s.append("\n\tCapa ").append(sizeTotal - 1).append(": ").append(nodes[sizeTotal - 1].length).append(" nodos");
+            for (int j = 0; j < nodes[sizeTotal - 1].length; j++) {
                 s.append(printDetailed(layer, j));
             }
         }
@@ -681,7 +681,7 @@ public class NeuralNetwork implements Serializable {
         int n = getWeightsCount();
         s.append(n).append("\nNúmero total de parámetros (w y biases): ");
 
-        for (int i = 1; i < shapeTotal; i++) {
+        for (int i = 1; i < sizeTotal; i++) {
             n += nodes[i].length;
         }
         s.append(n);
