@@ -7,7 +7,9 @@ import panelDrawNumber.buttons.actions.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class ShowNumber {
     public static final int WIDTHDP = 28;
@@ -35,7 +37,6 @@ public class ShowNumber {
 
             PanelButton clearButton = new PanelButton("Clear");
             PanelButton sendButton = new PanelButton("Send to ai");
-            PanelButton selectNumber = new PanelButton("Select next number from training data");
 
             moveUp.addActionListener(new MovePanel(dp, "up"));
             moveDown.addActionListener(new MovePanel(dp, "down"));
@@ -44,7 +45,6 @@ public class ShowNumber {
 
             clearButton.addActionListener(new ClearAction(dp));
             sendButton.addActionListener(new SendAction(dp));
-            selectNumber.addActionListener(new SelectNumber(dp));
 
             moveUp.setBounds(DrawingPanel.TILESIZE * WIDTHDP / 2 + 50, 10, 80, 80);
             moveDown.setBounds(DrawingPanel.TILESIZE * HEIGTHDP / 2 + 50, DrawingPanel.TILESIZE * WIDTHDP + 110, 80, 80);
@@ -53,7 +53,6 @@ public class ShowNumber {
 
             clearButton.setBounds(POSBUTTON, 310, 400, 180);
             sendButton.setBounds(POSBUTTON, 40, 400, 250);
-            selectNumber.setBounds(POSBUTTON, 510, 300, 80);
 
             window.setSize(DrawingPanel.TILESIZE * WIDTHDP + 700, DrawingPanel.TILESIZE * WIDTHDP + 250);
             window.setResizable(false);
@@ -72,8 +71,6 @@ public class ShowNumber {
             dp.addButton(clearButton);
             // Enter
             dp.addButton(sendButton);
-            // R
-            dp.addButton(selectNumber);
 
             dp.startThread();
             dp.requestFocusInWindow();

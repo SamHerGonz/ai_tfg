@@ -28,7 +28,7 @@ public class NeuralNetwork implements Serializable {
         }
         shape[shape.length - 1] = nOutput;
         setNodes(createNodes(shape, max));
-        connectNodesDeepMode(minimization, max);
+        connectNodesDeepMode(minimization * 2, max);
     }
 
 
@@ -656,7 +656,7 @@ public class NeuralNetwork implements Serializable {
 
     public String printDetailed(int layer) {
         StringBuilder s = new StringBuilder();
-        if (layer == sizeTotal - 1) {
+        if (layer != sizeTotal - 1) {
             s.append("\n\tCapa ").append(layer).append(": ").append(nodes[layer].length).append(" nodos, con ").append(getWeightsCount(layer)).append(" pesos");
             for (int j = 0; j < nodes[layer].length; j++) {
                 s.append(printDetailed(layer, j));
@@ -672,7 +672,7 @@ public class NeuralNetwork implements Serializable {
     }
 
     public String printDetailed(int layer, int nodeIndex) {
-        return "\n\t\t" + nodes[layer][nodeIndex].toString().replace("\n", "\n\t\t");
+        return "\n\t\t" + nodes[layer][nodeIndex].toString().replace("\n", "\n\t\t").replace("node:", "node number " + nodeIndex + ":");
     }
 
 

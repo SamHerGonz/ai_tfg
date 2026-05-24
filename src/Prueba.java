@@ -20,19 +20,19 @@ public class Prueba {
     public static void main(String[] args) {
         try{
             // Ejemplo valor inverso
-            int[] shape = {2,2,2};
+            int[] shape = {2,1000,2};
             NeuralNetwork ai1 = new NeuralNetwork(shape, 1);
             double[] temp = {1,1};
             long time = System.nanoTime();
             // A partir de la iteración 2000 (más o menos) empieza a aprender correctamente, eso cuando el rango de iniciación de los pesos y biases es 1.
-            for (int i = 0; i < 100000; i++) {
+            for (int i = 0; i < 10000000; i++) {
                 double[] data = new double[2];
                 for (int j = 0; j < data.length; j++) {
                     data[j] = Math.random();
                 }
                 double[] answer = NeuralMath.subtractArrays(temp,data);
                 ai1.run(data,answer,10,false);
-                if (i % 20000 == 0) {
+                if (i % 25000 == 0) {
                     System.out.println("Vuelta: " + i);
                 }
             }

@@ -9,6 +9,7 @@ public class MainAI {
 	public static void main(String[] args) {
         if (args.length != 2) throw new RuntimeException("Debe de haber 2 parámetros");
         int n, n1, n2,n3;
+        double d;
         // Tamaño 784,30,10 60 vueltas tiempo: 582,71 segundos (9,71 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 60 vueltas tiempo: 370,453093 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
         // Tamaño 784,16,16,10 con 1ª capa con el mínimo de pesos (784) 60 vueltas tiempo: 195.7935879 segundos (6,17 por vuelta, 70000 iteraciones(10000 + 5000 de MiniBatch 12))
@@ -69,65 +70,33 @@ public class MainAI {
                 if (reader.nextLine().equalsIgnoreCase("s")) {
                     System.out.println("Inserte el valor máximo de iniciación de los pesos y biases");
                     try {
-                        n = 0;
-                        do {
-                            try {
-                                n = reader.nextInt();
-                            } catch (Exception e) {
-                                System.out.println("Número no válido");
-                            }
-                        } while (n < 0);
+                        d = reader.nextDouble();
                         System.out.println("Indique el valor en el que las matrices se irán decrementando");
-                        n2 = 0;
-                        do {
-                            try {
-                                n2 = reader.nextInt();
-                            } catch (Exception e) {
-                                System.out.println("Número no válido");
-                            }
-                        } while (n2 < 0);
+                        n2 = reader.nextInt();
                         reader.nextLine();
-                        ai = new NeuralNetwork(784,10,n2, n);
+                        ai = new NeuralNetwork(784,10,n2, d);
+                        BufferedWriter bw = new BufferedWriter(new FileWriter("a2.txt"));
+                        bw.write(ai.printDetailed());
+                        bw.close();
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
                 }
                 else {
                     System.out.println("Inserte el número de capas ocultas que va a tener la red neuronal: ");
-                    n = 0;
-                    do {
-                        try {
-                            n = reader.nextInt();
-                        } catch (Exception e) {
-                            System.out.println("Número no válido");
-                        }
-                    } while (n < 0);
+                    n = reader.nextInt();
                     shape = new int[n + 2];
                     shape[0] = 784;
                     shape[shape.length - 1] = 10;
                     for (int i = 1; i < shape.length - 1; i++) {
                         System.out.println("Inserte el tamaño de la capa " + i);
-                        n = 0;
-                        do {
-                            try {
-                                n = reader.nextInt();
-                            } catch (Exception e) {
-                                System.out.println("Número no válido");
-                            }
-                        } while (n < 0);
+                        n = reader.nextInt();
                         shape[i] = n;
                     }
                     System.out.println("Inserte el valor máximo de iniciación de los pesos y biases");
                     try {
-                        n = 0;
-                        do {
-                            try {
-                                n = reader.nextInt();
-                            } catch (Exception e) {
-                                System.out.println("Número no válido");
-                            }
-                        } while (n < 0);
-                        ai = new NeuralNetwork(shape, n);
+                        d = reader.nextDouble();
+                        ai = new NeuralNetwork(shape, d);
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
@@ -235,7 +204,8 @@ public class MainAI {
                         for (int i = 0; i < iMax; i++) {
                             reader.nextLine();
                             System.out.println("Vuelta " + i);
-                            ai.train(recordsTrain, expectedTrain, rate);
+                            List<double[]> records = moveAllData(recordsTrain, 1);
+                            ai.train(records, expectedTrain, rate);
                             int v = ai.verify(recordsTest, expectedTest);
                             System.out.println("Se han acertado " + v + " de " + recordsTest.size());
                             if (firstVal == 0) {

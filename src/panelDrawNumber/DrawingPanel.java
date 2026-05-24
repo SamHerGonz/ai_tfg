@@ -42,7 +42,10 @@ public class DrawingPanel extends JPanel implements Runnable {
     }
 
     public void setAnswer(boolean show) {
+        long time = System.nanoTime();
         double[] answer = ai.getAnswer(getDrawingBoard(false));
+        time = (System.nanoTime() - time);
+        System.out.println(time / 100000000.0);
         this.answer = String.valueOf(NeuralMath.getMaxPosition(answer));
         if (show) {
             System.out.println(Arrays.toString(answer).replace(',','\n'));
