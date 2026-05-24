@@ -75,9 +75,6 @@ public class MainAI {
                         n2 = reader.nextInt();
                         reader.nextLine();
                         ai = new NeuralNetwork(784,10,n2, d);
-                        BufferedWriter bw = new BufferedWriter(new FileWriter("a2.txt"));
-                        bw.write(ai.printDetailed());
-                        bw.close();
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
