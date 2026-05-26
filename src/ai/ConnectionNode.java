@@ -59,7 +59,7 @@ public class ConnectionNode extends Node implements Serializable {
         setBias(getBias() + bias);
     }
 
-    public void addNodeFront(int idNode, double max) {
+    public void addWeightFront(int idNode, double max) {
         // Inicializar el valor de una conexión, con un rango del -max al max
         getIdNodeFrontLayer().add(idNode);
         getWeightsFrontLayer().add(Math.random() * (max * 2) - max);

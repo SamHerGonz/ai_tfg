@@ -37,7 +37,7 @@ public class InputNode extends Node implements Serializable {
         this.getWeightsFrontLayer().set(index, this.getWeightsFrontLayer().get(index) + value);
     }
 
-    public void addNodeFront(int idNode, double max) {
+    public void addWeightFront(int idNode, double max) {
         // Inicializar el valor de un peso
         getIdNodeFrontLayer().add(idNode);
         getWeightsFrontLayer().add(Math.random() * (max * 2) - max);

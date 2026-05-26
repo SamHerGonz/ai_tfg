@@ -158,13 +158,13 @@ public class NeuralNetwork implements Serializable {
             if (nodes[i][0] instanceof InputNode) {
                 for (int j = 0; j < nodes[i].length; j++) {
                     for (int k = 0; k < nodes[i + 1].length; k++) {
-                        ((InputNode) nodes[i][j]).addNodeFront(k, max);
+                        ((InputNode) nodes[i][j]).addWeightFront(k, max);
                     }
                 }
             } else if (nodes[i][0] instanceof ConnectionNode) {
                 for (int j = 0; j < nodes[i].length; j++) {
                     for (int k = 0; k < nodes[i + 1].length; k++) {
-                        ((ConnectionNode) nodes[i][j]).addNodeFront(k, max);
+                        ((ConnectionNode) nodes[i][j]).addWeightFront(k, max);
                     }
                 }
             }
@@ -182,7 +182,7 @@ public class NeuralNetwork implements Serializable {
                     int posY = (j / sqrtLength) + minimization;
                     for (int k = -minimization; k <= minimization; k++) {
                         for (int l = -minimization; l <= minimization; l++) {
-                            ((InputNode)nodes[i - 1][((posY + k) * sqrtLength) + (posX + l)]).addNodeFront(j,max);
+                            ((InputNode)nodes[i - 1][((posY + k) * sqrtLength) + (posX + l)]).addWeightFront(j,max);
                         }
                     }
                 }
@@ -193,7 +193,7 @@ public class NeuralNetwork implements Serializable {
                     int posY = (j / sqrtLength) + minimization;
                     for (int k = -minimization; k <= minimization; k++) {
                         for (int l = -minimization; l <= minimization; l++) {
-                            ((ConnectionNode)nodes[i - 1][((posY + k) * sqrtLength) + (posX + l)]).addNodeFront(j,max);
+                            ((ConnectionNode)nodes[i - 1][((posY + k) * sqrtLength) + (posX + l)]).addWeightFront(j,max);
                         }
                     }
                 }
@@ -203,7 +203,7 @@ public class NeuralNetwork implements Serializable {
         // Conectar la penúltima capa con todas sus conexiones
         for (int j = 0; j < nodes[nodes.length - 2].length; j++) {
             for (int k = 0; k < nodes[nodes.length - 1].length; k++) {
-                ((ConnectionNode)nodes[nodes.length - 2][j]).addNodeFront(k, max);
+                ((ConnectionNode)nodes[nodes.length - 2][j]).addWeightFront(k, max);
             }
         }
     }
@@ -214,13 +214,13 @@ public class NeuralNetwork implements Serializable {
             if (((InputNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
                 throw new Exception("Esta conexión ya existe");
             }
-            ((InputNode) nodes[layer][firstLayerIndex]).addNodeFront(lastLayerIndex, max);
+            ((InputNode) nodes[layer][firstLayerIndex]).addWeightFront(lastLayerIndex, max);
         }
         else if (nodes[layer][firstLayerIndex] instanceof ConnectionNode) {
             if (((ConnectionNode) nodes[layer][firstLayerIndex]).getIdNodeFrontLayer().contains(lastLayerIndex)) {
                 throw new Exception("Esta conexión ya existe");
             }
-            ((ConnectionNode) nodes[layer][firstLayerIndex]).addNodeFront(lastLayerIndex, max);
+            ((ConnectionNode) nodes[layer][firstLayerIndex]).addWeightFront(lastLayerIndex, max);
         }
     }
 
