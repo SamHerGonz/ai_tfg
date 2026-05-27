@@ -368,19 +368,19 @@ public class NeuralNetwork implements Serializable {
      * @param data Un array con los datos que se van a usar
      * @param expectedData Un array con el dato esperado de cada minibatch
      * @param learningRate Un multiplicador para ver cuánto aprende de esta iteración
-     * @param showMarginError Si quieres que se vea el resultado obtenido
+     * @param showError Si quieres que se vea el resultado obtenido
      * @throws ExceptionInInitializerError Si los datos obtenidos se pueden usar, algunas de esas siendo verificaciones internas
      */
-    public void runMiniBatch(double[][] data, double[][] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
+    public void runMiniBatch(double[][] data, double[][] expectedData, double learningRate, boolean showError) throws ExceptionInInitializerError {
         double[][][] changes = null;
         for (int i = 0; i < data.length; i++) {
             double[][] values = feedforward(data[i]);
 
-            if (showMarginError) {
-                // Calcular el margen de error de la alimentación para delante respecto al dato esperado
-                double marginError = 0;
+            if (showError) {
+                // Calcular el error de la alimentación para delante respecto al dato esperado
+                double error = 0;
                 for (int j = 0; j < nodes[sizeTotal - 1].length; j++) {
-                    marginError += Math.pow(expectedData[i][j] - values[values.length - 1][j], 2) / 2;
+                    error += Math.pow(expectedData[i][j] - values[values.length - 1][j], 2) / 2;
                 }
 
                 // Imprimir los outputs
@@ -388,7 +388,7 @@ public class NeuralNetwork implements Serializable {
                     System.out.println(values[values.length - 1][j]);
                 }
 
-                System.out.println("Error de margen: " + marginError);
+                System.out.println("Error: " + error);
             }
 
             // Obtener los cambios de los pesos y biases
@@ -408,18 +408,18 @@ public class NeuralNetwork implements Serializable {
      * @param data Un array con los datos que se van a usar
      * @param expectedData Un array con el dato esperado de cada minibatch
      * @param learningRate Un multiplicador para ver cuánto aprende de esta iteración
-     * @param showMarginError Si quieres que se vea el resultado obtenido
+     * @param showError Si quieres que se vea el resultado obtenido
      * @throws ExceptionInInitializerError Si los datos obtenidos se pueden usar, algunas de esas siendo verificaciones internas
      */
-    public void run(double[] data, double[] expectedData, double learningRate, boolean showMarginError) throws ExceptionInInitializerError {
+    public void run(double[] data, double[] expectedData, double learningRate, boolean showError) throws ExceptionInInitializerError {
         // Ejecutar la red neuronal, y obtener los valores de todos los nodos durante la alimentación hacia delante
         double[][] values = feedforward(data);
 
-        if (showMarginError) {
-            // Calcular el margen de error de la alimentación para delante respecto al dato esperado
-            double marginError = 0;
+        if (showError) {
+            // Calcular el error de la alimentación para delante respecto al dato esperado
+            double error = 0;
             for (int i = 0; i < nodes[sizeTotal - 1].length; i++) {
-                marginError += Math.pow(expectedData[i] - values[values.length - 1][i], 2) / 2;
+                error += Math.pow(expectedData[i] - values[values.length - 1][i], 2) / 2;
             }
 
             // Imprimir los outputs
@@ -427,7 +427,7 @@ public class NeuralNetwork implements Serializable {
                 System.out.println((values[values.length - 1][i]));
             }
 
-            System.out.println("Error de margen: " + marginError);
+            System.out.println("Error: " + error);
         }
 
         // Obtener los cambios de los pesos y biases y hacer los cambios de los datos obtenidos
@@ -518,7 +518,7 @@ public class NeuralNetwork implements Serializable {
         difNodeData[sizeTotal - 2] = NeuralMath.subtractArrays(expectedData, values[values.length - 1]);
 
         // Calcular los datos esperados de la última capa en expectedDatas
-        // Ya hemos calculado el margen de error de este nodo en el targetOutputs
+        // Ya hemos calculado el error de este nodo en el targetOutputs
         for (int j = 0; j < nodes[sizeTotal - 1].length; j++) {
             difNodeData[sizeTotal - 2][j] *= NeuralMath.setDerivativeSigmoid(values[values.length - 1][j]);
         }
@@ -526,7 +526,7 @@ public class NeuralNetwork implements Serializable {
         // Calcular los datos esperados del resto de capas
         for (short i = (short) (sizeTotal - 2); i > 0; i--) {
             // Ya que la siguiente capa es siempre una instancia de ConnectionNode, no tenemos ningún motivo para verificarlo
-            // En cada capa se obtienen el margen de error de la capa anterior para ser usado en el siguiente paso de retropropagación
+            // En cada capa se obtienen el error de la capa anterior para ser usado en el siguiente paso de retropropagación
             for (int j = 0; j < nodes[i].length; j++) {
                 difNodeData[i - 1][j] = ((ConnectionNode) nodes[i][j]).getExpectedDataNode(values[i][j], difNodeData[i]);
             }
