@@ -7,8 +7,8 @@ public class NeuralMath {
      * @param n Valor
      * @return La funcion activada
      */
-    public static double setSigmoid(double n) {
-        return (1 / (1 + Math.exp(- n)));
+    public static float setSigmoid(float n) {
+        return (float) (1 / (1 + Math.exp(- n)));
     }
 
     /**
@@ -16,7 +16,8 @@ public class NeuralMath {
      * @param sigmoid valor
      * @return La derivada de la funcion activada
      */
-    public static double setDerivativeSigmoid(double sigmoid) {
+    public static float setDerivativeSigmoid(float sigmoid) {
+        sigmoid = setSigmoid(sigmoid);
         return sigmoid * (1 - sigmoid);
     }
 
@@ -26,8 +27,8 @@ public class NeuralMath {
      * @param a2 the second array
      * @return An array with the sum of both arrays
      */
-    public static double[][][] addArrays(double[][][] a1, double[][][] a2) {
-        double[][][] ret_array = a1.clone();
+    public static float[][][] addArrays(float[][][] a1, float[][][] a2) {
+        float[][][] ret_array = a1.clone();
         for (int i = 0; i < a2.length; i++) {
             for (int j = 0; j < a2[i].length; j++) {
                 for (int k = 0; k < a2[i][j].length; k++) {
@@ -44,15 +45,31 @@ public class NeuralMath {
      * @param a2 Array number 2
      * @return a1 - a2 in an array
      */
-    public static double[] subtractArrays(double[] a1, double[] a2) {
-        double[] ret_array = new double[a1.length];
+    public static float[] subtractArrays(float[] a1, float[] a2) {
+        float[] ret_array = new float[a1.length];
         for (int i = 0; i < ret_array.length; i++) {
             ret_array[i] = a1[i] - a2[i];
         }
         return ret_array;
     }
 
-    public static int getMaxPosition(double[] array) {
+    public static float[][] subtractArrays(float[][] a1, float[][] a2) {
+        float[][] ret_array = new float[a1.length][];
+        for (int i = 0; i < ret_array.length; i++) {
+            ret_array[i] = subtractArrays(a1[i], a2[i]);
+        }
+        return ret_array;
+    }
+
+    public static float[][][] subtractArrays(float[][][] a1, float[][][] a2) {
+        float[][][] ret_array = new float[a1.length][][];
+        for (int i = 0; i < ret_array.length; i++) {
+            ret_array[i] = subtractArrays(a1[i], a2[i]);
+        }
+        return ret_array;
+    }
+
+    public static int getMaxPosition(float[] array) {
         int maxAnswer = 0;
         for (int j = 1; j < array.length; j++) {
             if (array[j] > array[maxAnswer]) {
@@ -62,8 +79,8 @@ public class NeuralMath {
         return maxAnswer;
     }
 
-    public static double[] moveMatrix(double[] record, int width, int height, int x, int y) {
-        double[] ret_value = new double[record.length];
+    public static float[] moveMatrix(float[] record, int width, int height, int x, int y) {
+        float[] ret_value = new float[record.length];
         System.arraycopy(record, 0, ret_value, 0, ret_value.length);
         for (int i = 0; i < x; i++) {
             if (canMoveMatrix(record,4, height)) {
@@ -88,7 +105,7 @@ public class NeuralMath {
         return ret_value;
     }
 
-    private static boolean canMoveMatrix(double[] record, int direction, int size) {
+    private static boolean canMoveMatrix(float[] record, int direction, int size) {
         boolean b = true;
         switch (direction) {
             case 1:

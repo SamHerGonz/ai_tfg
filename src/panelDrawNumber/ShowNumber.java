@@ -1,15 +1,14 @@
 package panelDrawNumber;
 
 import ai.NeuralNetwork;
+import ai.SupervisedLearningNeuralNetwork;
 import panelDrawNumber.buttons.PanelButton;
 import panelDrawNumber.buttons.actions.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 public class ShowNumber {
     public static final int WIDTHDP = 28;
@@ -24,7 +23,7 @@ public class ShowNumber {
         JFrame window = new JFrame("Título");
         try {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args[0]));
-            NeuralNetwork ai = (NeuralNetwork) ois.readObject();
+            SupervisedLearningNeuralNetwork ai = (SupervisedLearningNeuralNetwork) ois.readObject();
             ois.close();
             System.out.println(ai);
 

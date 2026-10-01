@@ -1,7 +1,7 @@
 package panelDrawNumber;
 
 import ai.NeuralMath;
-import ai.NeuralNetwork;
+import ai.SupervisedLearningNeuralNetwork;
 import panelDrawNumber.buttons.actions.GlobalAction;
 
 import javax.swing.*;
@@ -21,13 +21,13 @@ public class DrawingPanel extends JPanel implements Runnable {
     public DrawingBoard drawingBoard;
     public boolean finished;
 
-    public NeuralNetwork ai;
+    public SupervisedLearningNeuralNetwork ai;
 
     public int expectedAnswer = 0;
     public String answer = "";
     public int index;
 
-    public DrawingPanel(JFrame window, int width, int height, NeuralNetwork ai, int posPanelX, int posPanelY, int index) {
+    public DrawingPanel(JFrame window, int width, int height, SupervisedLearningNeuralNetwork ai, int posPanelX, int posPanelY, int index) {
         Rectangle r = new Rectangle(posPanelX, posPanelY, TILESIZE * width, TILESIZE * height);
         this.globalAction = new GlobalAction(this);
         drawingBoard = new DrawingBoard(new int[width][height], r);
@@ -43,7 +43,7 @@ public class DrawingPanel extends JPanel implements Runnable {
 
     public void setAnswer(boolean show) {
         long time = System.nanoTime();
-        double[] answer = ai.getAnswer(getDrawingBoard(false));
+        float[] answer = ai.getAnswer(getDrawingBoard(false));
         time = (System.nanoTime() - time);
         System.out.println(time / 100000000.0);
         this.answer = String.valueOf(NeuralMath.getMaxPosition(answer));
@@ -52,14 +52,14 @@ public class DrawingPanel extends JPanel implements Runnable {
         }
     }
 
-    public double[] getDrawingBoard(boolean center) {
+    public float[] getDrawingBoard(boolean center) {
         int[][] pos = center ? drawingBoard.centerPosition() : this.drawingBoard.getPositions();
-        double[] ret_value;
+        float[] ret_value;
         int n = 0;
         for (int[] v : pos) {
             n += v.length;
         }
-        ret_value = new double[n];
+        ret_value = new float[n];
 
         for (int i = 0; i < pos.length; i++) {
             for (int j = 0; j < pos[i].length; j++) {
