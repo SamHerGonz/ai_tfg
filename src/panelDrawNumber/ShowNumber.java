@@ -1,6 +1,5 @@
 package panelDrawNumber;
 
-import ai.NeuralNetwork;
 import ai.SupervisedLearningNeuralNetwork;
 import panelDrawNumber.buttons.PanelButton;
 import panelDrawNumber.buttons.actions.*;
