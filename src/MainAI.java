@@ -5,18 +5,10 @@ import java.util.*;
 
 public class MainAI {
     public static void main(String[] args) {
-        short half = Float.floatToFloat16(3.15F);
-        float full = Float.float16ToFloat(half);
-        for (int i = 0; i < 100; i++) {
-            System.out.println(half);
-            half = Float.floatToFloat16(full + 0.01F);
-            full = Float.float16ToFloat(half);
-        }
-        System.out.println(full);
         if (args.length != 2) throw new RuntimeException("Debe de haber 2 parámetros");
 
         // Con un tamaño de {784,100,100,75,75,50,10} la tasa que mejor va es 0,04
-        int[] shape = {784,75,10};
+        int[] shape = {784,30,10};
         SupervisedLearningNeuralNetwork ai;
 
         List<float[]> recordsTrain = new ArrayList<>();
@@ -56,7 +48,17 @@ public class MainAI {
             try {
                 ai = new SupervisedLearningNeuralNetwork(shape, 1);
                 System.out.println(ai);
-                removeALotOfWeights(ai,0.6F);
+                /*for (int j = 0; j < shape[0]; j++) {
+                    for (int k = 0; k < shape[2]; k++) {
+                        ai.addWeight((short) 0,j,shape[0] + k,1);
+                    }
+                }
+                for (int j = 0; j < shape[1]; j++) {
+                    for (int k = 0; k < shape[3]; k++) {
+                        ai.addWeight((short) 1,j,shape[1] + k,1);
+                    }
+                }*/
+
                 System.out.println(ai);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -150,7 +152,7 @@ public class MainAI {
                     if (ai.getNodes()[0][j] instanceof InputNode) {
                         if (k != randomNodeOutput) {
                             if (((InputNode) ai.getNodes()[0][j]).getIdNodeFrontLayerContains(k)) {
-                                ai.removeWeight(0, j, k);
+                                ai.removeWeight((short) 0, j, k);
                             }
                         }
                     }
@@ -183,7 +185,7 @@ public class MainAI {
     }
 
     public static void removeALotOfWeights(NeuralNetwork ai, float percent) {
-        for (int i = 0; i < ai.getSizeTotal() - 2; i++) {
+        for (short i = 0; i < ai.getSizeTotal() - 2; i++) {
             for (int j = 0; j < ai.getNodes()[i].length; j++) {
                 if (ai.getNodes()[i][j] instanceof InputNode) {
                     int size = ((InputNode) ai.getNodes()[i][j]).getIdNodeFrontLayer().length;
